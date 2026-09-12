@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block titre %}Sections — AFEMC-CI{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-3">Sections</h1>
+<div class="row g-3">
+  {% for section in sections %}
+    <div class="col-md-4">
+      <div class="card h-100"><div class="card-body">
+        <h2 class="h6 mb-1">{{ section.libelle }}</h2>
+        <p class="text-muted small mb-2">{{ section.etablissement|default:section.ville }}</p>
+        <div class="d-flex justify-content-between align-items-end">
+          <div>
+            <div class="intitule">Membres actifs</div>
+            <div class="h4 mb-0">{{ section.effectif_actif }}</div>
+          </div>
+          <a href="{% url 'sections:detail' section.pk %}" class="btn btn-outline-primary btn-sm">Détail</a>
+        </div>
+      </div></div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

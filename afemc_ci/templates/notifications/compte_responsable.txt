@@ -1,0 +1,15 @@
+Madame,
+
+Un compte d'accès au système de gestion de l'Association des Femmes
+Enseignantes Chercheures de Côte d'Ivoire a été créé pour vous, {{ nom }},
+avec le rôle : {{ role }}{% if section %} — section {{ section }}{% endif %}.
+
+Pour l'activer et choisir votre mot de passe, veuillez suivre ce lien :
+
+{{ lien }}
+
+Ce lien est valable 3 jours. Passé ce délai, contactez l'administrateur du
+système pour en obtenir un nouveau.
+
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

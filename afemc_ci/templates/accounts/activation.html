@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block titre %}Activation du compte — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 text-center mb-1">Activation du compte</h1>
+        <p class="text-center text-muted small mb-4">
+          Choisissez votre mot de passe pour finaliser votre adhésion.
+        </p>
+
+        {% if validlink %}
+          {% if form.errors %}
+            <div class="alert alert-danger py-2 small">
+              Veuillez corriger les erreurs ci-dessous.
+            </div>
+          {% endif %}
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">{{ form.new_password1.label }}</label>
+              {{ form.new_password1 }}
+              {% if form.new_password1.errors %}
+                <div class="text-danger small">{{ form.new_password1.errors|join:' ' }}</div>
+              {% endif %}
+            </div>
+            <div class="mb-4">
+              <label class="form-label">{{ form.new_password2.label }}</label>
+              {{ form.new_password2 }}
+              {% if form.new_password2.errors %}
+                <div class="text-danger small">{{ form.new_password2.errors|join:' ' }}</div>
+              {% endif %}
+            </div>
+            <button class="btn btn-primary w-100">Activer mon compte</button>
+          </form>
+        {% else %}
+          <div class="alert alert-danger small mb-0">
+            Ce lien d'activation est invalide ou a expiré. Contactez le secrétariat
+            de votre section pour en obtenir un nouveau.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

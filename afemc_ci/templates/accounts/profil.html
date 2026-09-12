@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block titre %}Mon profil{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-4">Mon profil</h1>
+<div class="card"><div class="card-body">
+  <dl class="row mb-0">
+    <dt class="col-sm-3">Nom et prénoms</dt><dd class="col-sm-9">{{ utilisateur.nom_complet }}</dd>
+    <dt class="col-sm-3">Adresse électronique</dt><dd class="col-sm-9">{{ utilisateur.email }}</dd>
+    <dt class="col-sm-3">Rôle</dt><dd class="col-sm-9">{{ utilisateur.get_role_display }}</dd>
+    <dt class="col-sm-3">Section</dt><dd class="col-sm-9">{{ utilisateur.section|default:'—' }}</dd>
+  </dl>
+</div></div>
+{% endblock %}

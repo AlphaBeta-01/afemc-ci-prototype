@@ -1,0 +1,12 @@
+Bonjour {{ responsable }},
+
+Synthèse hebdomadaire de l'exercice {{ exercice }} :
+
+- Membres actifs : {{ effectif }}
+- Cotisations en retard : {{ retards }}
+- Taux de recouvrement : {{ taux }} %
+- Reste à recouvrer : {{ reste }} FCFA
+
+Le détail est consultable dans le tableau de bord.
+
+Système de gestion AFEMC-CI

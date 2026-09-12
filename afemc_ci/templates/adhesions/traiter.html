@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block titre %}Traiter une demande{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <h1 class="h4 mb-3">Demande de {{ demande.nom_complet }}</h1>
+
+    <div class="card mb-3"><div class="card-body">
+      <dl class="row small mb-0">
+        <dt class="col-4">Adresse électronique</dt><dd class="col-8">{{ demande.email }}</dd>
+        <dt class="col-4">Téléphone</dt><dd class="col-8">{{ demande.telephone|default:'—' }}</dd>
+        <dt class="col-4">Grade</dt><dd class="col-8">{{ demande.grade|default:'—' }}</dd>
+        <dt class="col-4">Établissement</dt><dd class="col-8">{{ demande.etablissement|default:'—' }}</dd>
+        <dt class="col-4">Section souhaitée</dt><dd class="col-8">{{ demande.section.libelle }}</dd>
+        <dt class="col-4">Statut actuel</dt><dd class="col-8">{{ demande.get_statut_display }}</dd>
+        <dt class="col-4">Motivation</dt><dd class="col-8">{{ demande.motivation|default:'—'|linebreaksbr }}</dd>
+      </dl>
+    </div></div>
+
+    <div class="card mb-3"><div class="card-body">
+      <h2 class="h6 mb-3">Pièces justificatives</h2>
+      {% for piece in demande.pieces.all %}
+        <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+          <span>{{ piece.get_type_piece_display }}</span>
+          <a href="{{ piece.fichier.url }}" target="_blank" rel="noopener"
+             class="btn btn-outline-secondary btn-sm py-0">Ouvrir</a>
+        </div>
+      {% empty %}
+        <p class="text-danger small mb-0">
+          Aucun document déposé : la qualité d'enseignante chercheure n'est pas justifiée.
+        </p>
+      {% endfor %}
+    </div></div>
+
+    {% if transitions %}
+      <div class="card"><div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Décision</label>
+            <select name="statut" class="form-select">
+              {% for statut in transitions %}
+                <option value="{{ statut }}">{{ statut }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">
+              Seules les transitions prévues par le processus statutaire sont proposées.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Motif (en cas de rejet ou de demande d'informations)</label>
+            <textarea name="motif" rows="3" class="form-control"></textarea>
+          </div>
+          <button class="btn btn-primary">Valider la décision</button>
+          <a href="{% url 'adhesions:liste' %}" class="btn btn-link">Retour</a>
+        </form>
+      </div></div>
+    {% else %}
+      <div class="alert alert-secondary">
+        Cette demande est close : aucune transition n'est possible.
+      </div>
+      <a href="{% url 'adhesions:liste' %}" class="btn btn-outline-primary btn-sm">Retour</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

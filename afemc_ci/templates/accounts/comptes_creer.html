@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block titre %}Nouveau compte responsable{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <h1 class="h4 mb-4">Nouveau compte responsable</h1>
+    <div class="card"><div class="card-body">
+      <form method="post" class="row g-3">
+        {% csrf_token %}
+        {% for champ in formulaire %}
+          <div class="col-md-6">
+            <label class="form-label">{{ champ.label }}</label>
+            {{ champ }}
+            {% if champ.help_text %}<div class="form-text">{{ champ.help_text }}</div>{% endif %}
+            {% if champ.errors %}<div class="text-danger small mt-1">{{ champ.errors.0 }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <div class="col-12">
+          <p class="text-muted small">
+            Le compte est créé inactif : un courriel avec un lien d'activation
+            (valable 3 jours) est envoyé pour que la personne choisisse
+            elle-même son mot de passe.
+          </p>
+          <button class="btn btn-primary">Créer le compte</button>
+          <a href="{% url 'accounts:comptes_liste' %}" class="btn btn-link">Annuler</a>
+        </div>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

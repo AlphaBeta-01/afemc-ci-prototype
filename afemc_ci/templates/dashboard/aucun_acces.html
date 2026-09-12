@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block titre %}Accueil — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="alert alert-secondary">
+  {{ message|default:"Votre compte n'est rattaché à aucune fiche de membre. Contactez le secrétariat de votre section." }}
+</div>
+{% endblock %}

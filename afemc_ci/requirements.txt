@@ -1,0 +1,7 @@
+Django==5.0.14
+psycopg[binary]==3.3.5
+celery==5.3.6
+redis==5.0.1
+python-dotenv==1.0.1
+freezegun==1.5.5
+coverage==7.4.4

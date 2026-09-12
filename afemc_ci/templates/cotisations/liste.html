@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block titre %}Cotisations — AFEMC-CI{% endblock %}
+{% block contenu %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h1 class="h4 mb-0">Cotisations — exercice {{ exercice }}</h1>
+  <div class="d-flex gap-2">
+    <a href="{% url 'cotisations:export' %}?exercice={{ exercice }}" class="btn btn-outline-secondary btn-sm">Export CSV</a>
+    {% if user.role == 'ADMIN' or user.role == 'RESP_FINANCIER' %}
+      <a href="{% url 'cotisations:emettre' %}" class="btn btn-primary btn-sm">Émettre les cotisations</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="card vignette"><div class="card-body py-3">
+    <div class="intitule">Taux de recouvrement</div>
+    <div class="h5 mb-0">{{ indicateurs.taux_recouvrement|floatformat:1 }} %</div>
+  </div></div></div>
+  <div class="col-6 col-lg-3"><div class="card vignette alerte"><div class="card-body py-3">
+    <div class="intitule">En retard</div>
+    <div class="h5 mb-0">{{ indicateurs.nb_retard }}</div>
+  </div></div></div>
+  <div class="col-6 col-lg-3"><div class="card vignette succes"><div class="card-body py-3">
+    <div class="intitule">Payées</div>
+    <div class="h5 mb-0">{{ indicateurs.nb_payees }}</div>
+  </div></div></div>
+  <div class="col-6 col-lg-3"><div class="card vignette attention"><div class="card-body py-3">
+    <div class="intitule">Reste à recouvrer</div>
+    <div class="h5 mb-0">{{ indicateurs.reste_a_recouvrer|floatformat:0 }} FCFA</div>
+  </div></div></div>
+</div>
+
+<div class="card mb-3"><div class="card-body py-3">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Exercice</label>
+      <input type="number" name="exercice" value="{{ exercice }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Statut</label>
+      <select name="statut" class="form-select form-select-sm">
+        <option value="">Tous</option>
+        {% for valeur, libelle in statuts %}
+          <option value="{{ valeur }}" {% if parametres.statut == valeur %}selected{% endif %}>{{ libelle }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-grid"><button class="btn btn-outline-primary btn-sm">Filtrer</button></div>
+  </form>
+</div></div>
+
+<div class="card"><div class="table-responsive">
+  <table class="table table-hover table-sm align-middle mb-0">
+    <thead class="table-light">
+      <tr><th>Matricule</th><th>Membre</th><th>Section</th><th class="text-end">Dû</th>
+          <th class="text-end">Payé</th><th class="text-end">Reste</th>
+          <th>Échéance</th><th>Statut</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for cotisation in page %}
+      <tr>
+        <td class="font-monospace small">{{ cotisation.membre.matricule }}</td>
+        <td><a href="{% url 'membres:detail' cotisation.membre.pk %}">{{ cotisation.membre.nom_complet }}</a></td>
+        <td class="small">{{ cotisation.membre.section.libelle }}</td>
+        <td class="text-end">{{ cotisation.montant_du|floatformat:0 }}</td>
+        <td class="text-end">{{ cotisation.montant_paye|floatformat:0 }}</td>
+        <td class="text-end fw-semibold">{{ cotisation.reste_a_payer|floatformat:0 }}</td>
+        <td class="small">{{ cotisation.date_echeance|date:'d/m/Y' }}</td>
+        <td>
+          {% if cotisation.statut == 'PAYEE' %}<span class="badge text-bg-success">Payée</span>
+          {% elif cotisation.statut == 'EN_RETARD' %}<span class="badge text-bg-danger">En retard</span>
+          {% elif cotisation.statut == 'PARTIEL' %}<span class="badge text-bg-info">Partielle</span>
+          {% elif cotisation.statut == 'EXEMPTEE' %}<span class="badge text-bg-secondary">Exemptée</span>
+          {% else %}<span class="badge text-bg-light text-dark">En attente</span>{% endif %}
+        </td>
+        <td class="text-end">
+          {% if user.role == 'ADMIN' or user.role == 'RESP_FINANCIER' %}
+            {% if cotisation.reste_a_payer > 0 %}
+              <a class="btn btn-outline-success btn-sm py-0"
+                 href="{% url 'cotisations:paiement' cotisation.pk %}">Paiement</a>
+            {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="9" class="text-muted p-4 text-center">Aucune cotisation pour cet exercice.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+
+{% include 'pagination.html' %}
+{% endblock %}

@@ -1,0 +1,17 @@
+Madame, Chère consœur,
+
+Nous revenons vers vous au sujet de votre cotisation de l'exercice {{ exercice }}
+au titre de la section {{ section }}.
+
+Montant appelé : {{ montant_du }} FCFA
+Reste à régler : {{ reste }} FCFA
+Date d'échéance : {{ echeance }}
+
+Nous vous serions reconnaissantes de bien vouloir procéder au règlement
+dans les meilleurs délais. Si ce versement a déjà été effectué, nous vous
+prions de ne pas tenir compte du présent message.
+
+Nous restons à votre disposition pour toute précision.
+
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

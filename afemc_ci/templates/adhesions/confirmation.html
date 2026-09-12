@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block titre %}Demande enregistrée{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center">
+  <div class="col-md-6 text-center py-5">
+    <h1 class="h4 mb-3">Votre demande a bien été enregistrée</h1>
+    <p class="text-muted">
+      Elle sera examinée par le responsable administratif de l'association.
+      Vous recevrez une réponse à l'adresse électronique indiquée.
+    </p>
+    <a href="{% url 'accounts:connexion' %}" class="btn btn-outline-primary btn-sm mt-2">Retour à l'accueil</a>
+  </div>
+</div>
+{% endblock %}

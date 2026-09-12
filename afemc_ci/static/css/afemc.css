@@ -1,0 +1,165 @@
+/* Feuille de style du prototype AFEMC-CI — palette reprise du logo de
+   l'association : bleu marine institutionnel et rose magenta (bonnet,
+   étoiles). Un seul fichier, chargé après Bootstrap : tout habillage
+   défini ici s'applique donc à toutes les pages sans toucher aux gabarits. */
+
+:root {
+  --afemc-marine: #12204f;
+  --afemc-marine-fonce: #0a1636;
+  --afemc-marine-claire: #2c3e78;
+  --afemc-rose: #e0127e;
+  --afemc-rose-fonce: #b30e64;
+  --afemc-rose-claire: #fbe4f0;
+  --afemc-encre: #262b45;          /* texte : un noir adouci, teinté marine */
+  --afemc-radius: .7rem;
+  --afemc-radius-lg: 1rem;
+  --afemc-ombre: 0 .35rem 1.25rem rgba(18, 32, 79, .08);
+  --afemc-ombre-hover: 0 .6rem 1.75rem rgba(18, 32, 79, .14);
+  --afemc-degrade-marque: linear-gradient(90deg, var(--afemc-marine) 0%, var(--afemc-rose) 100%);
+
+  --bs-primary: var(--afemc-rose);
+  --bs-primary-rgb: 224, 18, 126;
+  --bs-link-color: var(--afemc-rose);
+  --bs-link-color-rgb: 224, 18, 126;
+  --bs-link-hover-color: var(--afemc-rose-fonce);
+  --bs-link-hover-color-rgb: 179, 14, 100;
+  --bs-focus-ring-color: rgba(224, 18, 126, .25);
+  --bs-body-color: var(--afemc-encre);
+}
+
+body {
+  font-size: .95rem;
+  color: var(--afemc-encre);
+  background-color: #faf8f9;
+  background-image: radial-gradient(circle at 100% 0%, rgba(224, 18, 126, .05), transparent 45%),
+                     radial-gradient(circle at 0% 100%, rgba(18, 32, 79, .04), transparent 40%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, .h1, .h2, .h3, .h4, .h5, .h6 { color: var(--afemc-marine); font-weight: 600; }
+
+a { transition: color .15s ease; }
+
+/* ----- Bandeau de navigation ----- */
+.navbar.bg-primary {
+  background: linear-gradient(115deg, var(--afemc-marine) 0%, var(--afemc-marine-fonce) 100%) !important;
+  box-shadow: 0 .25rem 1rem rgba(10, 22, 54, .25);
+  border-bottom: 3px solid var(--afemc-rose);
+}
+.navbar-brand { display: flex; align-items: center; gap: .55rem; }
+.navbar-brand img {
+  height: 40px; width: auto; border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .35);
+}
+.navbar-dark .navbar-nav .nav-link {
+  border-radius: .4rem;
+  padding-left: .65rem; padding-right: .65rem;
+  transition: background-color .15s ease, color .15s ease;
+}
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+  background-color: rgba(255, 255, 255, .1);
+  color: #fff;
+}
+.navbar-dark .navbar-text { color: rgba(255, 255, 255, .85) !important; }
+
+/* ----- En-tête des pages publiques (connexion, demande d'adhésion, activation) ----- */
+.afemc-entete-publique {
+  background: #fff;
+  border-bottom: none;
+  position: relative;
+  padding-bottom: calc(.5rem + 3px);
+}
+.afemc-entete-publique::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: var(--afemc-degrade-marque);
+}
+.afemc-entete-publique img {
+  height: 64px; width: auto;
+  filter: drop-shadow(0 .2rem .5rem rgba(18, 32, 79, .12));
+}
+
+/* ----- Boutons : rose, la couleur vivante du logo ----- */
+.btn {
+  --bs-btn-border-radius: .55rem;
+  font-weight: 500;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .15s ease, border-color .15s ease;
+}
+.btn-primary, .btn-outline-primary { --bs-btn-focus-shadow-rgb: 224, 18, 126; }
+.btn-primary {
+  --bs-btn-bg: var(--afemc-rose);
+  --bs-btn-border-color: var(--afemc-rose);
+  --bs-btn-hover-bg: var(--afemc-rose-fonce);
+  --bs-btn-hover-border-color: var(--afemc-rose-fonce);
+  --bs-btn-active-bg: var(--afemc-rose-fonce);
+  --bs-btn-active-border-color: var(--afemc-rose-fonce);
+  --bs-btn-disabled-bg: var(--afemc-rose);
+  --bs-btn-disabled-border-color: var(--afemc-rose);
+  box-shadow: 0 .25rem .65rem rgba(224, 18, 126, .25);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 .4rem .9rem rgba(224, 18, 126, .3); }
+.btn-outline-primary {
+  --bs-btn-color: var(--afemc-rose);
+  --bs-btn-border-color: var(--afemc-rose);
+  --bs-btn-hover-bg: var(--afemc-rose);
+  --bs-btn-hover-border-color: var(--afemc-rose);
+  --bs-btn-active-bg: var(--afemc-rose);
+  --bs-btn-active-border-color: var(--afemc-rose);
+  --bs-btn-disabled-color: var(--afemc-rose);
+  --bs-btn-disabled-border-color: var(--afemc-rose);
+}
+.btn-outline-primary:hover { transform: translateY(-1px); }
+.form-check-input:checked { background-color: var(--afemc-rose); border-color: var(--afemc-rose); }
+.form-control, .form-select {
+  border-radius: .55rem;
+  border-color: #e3e1e8;
+}
+.form-control:focus, .form-select:focus { border-color: var(--afemc-rose); }
+
+/* ----- Cartes : socle visuel de presque tous les écrans ----- */
+.card {
+  border: 1px solid rgba(18, 32, 79, .06);
+  border-radius: var(--afemc-radius);
+  box-shadow: var(--afemc-ombre);
+}
+a.card, .card.h-100 { transition: box-shadow .2s ease, transform .2s ease; }
+
+/* ----- Tableaux ----- */
+.table thead.table-light th {
+  background-color: var(--afemc-rose-claire);
+  color: var(--afemc-marine);
+  font-size: .78rem; text-transform: uppercase; letter-spacing: .03em;
+  border-bottom: none;
+}
+.table-hover > tbody > tr:hover > * { background-color: rgba(224, 18, 126, .045); }
+
+/* ----- Badges de statut : pastille douce plutôt que solide ----- */
+.badge-statut { font-weight: 600; letter-spacing: .01em; }
+
+/* ----- Vignettes du tableau de bord ----- */
+.vignette {
+  border: 0; border-left: 4px solid var(--afemc-marine);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.vignette:hover { transform: translateY(-2px); box-shadow: var(--afemc-ombre-hover); }
+.vignette .valeur { font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--afemc-marine); }
+.vignette .intitule { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: #6c757d; }
+.vignette.alerte { border-left-color: #dc3545; }
+.vignette.attention { border-left-color: var(--afemc-rose); }
+.vignette.succes { border-left-color: #198754; }
+
+.table-sm td, .table-sm th { padding: .4rem .5rem; }
+
+/* ----- Alertes : coins adoucis, cohérents avec le reste ----- */
+.alert { border-radius: var(--afemc-radius); border: none; }
+
+/* ----- Pied de page ----- */
+footer { border-top: 1px solid rgba(18, 32, 79, .08); }
+
+/* ----- Cartes des pages publiques (connexion, activation…) : un peu de faste ----- */
+.afemc-entete-publique + main .card {
+  box-shadow: var(--afemc-ombre-hover);
+  border-top: 3px solid var(--afemc-rose);
+}

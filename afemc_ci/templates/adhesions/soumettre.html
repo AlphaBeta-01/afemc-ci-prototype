@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block titre %}Demande d'adhésion — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <h1 class="h4 mb-4">Demande d'adhésion</h1>
+    <div class="card"><div class="card-body">
+      <form method="post" enctype="multipart/form-data" class="row g-3">
+        {% csrf_token %}
+        {% for champ in formulaire %}
+          <div class="{% if champ.name == 'motivation' %}col-12{% else %}col-md-6{% endif %}">
+            <label class="form-label">{{ champ.label }}</label>
+            {{ champ }}
+            {% if champ.errors %}<div class="text-danger small mt-1">{{ champ.errors.0 }}</div>{% endif %}
+          </div>
+        {% endfor %}
+
+        <div class="col-12">
+          <hr>
+          <h2 class="h6 mb-1">Pièces justificatives</h2>
+          <p class="text-muted small">
+            Joignez au moins un document attestant votre statut d'enseignante
+            chercheure (carte professionnelle, attestation d'exercice ou diplôme).
+            Formats acceptés : PDF, JPG, PNG — 5 Mo maximum par fichier.
+          </p>
+          {% if formset.non_form_errors %}
+            <div class="alert alert-danger py-2 small">{{ formset.non_form_errors.0 }}</div>
+          {% endif %}
+          {{ formset.management_form }}
+          {% for piece in formset %}
+            <div class="row g-2 align-items-start mb-2">
+              <div class="col-md-5">
+                {{ piece.type_piece }}
+                {% if piece.type_piece.errors %}
+                  <div class="text-danger small mt-1">{{ piece.type_piece.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-7">
+                {{ piece.fichier }}
+                {% if piece.fichier.errors %}
+                  <div class="text-danger small mt-1">{{ piece.fichier.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary">Envoyer ma demande</button>
+          <a href="{% url 'accounts:connexion' %}" class="btn btn-link">Retour</a>
+        </div>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

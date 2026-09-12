@@ -1,0 +1,15 @@
+Madame,
+
+Votre demande d'adhésion à l'Association des Femmes Enseignantes Chercheures
+de Côte d'Ivoire a été validée. Bienvenue parmi nous, {{ membre }}.
+
+Pour accéder à votre espace personnel, veuillez d'abord activer votre compte
+et choisir votre mot de passe en suivant ce lien :
+
+{{ lien }}
+
+Ce lien est valable 3 jours. Passé ce délai, contactez le secrétariat de
+votre section pour en obtenir un nouveau.
+
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

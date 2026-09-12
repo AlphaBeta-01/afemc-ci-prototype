@@ -1,0 +1,14 @@
+Madame,
+
+Nous accusons réception de votre demande d'adhésion à la section {{ section }}
+de l'Association des Femmes Enseignantes Chercheures de Côte d'Ivoire.
+
+État de votre demande : {{ statut }}
+{% if motif %}
+Observation : {{ motif }}
+{% endif %}
+
+Nous vous remercions de l'intérêt que vous portez à notre association.
+
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

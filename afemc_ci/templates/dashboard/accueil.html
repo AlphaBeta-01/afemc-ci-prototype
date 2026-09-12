@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block titre %}Tableau de bord — AFEMC-CI{% endblock %}
+{% block contenu %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h4 mb-0">Tableau de bord décisionnel</h1>
+    <p class="text-muted small mb-0">
+      Exercice {{ exercice }}{% if section %} — section {{ section.libelle }}{% endif %}
+    </p>
+  </div>
+  <form method="get" class="d-flex gap-2">
+    <select name="exercice" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for annee in exercices %}
+        <option value="{{ annee }}" {% if annee == exercice %}selected{% endif %}>{{ annee }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 {% if user.role == 'RESP_FINANCIER' %}col-lg-4{% else %}col-lg-3{% endif %}">
+    <div class="card vignette succes h-100"><div class="card-body">
+      <div class="intitule">Membres actifs</div>
+      <div class="valeur">{{ indicateurs.effectif_total }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 {% if user.role == 'RESP_FINANCIER' %}col-lg-4{% else %}col-lg-3{% endif %}">
+    <div class="card vignette h-100"><div class="card-body">
+      <div class="intitule">Taux de recouvrement</div>
+      <div class="valeur">{{ indicateurs.taux_recouvrement|floatformat:1 }} %</div>
+    </div></div>
+  </div>
+  <div class="col-6 {% if user.role == 'RESP_FINANCIER' %}col-lg-4{% else %}col-lg-3{% endif %}">
+    <div class="card vignette alerte h-100"><div class="card-body">
+      <div class="intitule">Cotisations en retard</div>
+      <div class="valeur">{{ indicateurs.nb_retard }}</div>
+    </div></div>
+  </div>
+  {% if user.role != 'RESP_FINANCIER' %}
+  <div class="col-6 col-lg-3">
+    <div class="card vignette attention h-100"><div class="card-body">
+      <div class="intitule">Demandes en attente</div>
+      <div class="valeur">{{ indicateurs.demandes_en_attente }}</div>
+    </div></div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card h-100"><div class="card-body">
+      <div class="intitule">Montant appelé</div>
+      <div class="h5 mb-0">{{ indicateurs.total_du|floatformat:0 }} FCFA</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100"><div class="card-body">
+      <div class="intitule">Montant encaissé</div>
+      <div class="h5 mb-0">{{ indicateurs.total_paye|floatformat:0 }} FCFA</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100"><div class="card-body">
+      <div class="intitule">Reste à recouvrer</div>
+      <div class="h5 mb-0">{{ indicateurs.reste_a_recouvrer|floatformat:0 }} FCFA</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100"><div class="card-body">
+      <div class="intitule">Relances émises</div>
+      <div class="h5 mb-0">{{ indicateurs.relances_emises }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-5">
+    <div class="card h-100"><div class="card-body">
+      <h2 class="h6 mb-3">Répartition des membres par section</h2>
+      <canvas id="graphiqueSections" height="200"></canvas>
+    </div></div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100"><div class="card-body">
+      <h2 class="h6 mb-3">Évolution mensuelle des encaissements</h2>
+      <canvas id="graphiqueEvolution" height="200"></canvas>
+    </div></div>
+  </div>
+  <div class="col-lg-3">
+    <div class="card h-100"><div class="card-body">
+      <h2 class="h6 mb-3">Statut des cotisations</h2>
+      <canvas id="graphiqueStatuts" height="200"></canvas>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="{% if user.role == 'RESP_FINANCIER' %}col-lg-12{% else %}col-lg-7{% endif %}">
+    <div class="card h-100"><div class="card-body">
+      <h2 class="h6 mb-3">Situations appelant une attention</h2>
+      <table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Membre</th><th>Section</th><th>Échéance</th><th class="text-end">Reste</th></tr></thead>
+        <tbody>
+        {% for cotisation in retards %}
+          <tr>
+            <td><a href="{% url 'membres:detail' cotisation.membre.pk %}">{{ cotisation.membre.nom_complet }}</a></td>
+            <td>{{ cotisation.membre.section.libelle }}</td>
+            <td>{{ cotisation.date_echeance|date:'d/m/Y' }}</td>
+            <td class="text-end">{{ cotisation.reste_a_payer|floatformat:0 }} FCFA</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">Aucune cotisation en retard.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+  {% if user.role != 'RESP_FINANCIER' %}
+  <div class="col-lg-5">
+    <div class="card h-100"><div class="card-body">
+      <h2 class="h6 mb-3">Demandes d'adhésion à traiter</h2>
+      <ul class="list-group list-group-flush">
+        {% for demande in demandes %}
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <span>{{ demande.nom_complet }} <span class="text-muted small">— {{ demande.section.libelle }}</span></span>
+            <span class="badge text-bg-warning">{{ demande.get_statut_display }}</span>
+          </li>
+        {% empty %}
+          <li class="list-group-item px-0 text-muted">Aucune demande en attente.</li>
+        {% endfor %}
+      </ul>
+    </div></div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ donnees_sections|json_script:"donneesSections" }}
+{{ donnees_evolution|json_script:"donneesEvolution" }}
+{{ donnees_statuts|json_script:"donneesStatuts" }}
+<script>
+const lire = (id) => JSON.parse(JSON.parse(document.getElementById(id).textContent));
+const sections = lire('donneesSections');
+const evolution = lire('donneesEvolution');
+const statuts = lire('donneesStatuts');
+
+new Chart(document.getElementById('graphiqueSections'), {
+  type: 'bar',
+  data: { labels: sections.libelles,
+          datasets: [{ label: 'Membres actifs', data: sections.effectifs,
+                       backgroundColor: '#12204f', borderRadius: 6, maxBarThickness: 36 }] },
+  options: { plugins: { legend: { display: false } },
+             scales: { y: { beginAtZero: true, grid: { color: '#eef0f4' } },
+                       x: { grid: { display: false } } } }
+});
+
+new Chart(document.getElementById('graphiqueEvolution'), {
+  type: 'line',
+  data: { labels: evolution.libelles,
+          datasets: [{ label: 'Encaissements (FCFA)', data: evolution.montants,
+                       borderColor: '#e0127e', backgroundColor: 'rgba(224, 18, 126, .12)',
+                       pointBackgroundColor: '#e0127e', pointRadius: 4, borderWidth: 2,
+                       tension: .3, fill: true }] },
+  options: { plugins: { legend: { display: false } },
+             scales: { y: { beginAtZero: true, grid: { color: '#eef0f4' } },
+                       x: { grid: { display: false } } } }
+});
+
+new Chart(document.getElementById('graphiqueStatuts'), {
+  type: 'doughnut',
+  data: { labels: statuts.libelles,
+          datasets: [{ data: statuts.valeurs,
+                       backgroundColor: ['#198754','#0dcaf0','#dc3545','#adb5bd','#6f42c1'] }] },
+  options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block titre %}Tableau de bord — {{ section.libelle }}{% endblock %}
+{% block contenu %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="h4 mb-0">Tableau de bord — {{ section.libelle }}</h1>
+    <p class="text-muted small mb-0">
+      {{ section.ville|default:'—' }}{% if section.etablissement %} — {{ section.etablissement }}{% endif %}
+    </p>
+  </div>
+  <a href="{% url 'sections:detail' section.pk %}" class="btn btn-outline-primary btn-sm">
+    Fiche de la section
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-4">
+    <div class="card vignette succes h-100"><div class="card-body">
+      <div class="intitule">Membres actifs</div>
+      <div class="valeur">{{ effectif_actif }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-4">
+    <div class="card vignette h-100"><div class="card-body">
+      <div class="intitule">Membres inactifs</div>
+      <div class="valeur">{{ effectif_inactif }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-4">
+    <div class="card vignette alerte h-100"><div class="card-body">
+      <div class="intitule">Membres suspendus</div>
+      <div class="valeur">{{ effectif_suspendu }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h6 mb-0">Membres récemment inscrits</h2>
+      <a href="{% url 'membres:liste' %}" class="btn btn-outline-primary btn-sm">Voir tous les membres</a>
+    </div>
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Matricule</th><th>Nom et prénoms</th><th>Adhésion</th><th>Statut</th></tr></thead>
+      <tbody>
+      {% for membre in membres_recents %}
+        <tr>
+          <td class="font-monospace small">{{ membre.matricule }}</td>
+          <td><a href="{% url 'membres:detail' membre.pk %}">{{ membre.nom_complet }}</a></td>
+          <td class="small">{{ membre.date_adhesion|date:'d/m/Y' }}</td>
+          <td>
+            {% if membre.statut == 'ACTIF' %}<span class="badge text-bg-success badge-statut">Actif</span>
+            {% elif membre.statut == 'SUSPENDU' %}<span class="badge text-bg-danger badge-statut">Suspendu</span>
+            {% else %}<span class="badge text-bg-secondary badge-statut">Inactif</span>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="text-muted p-4 text-center">Aucun membre dans cette section.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

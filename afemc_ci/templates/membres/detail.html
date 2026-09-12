@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block titre %}{{ membre.nom_complet }} — AFEMC-CI{% endblock %}
+{% block contenu %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <div>
+    <h1 class="h4 mb-0">{{ membre.nom_complet }}</h1>
+    <span class="text-muted font-monospace small">{{ membre.matricule }}</span>
+  </div>
+  {% if user.role == 'ADMIN' or user.role == 'RESP_ADMIN' or user.role == 'RESP_SECTION' %}
+    <a href="{% url 'membres:modifier' membre.pk %}" class="btn btn-outline-primary btn-sm">Modifier la fiche</a>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card"><div class="card-body">
+      <h2 class="h6 mb-3">Identité et rattachement</h2>
+      <dl class="row small mb-0">
+        <dt class="col-5">Adresse électronique</dt><dd class="col-7">{{ membre.email }}</dd>
+        <dt class="col-5">Téléphone</dt><dd class="col-7">{{ membre.telephone|default:'—' }}</dd>
+        <dt class="col-5">Grade</dt><dd class="col-7">{{ membre.grade|default:'—' }}</dd>
+        <dt class="col-5">Établissement</dt><dd class="col-7">{{ membre.etablissement|default:'—' }}</dd>
+        <dt class="col-5">Section</dt><dd class="col-7">{{ membre.section.libelle }}</dd>
+        <dt class="col-5">Date d'adhésion</dt><dd class="col-7">{{ membre.date_adhesion|date:'d/m/Y' }}</dd>
+        <dt class="col-5">Statut</dt><dd class="col-7">{{ membre.get_statut_display }}</dd>
+      </dl>
+    </div></div>
+  </div>
+
+  {% if user.role != 'RESP_SECTION' %}
+  <div class="col-lg-8">
+    <div class="card mb-3"><div class="card-body">
+      <h2 class="h6 mb-3">Historique des cotisations</h2>
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr><th>Exercice</th><th class="text-end">Dû</th><th class="text-end">Payé</th>
+              <th class="text-end">Reste</th><th>Échéance</th><th>Statut</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for cotisation in cotisations %}
+          <tr>
+            <td>{{ cotisation.exercice }}</td>
+            <td class="text-end">{{ cotisation.montant_du|floatformat:0 }}</td>
+            <td class="text-end">{{ cotisation.montant_paye|floatformat:0 }}</td>
+            <td class="text-end">{{ cotisation.reste_a_payer|floatformat:0 }}</td>
+            <td class="small">{{ cotisation.date_echeance|date:'d/m/Y' }}</td>
+            <td>
+              {% if cotisation.statut == 'PAYEE' %}<span class="badge text-bg-success">Payée</span>
+              {% elif cotisation.statut == 'EN_RETARD' %}<span class="badge text-bg-danger">En retard</span>
+              {% elif cotisation.statut == 'PARTIEL' %}<span class="badge text-bg-info">Partielle</span>
+              {% elif cotisation.statut == 'EXEMPTEE' %}<span class="badge text-bg-secondary">Exemptée</span>
+              {% else %}<span class="badge text-bg-light text-dark">En attente</span>{% endif %}
+            </td>
+            <td class="text-end">
+              {% if user.role == 'ADMIN' or user.role == 'RESP_FINANCIER' %}
+                {% if cotisation.reste_a_payer > 0 %}
+                  <a class="btn btn-outline-success btn-sm py-0"
+                     href="{% url 'cotisations:paiement' cotisation.pk %}">Paiement</a>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-muted">Aucune cotisation enregistrée.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+
+    <div class="card"><div class="card-body">
+      <h2 class="h6 mb-3">Relances reçues</h2>
+      <table class="table table-sm mb-0">
+        <thead class="table-light"><tr><th>Date</th><th>Règle</th><th>Niveau</th><th>Écart</th></tr></thead>
+        <tbody>
+        {% for relance in relances %}
+          <tr>
+            <td class="small">{{ relance.date_emission|date:'d/m/Y H:i' }}</td>
+            <td>{{ relance.regle.code }} — {{ relance.regle.libelle }}</td>
+            <td>{{ relance.regle.get_niveau_display }}</td>
+            <td>{{ relance.jours_ecart }} j</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">Aucune relance émise.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

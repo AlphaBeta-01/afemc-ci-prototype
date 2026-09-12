@@ -1,0 +1,12 @@
+[run]
+source = apps
+omit =
+    */migrations/*
+    */tests/*
+    */apps.py
+    */__init__.py
+    */management/commands/charger_donnees_demo.py
+
+[report]
+precision = 0
+show_missing = True

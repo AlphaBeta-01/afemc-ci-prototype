@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block titre %}Relances — AFEMC-CI{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-3">Relances émises</h1>
+
+<div class="card mb-3"><div class="card-body">
+  <h2 class="h6 mb-3">Règles de relance en vigueur</h2>
+  <table class="table table-sm mb-0">
+    <thead class="table-light">
+      <tr><th>Code</th><th>Libellé</th><th>Déclenchement</th><th>Niveau</th>
+          <th>Destinataires</th><th>État</th></tr>
+    </thead>
+    <tbody>
+    {% for regle in regles %}
+      <tr>
+        <td class="font-monospace">{{ regle.code }}</td>
+        <td>{{ regle.libelle }}</td>
+        <td class="small">
+          {% if regle.decalage_jours < 0 %}{{ regle.decalage_jours|cut:'-' }} jours avant l'échéance
+          {% else %}{{ regle.decalage_jours }} jours après l'échéance{% endif %}
+        </td>
+        <td>{{ regle.get_niveau_display }}</td>
+        <td class="small">{{ regle.get_destinataires_display }}</td>
+        <td>{% if regle.active %}<span class="badge text-bg-success">Active</span>
+            {% else %}<span class="badge text-bg-secondary">Suspendue</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+
+<div class="card"><div class="table-responsive">
+  <table class="table table-hover table-sm align-middle mb-0">
+    <thead class="table-light">
+      <tr><th>Date</th><th>Membre</th><th>Exercice</th><th>Règle</th>
+          <th>Niveau</th><th>Écart</th></tr>
+    </thead>
+    <tbody>
+    {% for relance in page %}
+      <tr>
+        <td class="small">{{ relance.date_emission|date:'d/m/Y H:i' }}</td>
+        <td><a href="{% url 'membres:detail' relance.cotisation.membre.pk %}">{{ relance.cotisation.membre.nom_complet }}</a></td>
+        <td>{{ relance.cotisation.exercice }}</td>
+        <td class="font-monospace small">{{ relance.regle.code }}</td>
+        <td>{{ relance.regle.get_niveau_display }}</td>
+        <td>{{ relance.jours_ecart }} j</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-muted p-4 text-center">Aucune relance émise à ce jour.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+
+{% include 'pagination.html' %}
+{% endblock %}
