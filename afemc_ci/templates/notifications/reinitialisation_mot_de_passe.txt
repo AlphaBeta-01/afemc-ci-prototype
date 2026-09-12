@@ -1,0 +1,17 @@
+Madame,
+
+Une demande de réinitialisation de mot de passe a été effectuée pour votre
+compte AFEMC-CI ({{ nom }}).
+
+Si vous êtes à l'origine de cette demande, choisissez votre nouveau mot de
+passe en suivant ce lien :
+
+{{ lien }}
+
+Ce lien est valable 3 jours et ne peut servir qu'une seule fois.
+
+Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce
+message : votre mot de passe actuel reste inchangé.
+
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

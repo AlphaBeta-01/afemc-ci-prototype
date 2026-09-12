@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block titre %}Mot de passe oublié — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4 text-center">
+        <h1 class="h5 mb-3">Vérifiez votre boîte de réception</h1>
+        <p class="text-muted small mb-4">
+          Si l'adresse indiquée correspond à un compte, un courriel contenant
+          un lien de réinitialisation (valable 3 jours) vient de vous être
+          envoyé.
+        </p>
+        <a href="{% url 'accounts:connexion' %}" class="btn btn-outline-primary btn-sm">
+          Retour à la connexion
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

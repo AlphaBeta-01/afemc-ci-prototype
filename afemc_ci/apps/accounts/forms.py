@@ -31,6 +31,15 @@ class FormulaireActivation(SetPasswordForm):
         widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
 
+class FormulaireMotDePasseOublie(forms.Form):
+    """Demande de lien de réinitialisation (RG02)."""
+
+    email = forms.EmailField(
+        label='Adresse électronique',
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autofocus': True,
+                                       'placeholder': 'prenom.nom@exemple.org'}))
+
+
 class FormulaireCompteResponsable(forms.ModelForm):
     """Création d'un compte responsable (RG08), réservée à l'Administrateur.
 

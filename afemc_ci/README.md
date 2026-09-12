@@ -87,6 +87,16 @@ comme les relances.
 La base des liens absolus insérés dans ces courriels se règle via la variable
 `SITE_URL` (`.env`), par défaut `http://127.0.0.1:8000`.
 
+### Mot de passe oublié
+
+Un compte déjà actif peut réinitialiser son mot de passe depuis la page de
+connexion (« Mot de passe oublié ? » → `/comptes/mot-de-passe-oublie/`). La
+réponse est identique que l'adresse corresponde ou non à un compte, pour ne
+jamais révéler quelles adresses sont enregistrées. Le lien envoyé est
+strictement le même mécanisme que l'activation initiale (`VueActivation`) :
+un compte pas encore activé peut donc aussi s'en servir pour obtenir un
+nouveau lien si le premier a expiré.
+
 ## 3. Mécanismes automatisés
 
 ```bash
@@ -143,14 +153,14 @@ Résultats attendus — ce sont les chiffres repris au chapitre 6 du mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 94 | core, accounts, membres, adhesions, cotisations, notifications, dashboard |
+| Tests unitaires | 99 | core, accounts, membres, adhesions, cotisations, notifications, dashboard |
 | Scénarios du moteur (SC01-SC24) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration (TI01-TI13) | 13 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF25) | 25 | `apps/core/tests/test_fonctionnels.py` (dont TF08 et TF16b, adaptés) |
 | Tests de sécurité (TS01-TS10) | 10 | `apps/core/tests/test_securite.py` |
-| **Total** | **169** | couverture : **95 %** du code applicatif |
+| **Total** | **174** | couverture : **95 %** du code applicatif |
 
-Les 33 tests unitaires supplémentaires (par rapport aux 126 initiaux du chapitre 6)
+Les 38 tests unitaires supplémentaires (par rapport aux 126 initiaux du chapitre 6)
 couvrent l'activation de compte, le rattrapage des comptes manquants
 (§ 2, « Compte du membre admis », et § 3, `regulariser_comptes_membres`),
 le périmètre resserré du responsable financier et du responsable de section

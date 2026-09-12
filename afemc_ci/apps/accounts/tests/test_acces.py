@@ -96,6 +96,74 @@ class TestActivationCompte(TestCase):
         self.assertFalse(self.compte.is_active)
 
 
+class TestMotDePasseOublie(TestCase):
+    """Réinitialisation en libre-service d'un mot de passe oublié (RG02)."""
+
+    def setUp(self):
+        self.compte = Utilisateur.objects.create_user(
+            email='responsable@afemc-ci.org', password='AncienMdp2026!', nom='KOUAME',
+            prenoms='Adjoua', role=Utilisateur.Role.RESP_ADMIN, is_active=True)
+
+    def _demander(self, email):
+        return self.client.post(reverse('accounts:mot_de_passe_oublie'), {'email': email})
+
+    def test_reponse_identique_que_le_compte_existe_ou_non(self):
+        r1 = self._demander('responsable@afemc-ci.org')
+        r2 = self._demander('personne@exemple.org')
+        self.assertEqual(r1.status_code, r2.status_code)
+        self.assertContains(r1, 'Vérifiez votre boîte de réception')
+        self.assertContains(r2, 'Vérifiez votre boîte de réception')
+
+    def test_un_lien_est_envoye_uniquement_si_le_compte_existe(self):
+        from apps.notifications.models import Notification
+
+        self._demander('responsable@afemc-ci.org')
+        self.assertEqual(Notification.objects.filter(
+            type='REINITIALISATION_MOT_DE_PASSE').count(), 1)
+
+        self._demander('personne@exemple.org')
+        self.assertEqual(Notification.objects.filter(
+            type='REINITIALISATION_MOT_DE_PASSE').count(), 1)          # toujours 1
+
+    def test_la_demande_est_toujours_journalisee(self):
+        self._demander('personne@exemple.org')
+        self.assertTrue(JournalOperation.objects.filter(
+            type_operation='DEMANDE_REINITIALISATION_MOT_DE_PASSE',
+            detail='personne@exemple.org').exists())
+
+    def test_le_lien_permet_de_changer_le_mot_de_passe_sans_desactiver_le_compte(self):
+        uidb64 = urlsafe_base64_encode(force_bytes(self.compte.pk))
+        token = default_token_generator.make_token(self.compte)
+
+        reponse_get = self.client.get(
+            reverse('accounts:activation', args=[uidb64, token]), follow=True)
+        url_pose = reponse_get.redirect_chain[-1][0]
+        self.client.post(url_pose, {'new_password1': 'NouveauMdp2026!',
+                                    'new_password2': 'NouveauMdp2026!'})
+
+        self.compte.refresh_from_db()
+        self.assertTrue(self.compte.is_active)          # toujours actif, pas "réactivé"
+        self.assertTrue(self.compte.check_password('NouveauMdp2026!'))
+        self.assertFalse(self.compte.check_password('AncienMdp2026!'))
+        self.assertTrue(JournalOperation.objects.filter(
+            type_operation='REINITIALISATION_MOT_DE_PASSE').exists())
+        self.assertFalse(JournalOperation.objects.filter(
+            type_operation='ACTIVATION_COMPTE').exists())
+
+    def test_un_compte_jamais_active_peut_reobtenir_un_lien(self):
+        """Sert aussi de renvoi de lien d'activation expiré (RG02)."""
+        from apps.notifications.models import Notification
+
+        inactif = Utilisateur.objects.create_user(
+            email='nouvelle@exemple.org', password=None, nom='TRAORE',
+            prenoms='Fatou', role=Utilisateur.Role.MEMBRE, is_active=False)
+        self._demander('nouvelle@exemple.org')
+        notification = Notification.objects.get(type='REINITIALISATION_MOT_DE_PASSE',
+                                                 destinataire='nouvelle@exemple.org')
+        self.assertIn('/comptes/activation/', notification.contexte['lien'])
+        self.assertFalse(inactif.is_active)          # inchangé tant que le lien n'est pas suivi
+
+
 class TestPerimetreResponsableSection(TestCase):
     """Le responsable de section : membres et sections seulement (RG08).
 

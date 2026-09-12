@@ -48,3 +48,25 @@ def creer_compte_responsable(nom, prenoms, email, role, section=None, cree_par=N
                   'section': section.libelle if section else '',
                   'lien': generer_lien_activation(compte)})
     return compte
+
+
+def demander_reinitialisation_mot_de_passe(email, requete=None):
+    """Déclenche l'envoi d'un lien de définition du mot de passe (RG02).
+
+    Le même lien sert aussi bien à activer un compte tout juste créé qu'à
+    réinitialiser un mot de passe oublié — `VueActivation` gère les deux cas.
+    Volontairement silencieuse si l'adresse n'existe pas, pour ne jamais
+    révéler quelles adresses sont enregistrées ; toujours journalisée.
+    """
+    compte = Utilisateur.objects.filter(email__iexact=email).first()
+    journaliser(None, 'DEMANDE_REINITIALISATION_MOT_DE_PASSE', email, requete)
+    if compte is None:
+        return None
+
+    creer_notification(
+        destinataire=compte.email,
+        type_notification='REINITIALISATION_MOT_DE_PASSE',
+        objet='Réinitialisation de votre mot de passe AFEMC-CI',
+        gabarit='notifications/reinitialisation_mot_de_passe.txt',
+        contexte={'nom': compte.nom_complet(), 'lien': generer_lien_activation(compte)})
+    return compte

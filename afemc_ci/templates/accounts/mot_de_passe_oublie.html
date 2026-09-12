@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block titre %}Mot de passe oublié — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h5 text-center mb-1">Mot de passe oublié</h1>
+        <p class="text-center text-muted small mb-4">
+          Indiquez votre adresse électronique : si un compte y est rattaché,
+          un lien de réinitialisation vous sera envoyé.
+        </p>
+
+        {% if formulaire.errors %}
+          <div class="alert alert-danger py-2 small">
+            Veuillez corriger l'adresse indiquée.
+          </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-4">
+            <label class="form-label">{{ formulaire.email.label }}</label>
+            {{ formulaire.email }}
+          </div>
+          <button class="btn btn-primary w-100">Envoyer le lien</button>
+        </form>
+
+        <hr class="my-4">
+        <p class="text-center small mb-0">
+          <a href="{% url 'accounts:connexion' %}">Retour à la connexion</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

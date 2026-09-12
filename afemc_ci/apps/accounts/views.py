@@ -3,14 +3,16 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import role_requis
 from apps.core.services import journaliser
 
-from .forms import FormulaireActivation, FormulaireCompteResponsable, FormulaireConnexion
+from .forms import (FormulaireActivation, FormulaireCompteResponsable, FormulaireConnexion,
+                    FormulaireMotDePasseOublie)
 from .models import Utilisateur
-from .services import creer_compte_responsable
+from .services import creer_compte_responsable, demander_reinitialisation_mot_de_passe
 
 
 class VueConnexion(auth_views.LoginView):
@@ -34,11 +36,12 @@ class VueDeconnexion(auth_views.LogoutView):
 
 
 class VueActivation(auth_views.PasswordResetConfirmView):
-    """Définition du mot de passe par le membre, à partir du lien reçu (RG02).
+    """Définition du mot de passe à partir du lien reçu (RG02).
 
-    Le compte est créé inactif lors de la validation de la demande d'adhésion
-    (`apps.adhesions.services.creer_compte_acces`) : cette vue est le seul
-    moyen de le rendre exploitable.
+    Un seul mécanisme pour deux usages : l'activation d'un compte tout juste
+    créé (inactif, cf. `creer_compte_acces`/`creer_compte_responsable`) et la
+    réinitialisation d'un mot de passe oublié sur un compte déjà actif — le
+    lien et l'écran sont identiques, seul le message final diffère.
     """
     template_name = 'accounts/activation.html'
     form_class = FormulaireActivation
@@ -46,13 +49,34 @@ class VueActivation(auth_views.PasswordResetConfirmView):
     post_reset_login = False
 
     def form_valid(self, form):
+        premiere_activation = not self.user.is_active
         reponse = super().form_valid(form)
         self.user.is_active = True
         self.user.save(update_fields=['is_active'])
-        journaliser(self.user, 'ACTIVATION_COMPTE', '', self.request)
-        messages.success(self.request,
-                          'Compte activé : vous pouvez à présent vous connecter.')
+        if premiere_activation:
+            journaliser(self.user, 'ACTIVATION_COMPTE', '', self.request)
+            messages.success(self.request,
+                             'Compte activé : vous pouvez à présent vous connecter.')
+        else:
+            journaliser(self.user, 'REINITIALISATION_MOT_DE_PASSE', '', self.request)
+            messages.success(self.request,
+                             'Mot de passe modifié : vous pouvez à présent vous connecter.')
         return reponse
+
+
+class VueMotDePasseOublie(View):
+    """Demande de lien de réinitialisation, sans révéler si l'adresse existe."""
+    template_name = 'accounts/mot_de_passe_oublie.html'
+
+    def get(self, requete):
+        return render(requete, self.template_name, {'formulaire': FormulaireMotDePasseOublie()})
+
+    def post(self, requete):
+        formulaire = FormulaireMotDePasseOublie(requete.POST)
+        if formulaire.is_valid():
+            demander_reinitialisation_mot_de_passe(formulaire.cleaned_data['email'], requete)
+            return render(requete, 'accounts/mot_de_passe_oublie_envoye.html')
+        return render(requete, self.template_name, {'formulaire': formulaire})
 
 
 @login_required
