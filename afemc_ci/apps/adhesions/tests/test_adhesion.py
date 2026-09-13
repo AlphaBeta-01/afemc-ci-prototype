@@ -131,6 +131,42 @@ class TestRegularisationComptesMembres(TestCase):
 
         self.assertEqual(regulariser_comptes_membres(), [])
 
+    def test_la_commande_signale_l_absence_de_compte_manquant(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        sortie = StringIO()
+        call_command('regulariser_comptes_membres', stdout=sortie)
+        self.assertIn('Aucun compte manquant', sortie.getvalue())
+
+    def test_la_commande_regularise_et_affiche_le_resultat(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        _, membre = self._demande_validee_sans_compte()
+        sortie = StringIO()
+        call_command('regulariser_comptes_membres', stdout=sortie)
+
+        self.assertIn(membre.matricule, sortie.getvalue())
+        self.assertIn('1 compte(s) régularisé(s)', sortie.getvalue())
+        membre.refresh_from_db()
+        self.assertIsNotNone(membre.utilisateur)
+
+    def test_la_commande_en_simulation_n_ecrit_rien(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        _, membre = self._demande_validee_sans_compte()
+        sortie = StringIO()
+        call_command('regulariser_comptes_membres', '--simulation', stdout=sortie)
+
+        self.assertIn('SIMULATION', sortie.getvalue())
+        membre.refresh_from_db()
+        self.assertIsNone(membre.utilisateur)
+
 
 class TestVisibiliteMenuAdhesions(TestCase):
     """Le responsable financier ne gère pas les adhésions (RG08) : le menu doit

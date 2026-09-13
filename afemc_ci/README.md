@@ -153,14 +153,14 @@ Résultats attendus — ce sont les chiffres repris au chapitre 6 du mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 106 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections |
+| Tests unitaires | 109 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections |
 | Scénarios du moteur (SC01-SC24) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration (TI01-TI13) | 13 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF25) | 25 | `apps/core/tests/test_fonctionnels.py` (dont TF08 et TF16b, adaptés) |
 | Tests de sécurité (TS01-TS10) | 10 | `apps/core/tests/test_securite.py` |
-| **Total** | **181** | couverture : **95 %** du code applicatif |
+| **Total** | **185** | couverture : **95 %** du code applicatif (mesurée à nouveau, contre PostgreSQL) |
 
-Les 45 tests unitaires supplémentaires (par rapport aux 126 initiaux du chapitre 6)
+Les 59 tests unitaires supplémentaires (par rapport aux 126 initiaux du chapitre 6)
 couvrent l'activation de compte et la réinitialisation de mot de passe, le
 rattrapage des comptes manquants (§ 2, « Compte du membre admis », et § 3,
 `regulariser_comptes_membres`), le périmètre resserré du responsable
