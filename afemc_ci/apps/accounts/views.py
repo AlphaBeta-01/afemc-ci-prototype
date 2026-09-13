@@ -36,7 +36,7 @@ class VueDeconnexion(auth_views.LogoutView):
 
 
 class VueActivation(auth_views.PasswordResetConfirmView):
-    """Définition du mot de passe à partir du lien reçu (RG02).
+    """Définition du mot de passe à partir du lien reçu (RG11).
 
     Un seul mécanisme pour deux usages : l'activation d'un compte tout juste
     créé (inactif, cf. `creer_compte_acces`/`creer_compte_responsable`) et la

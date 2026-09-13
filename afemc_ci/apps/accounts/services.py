@@ -15,7 +15,7 @@ ROLES_ATTRIBUABLES = (Utilisateur.Role.RESP_ADMIN, Utilisateur.Role.RESP_SECTION
 
 
 def generer_lien_activation(compte):
-    """Construit le lien à usage unique de définition du mot de passe (RG02).
+    """Construit le lien à usage unique de définition du mot de passe (RG11).
 
     Factorisé ici car utilisé à la fois pour l'admission d'un membre
     (`apps.adhesions.services`) et pour la création d'un compte responsable.
@@ -51,7 +51,7 @@ def creer_compte_responsable(nom, prenoms, email, role, section=None, cree_par=N
 
 
 def demander_reinitialisation_mot_de_passe(email, requete=None):
-    """Déclenche l'envoi d'un lien de définition du mot de passe (RG02).
+    """Déclenche l'envoi d'un lien de définition du mot de passe (RG11).
 
     Le même lien sert aussi bien à activer un compte tout juste créé qu'à
     réinitialiser un mot de passe oublié — `VueActivation` gère les deux cas.

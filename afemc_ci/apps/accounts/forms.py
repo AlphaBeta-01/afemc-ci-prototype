@@ -21,7 +21,7 @@ class FormulaireConnexion(AuthenticationForm):
 
 
 class FormulaireActivation(SetPasswordForm):
-    """Définition du mot de passe lors de l'activation d'un compte (RG02)."""
+    """Définition du mot de passe lors de l'activation d'un compte (RG11)."""
 
     new_password1 = forms.CharField(
         label='Nouveau mot de passe', strip=False,
@@ -32,7 +32,7 @@ class FormulaireActivation(SetPasswordForm):
 
 
 class FormulaireMotDePasseOublie(forms.Form):
-    """Demande de lien de réinitialisation (RG02)."""
+    """Demande de lien de réinitialisation (RG11)."""
 
     email = forms.EmailField(
         label='Adresse électronique',

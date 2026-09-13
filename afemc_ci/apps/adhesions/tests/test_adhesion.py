@@ -82,7 +82,7 @@ class TestCycleAdhesion(TestCase):
 
 
 class TestRegularisationComptesMembres(TestCase):
-    """Filet de rattrapage pour les membres admis sans compte (RG02)."""
+    """Filet de rattrapage pour les membres admis sans compte (RG11)."""
 
     def setUp(self):
         self.section = Section.objects.create(code='ABJ', libelle='Abidjan')
@@ -200,7 +200,7 @@ class TestVisibiliteMenuAdhesions(TestCase):
 
 
 class TestDepotPiecesJustificatives(TestCase):
-    """Une candidate doit prouver sa qualité d'enseignante chercheure (RG01)."""
+    """Une candidate doit prouver sa qualité d'enseignante chercheure (RG12)."""
 
     def setUp(self):
         self.section = Section.objects.create(code='ABJ', libelle='Abidjan')
@@ -345,7 +345,7 @@ class TestAccesPiecesJustificatives(TestCase):
 
 
 class TestChampsObligatoiresDemande(TestCase):
-    """Tous les renseignements du formulaire public sont exigés (RG01).
+    """Tous les renseignements du formulaire public sont exigés (RG12).
 
     Seul `motif` (motif de rejet, renseigné par le traitement — pas par la
     candidate) reste facultatif.

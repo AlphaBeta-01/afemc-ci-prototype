@@ -47,7 +47,7 @@ def emettre_cotisation_initiale(membre):
 
 
 def creer_compte_acces(membre):
-    """Crée le compte d'accès du nouveau membre, inactif jusqu'à activation (RG02).
+    """Crée le compte d'accès du nouveau membre, inactif jusqu'à activation (RG11).
 
     Aucun mot de passe n'est fixé ici : le membre en choisit un lui-même via le
     lien d'activation envoyé par courriel (cf. `envoyer_lien_activation`).
@@ -78,7 +78,7 @@ def envoyer_lien_activation(compte, membre):
 
 
 def regulariser_comptes_membres(simulation=False):
-    """Comble les comptes d'accès manquants pour des membres déjà admis (RG02).
+    """Comble les comptes d'accès manquants pour des membres déjà admis (RG11).
 
     Filet de rattrapage : une demande peut avoir été validée alors que
     `creer_compte_acces` n'était pas encore déployé (mise à jour du code en

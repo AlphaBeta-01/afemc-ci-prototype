@@ -161,11 +161,11 @@ Résultats attendus — ce sont les chiffres repris au chapitre 6 du mémoire :
 | **Total** | **192** | couverture : **95 %** du code applicatif (mesurée contre PostgreSQL) |
 
 Les 66 tests supplémentaires (par rapport aux 126 initiaux du chapitre 6)
-couvrent l'activation de compte et la réinitialisation de mot de passe, le
-rattrapage des comptes manquants (§ 2, « Compte du membre admis », et § 3,
-`regulariser_comptes_membres`), le périmètre resserré du responsable
+couvrent l'activation de compte et la réinitialisation de mot de passe
+(RG11), le rattrapage des comptes manquants (§ 2, « Compte du membre admis »,
+et § 3, `regulariser_comptes_membres`), le périmètre resserré du responsable
 financier et du responsable de section (RG08), et les pièces justificatives
-exigées à la soumission d'une demande d'adhésion (RG01, ci-dessous).
+exigées à la soumission d'une demande d'adhésion (RG12, ci-dessous).
 
 **TF26-TF30** rejouent, de bout en bout depuis l'interface, les scénarios
 ajoutés après la rédaction initiale du chapitre 6 : activation d'un compte
@@ -176,30 +176,37 @@ revue de sécurité (accès au détail d'une section, accès à une pièce
 justificative). Si le corps du mémoire doit en rendre compte, ce sont ces
 identifiants qu'il convient de citer.
 
-### Points de vigilance pour la cohérence avec le texte du mémoire
+### Nouvelles règles de gestion (RG11, RG12)
 
-Deux écarts trouvés en vérifiant que les règles de gestion RG01-RG09
-d'origine n'avaient pas été affaiblies par les ajouts de cette session (le
-code de RG01, RG04-RG09 est resté strictement inchangé — vérifié fichier par
-fichier) :
+Le texte du mémoire (§ 4.4) numérote RG01 à RG10. Après consultation de ce
+texte, deux règles introduites cette session ont reçu un numéro propre plutôt
+que de réemployer RG01 ou RG02 — qui désignent déjà, respectivement,
+l'unicité du membre (matricule) et son rattachement à une section, sans
+rapport avec ces ajouts (une première version de ce README, écrite avant
+consultation du texte, avait réemployé ces deux numéros par erreur ; le code
+et les tests ont depuis été corrigés) :
 
-- **Numérotation RG02/RG03** : ces deux numéros n'apparaissaient nulle part
-  dans le code d'origine. Les commentaires ajoutés cette session pour
-  l'activation de compte et la réinitialisation de mot de passe les
-  utilisent (« RG02 ») sans savoir ce qu'ils désignent réellement dans le
-  texte du mémoire — ce n'est qu'une supposition faite à partir du code, pas
-  une vérification contre le document. De même, « RG01 » a été réemployé
-  pour les pièces justificatives et les champs obligatoires de la demande
-  d'adhésion, alors qu'il désigne déjà l'unicité du matricule. À corriger en
-  numérotant ces nouvelles règles RG10 et suivants, une fois le texte du
-  mémoire consulté pour confirmer qu'aucun de ces numéros n'y est déjà pris.
-- **Périmètre du responsable de section et du responsable financier** : leur
-  accès aux cotisations, adhésions et relances a été délibérément retiré
-  cette session (à ta demande explicite). Si le texte déjà rédigé du mémoire
-  décrit l'ancien comportement (accès à ces écrans), il ne correspond plus
-  au code et doit être mis à jour en conséquence — ce n'est pas une
-  régression du code, mais une divergence entre le document et le
-  comportement actuel qu'il faut résoudre côté rédaction.
+- **RG11 — Activation et réinitialisation du mot de passe du compte d'un
+  membre.** Le compte d'un membre nouvellement admis est créé inactif ; un
+  lien à usage unique, valable 3 jours, permet de définir le mot de passe et
+  active le compte. Le même mécanisme sert de réinitialisation en
+  libre-service pour un compte déjà actif (« mot de passe oublié »), avec une
+  réponse strictement identique que l'adresse existe ou non, pour ne jamais
+  révéler quelles adresses sont enregistrées.
+- **RG12 — Pièces justificatives et complétude de la demande d'adhésion.**
+  Une demande d'adhésion doit comporter au moins un document attestant la
+  qualité d'enseignante chercheure de la candidate (carte professionnelle,
+  attestation d'exercice ou diplôme — formats PDF/JPG/PNG, 5 Mo maximum), et
+  l'ensemble des champs du formulaire public sont obligatoires.
+
+Point encore ouvert, non résolu par la seule lecture du chapitre 4 : le
+périmètre du responsable de section et du responsable financier (accès aux
+cotisations, adhésions et relances) a été délibérément resserré cette
+session, à la demande explicite de l'utilisateur. Si le chapitre 5 du
+mémoire (implémentation), non revu ici, décrit encore l'ancien comportement,
+il doit être mis à jour en conséquence — ce n'est pas une régression du
+code, mais une divergence entre le document et le comportement actuel du
+prototype.
 
 ### Revue de sécurité
 

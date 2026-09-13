@@ -54,7 +54,7 @@ class TestAuthentification(TestCase):
 
 
 class TestActivationCompte(TestCase):
-    """Prise de mot de passe par un membre nouvellement admis (RG02)."""
+    """Prise de mot de passe par un membre nouvellement admis (RG11)."""
 
     def setUp(self):
         self.compte = Utilisateur.objects.create_user(
@@ -97,7 +97,7 @@ class TestActivationCompte(TestCase):
 
 
 class TestMotDePasseOublie(TestCase):
-    """Réinitialisation en libre-service d'un mot de passe oublié (RG02)."""
+    """Réinitialisation en libre-service d'un mot de passe oublié (RG11)."""
 
     def setUp(self):
         self.compte = Utilisateur.objects.create_user(
@@ -151,7 +151,7 @@ class TestMotDePasseOublie(TestCase):
             type_operation='ACTIVATION_COMPTE').exists())
 
     def test_un_compte_jamais_active_peut_reobtenir_un_lien(self):
-        """Sert aussi de renvoi de lien d'activation expiré (RG02)."""
+        """Sert aussi de renvoi de lien d'activation expiré (RG11)."""
         from apps.notifications.models import Notification
 
         inactif = Utilisateur.objects.create_user(

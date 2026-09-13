@@ -142,7 +142,7 @@ class TestAdhesions(BaseFonctionnelle):
             'telephone': '+225 05 00 00 00 00', 'grade': 'Maître-Assistante',
             'etablissement': 'UFHB', 'section': self.abidjan.pk,
             'motivation': 'Participer aux activités scientifiques.',
-            # Au moins une pièce justificative est désormais exigée (RG01).
+            # Au moins une pièce justificative est désormais exigée (RG12).
             'pieces-TOTAL_FORMS': '2', 'pieces-INITIAL_FORMS': '0',
             'pieces-MIN_NUM_FORMS': '0', 'pieces-MAX_NUM_FORMS': '1000',
             'pieces-0-type_piece': 'DIPLOME', 'pieces-0-fichier': diplome,

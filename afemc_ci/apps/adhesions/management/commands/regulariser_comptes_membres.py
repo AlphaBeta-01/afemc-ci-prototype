@@ -1,4 +1,4 @@
-"""Rattrapage des comptes d'accès manquants pour des membres déjà admis (RG02)."""
+"""Rattrapage des comptes d'accès manquants pour des membres déjà admis (RG11)."""
 from django.core.management.base import BaseCommand
 
 from apps.adhesions.services import regulariser_comptes_membres
