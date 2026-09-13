@@ -153,20 +153,53 @@ Résultats attendus — ce sont les chiffres repris au chapitre 6 du mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 109 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections |
+| Tests unitaires | 111 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections |
 | Scénarios du moteur (SC01-SC24) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration (TI01-TI13) | 13 | `apps/cotisations/tests/test_integration.py` |
-| Tests fonctionnels (TF01-TF25) | 25 | `apps/core/tests/test_fonctionnels.py` (dont TF08 et TF16b, adaptés) |
-| Tests de sécurité (TS01-TS10) | 10 | `apps/core/tests/test_securite.py` |
-| **Total** | **185** | couverture : **95 %** du code applicatif (mesurée à nouveau, contre PostgreSQL) |
+| Tests fonctionnels (TF01-TF30) | 30 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF30 nouveaux) |
+| Tests de sécurité (TS01-TS12) | 12 | `apps/core/tests/test_securite.py` (TS11-TS12 nouveaux) |
+| **Total** | **192** | couverture : **95 %** du code applicatif (mesurée contre PostgreSQL) |
 
-Les 59 tests unitaires supplémentaires (par rapport aux 126 initiaux du chapitre 6)
+Les 66 tests supplémentaires (par rapport aux 126 initiaux du chapitre 6)
 couvrent l'activation de compte et la réinitialisation de mot de passe, le
 rattrapage des comptes manquants (§ 2, « Compte du membre admis », et § 3,
 `regulariser_comptes_membres`), le périmètre resserré du responsable
-financier et du responsable de section (RG08), les pièces justificatives
-exigées à la soumission d'une demande d'adhésion (RG01, ci-dessous), et les
-deux correctifs de la revue de sécurité ci-dessous.
+financier et du responsable de section (RG08), et les pièces justificatives
+exigées à la soumission d'une demande d'adhésion (RG01, ci-dessous).
+
+**TF26-TF30** rejouent, de bout en bout depuis l'interface, les scénarios
+ajoutés après la rédaction initiale du chapitre 6 : activation d'un compte
+membre, mot de passe oublié, création d'un compte responsable, périmètre
+resserré du responsable de section, rejet d'une demande sans document.
+**TS11-TS12** formalisent les deux failles trouvées et corrigées lors de la
+revue de sécurité (accès au détail d'une section, accès à une pièce
+justificative). Si le corps du mémoire doit en rendre compte, ce sont ces
+identifiants qu'il convient de citer.
+
+### Points de vigilance pour la cohérence avec le texte du mémoire
+
+Deux écarts trouvés en vérifiant que les règles de gestion RG01-RG09
+d'origine n'avaient pas été affaiblies par les ajouts de cette session (le
+code de RG01, RG04-RG09 est resté strictement inchangé — vérifié fichier par
+fichier) :
+
+- **Numérotation RG02/RG03** : ces deux numéros n'apparaissaient nulle part
+  dans le code d'origine. Les commentaires ajoutés cette session pour
+  l'activation de compte et la réinitialisation de mot de passe les
+  utilisent (« RG02 ») sans savoir ce qu'ils désignent réellement dans le
+  texte du mémoire — ce n'est qu'une supposition faite à partir du code, pas
+  une vérification contre le document. De même, « RG01 » a été réemployé
+  pour les pièces justificatives et les champs obligatoires de la demande
+  d'adhésion, alors qu'il désigne déjà l'unicité du matricule. À corriger en
+  numérotant ces nouvelles règles RG10 et suivants, une fois le texte du
+  mémoire consulté pour confirmer qu'aucun de ces numéros n'y est déjà pris.
+- **Périmètre du responsable de section et du responsable financier** : leur
+  accès aux cotisations, adhésions et relances a été délibérément retiré
+  cette session (à ta demande explicite). Si le texte déjà rédigé du mémoire
+  décrit l'ancien comportement (accès à ces écrans), il ne correspond plus
+  au code et doit être mis à jour en conséquence — ce n'est pas une
+  régression du code, mais une divergence entre le document et le
+  comportement actuel qu'il faut résoudre côté rédaction.
 
 ### Revue de sécurité
 

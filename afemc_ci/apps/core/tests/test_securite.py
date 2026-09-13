@@ -1,4 +1,8 @@
-"""Tests de sécurité TS01 à TS10 (§ 6.6.2 du mémoire)."""
+"""Tests de sécurité TS01 à TS12 (§ 6.6.2 du mémoire).
+
+TS11-TS12 formalisent les deux failles trouvées et corrigées lors de la
+revue de sécurité menée après la rédaction initiale du chapitre 6.
+"""
 from django.test import TestCase
 from django.urls import reverse
 
@@ -86,3 +90,36 @@ class TestSecurite(TestCase):
         self.assertFalse(outil.has_add_permission(None))
         self.assertFalse(outil.has_change_permission(None))
         self.assertFalse(outil.has_delete_permission(None))
+
+    def test_ts11_detail_de_section_inaccessible_a_un_simple_membre(self):
+        membre_actif = fabrique.utilisateur('MEMBRE', email='membre.actif@afemc-ci.org',
+                                            section_liee=self.abidjan)
+        self.client.login(username=membre_actif.email, password=fabrique.MOT_DE_PASSE)
+        reponse = self.client.get(reverse('sections:detail', args=[self.abidjan.pk]))
+        self.assertEqual(reponse.status_code, 403)
+
+    def test_ts12_piece_justificative_non_accessible_par_lien_direct(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        from apps.adhesions.models import DemandeAdhesion, PieceJustificative
+
+        demande = DemandeAdhesion.objects.create(
+            nom='DIABATE', prenoms='Salimata', email='salimata@exemple.org',
+            section=self.abidjan)
+        piece = PieceJustificative.objects.create(
+            demande=demande, type_piece=PieceJustificative.TypePiece.DIPLOME,
+            fichier=SimpleUploadedFile('diplome.pdf', b'%PDF-1.4',
+                                       content_type='application/pdf'))
+        url = reverse('adhesions:telecharger_piece', args=[piece.pk])
+
+        reponse = self.client.get(url)
+        self.assertEqual(reponse.status_code, 302)          # sans authentification
+
+        self.client.login(username=self.resp_abidjan.email, password=fabrique.MOT_DE_PASSE)
+        reponse = self.client.get(url)
+        self.assertEqual(reponse.status_code, 403)          # rôle non habilité
+        self.client.logout()
+
+        self.client.login(username=self.admin.email, password=fabrique.MOT_DE_PASSE)
+        reponse = self.client.get(url)
+        self.assertEqual(reponse.status_code, 200)          # rôle habilité

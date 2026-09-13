@@ -1,9 +1,14 @@
-"""Tests fonctionnels TF01 à TF18 (§ 6.4 du mémoire).
+"""Tests fonctionnels TF01 à TF30 (§ 6.4 du mémoire).
 
 Chaque test rejoue un cas d'utilisation depuis l'interface, pour un profil donné.
+TF26-TF30 couvrent les fonctionnalités ajoutées après la rédaction initiale du
+chapitre 6 (activation de compte, mot de passe oublié, gestion des comptes
+responsables, périmètre resserré du responsable de section, pièces
+justificatives) — à raccorder au texte du mémoire si celui-ci doit en rendre compte.
 """
 from datetime import date
 from decimal import Decimal
+from urllib.parse import urlparse
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -277,3 +282,87 @@ class TestMoteurEtTableauDeBord(BaseFonctionnelle):
         self.connecter(self.resp_abidjan)
         reponse = self.client.get(reverse('sections:detail', args=[self.korhogo.pk]))
         self.assertEqual(reponse.status_code, 403)
+
+
+class TestComptesEtPerimetreResserre(BaseFonctionnelle):
+    """TF26-TF30 : fonctionnalités ajoutées après le chapitre 6 initial."""
+
+    def test_tf26_activation_d_un_compte_membre_et_connexion(self):
+        from apps.notifications.models import Notification
+
+        demande = DemandeAdhesion.objects.create(
+            nom='SANOGO', prenoms='Aminata', email='aminata.tf26@exemple.org',
+            section=self.abidjan)
+        self.connecter(self.administratif)
+        self.client.post(reverse('adhesions:traiter', args=[demande.pk]),
+                         {'statut': 'EN_EXAMEN', 'motif': ''})
+        self.client.post(reverse('adhesions:traiter', args=[demande.pk]),
+                         {'statut': 'VALIDEE', 'motif': ''})
+        self.client.logout()
+
+        demande.refresh_from_db()
+        compte = demande.membre.utilisateur
+        self.assertFalse(compte.is_active)
+
+        notification = Notification.objects.get(type='ACTIVATION_COMPTE', membre=demande.membre)
+        chemin = urlparse(notification.contexte['lien']).path
+        # Le premier accès au jeton réel redirige vers l'URL « set-password » :
+        # deux temps, comme le veut PasswordResetConfirmView.
+        reponse_get = self.client.get(chemin, follow=True)
+        url_pose = reponse_get.redirect_chain[-1][0]
+        reponse = self.client.post(url_pose, {'new_password1': 'NouveauMdp2026!',
+                                              'new_password2': 'NouveauMdp2026!'})
+        self.assertEqual(reponse.status_code, 302)
+
+        compte.refresh_from_db()
+        self.assertTrue(compte.is_active)
+        self.assertTrue(self.client.login(username=compte.email, password='NouveauMdp2026!'))
+
+    def test_tf27_mot_de_passe_oublie_et_reinitialisation(self):
+        from apps.notifications.models import Notification
+
+        self.client.post(reverse('accounts:mot_de_passe_oublie'),
+                         {'email': self.financier.email})
+        notification = Notification.objects.get(type='REINITIALISATION_MOT_DE_PASSE')
+        chemin = urlparse(notification.contexte['lien']).path
+        reponse_get = self.client.get(chemin, follow=True)
+        url_pose = reponse_get.redirect_chain[-1][0]
+
+        self.client.post(url_pose, {'new_password1': 'Nouveau2026Mdp!',
+                                    'new_password2': 'Nouveau2026Mdp!'})
+
+        self.assertFalse(self.client.login(username=self.financier.email,
+                                           password=fabrique.MOT_DE_PASSE))
+        self.assertTrue(self.client.login(username=self.financier.email,
+                                          password='Nouveau2026Mdp!'))
+
+    def test_tf28_creation_d_un_compte_responsable_par_l_administrateur(self):
+        from apps.accounts.models import Utilisateur
+
+        self.connecter(self.admin)
+        reponse = self.client.post(reverse('accounts:comptes_creer'), {
+            'nom': 'TRAORE', 'prenoms': 'Mariam', 'email': 'mariam.tf28@afemc-ci.org',
+            'role': Utilisateur.Role.RESP_SECTION, 'section': self.korhogo.pk})
+        self.assertEqual(reponse.status_code, 302)
+
+        compte = Utilisateur.objects.get(email='mariam.tf28@afemc-ci.org')
+        self.assertEqual(compte.role, Utilisateur.Role.RESP_SECTION)
+        self.assertFalse(compte.is_active)
+
+    def test_tf29_le_responsable_de_section_est_exclu_des_ecrans_financiers(self):
+        self.connecter(self.resp_abidjan)
+        for nom_url in ('cotisations:liste', 'adhesions:liste', 'relances:liste'):
+            with self.subTest(url=nom_url):
+                self.assertEqual(self.client.get(reverse(nom_url)).status_code, 403)
+
+    def test_tf30_demande_d_adhesion_sans_document_est_refusee(self):
+        reponse = self.client.post(reverse('adhesions:soumettre'), {
+            'nom': 'KEITA', 'prenoms': 'Fanta', 'email': 'fanta@exemple.org',
+            'telephone': '+225 07 00 00 00 00', 'grade': 'Assistante',
+            'etablissement': 'UFHB', 'section': self.abidjan.pk,
+            'motivation': "Participer aux activités de l'association.",
+            'pieces-TOTAL_FORMS': '2', 'pieces-INITIAL_FORMS': '0',
+            'pieces-MIN_NUM_FORMS': '0', 'pieces-MAX_NUM_FORMS': '1000',
+            'pieces-0-type_piece': '', 'pieces-1-type_piece': ''})
+        self.assertEqual(reponse.status_code, 200)
+        self.assertFalse(DemandeAdhesion.objects.filter(email='fanta@exemple.org').exists())
