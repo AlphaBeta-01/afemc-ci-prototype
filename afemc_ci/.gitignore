@@ -8,3 +8,5 @@ htmlcov/
 .coverage
 media/
 var/
+control/
+celerybeat-schedule*

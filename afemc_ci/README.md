@@ -137,6 +137,31 @@ celery -A config beat -l info
 Sans ces deux processus (et sans Redis), rien ne se déclenche tout seul : il
 faut alors invoquer les commandes manuellement, comme en développement.
 
+**Vérifié en conditions réelles** (worker + beat effectivement lancés, une
+vraie action métier — demande de réinitialisation de mot de passe — mise en
+file puis acheminée sans aucune commande manuelle, détection des retards
+déclenchée via `.delay()` et relances envoyées automatiquement par le
+worker) : le mécanisme fonctionne de bout en bout, pas seulement sur le
+papier.
+
+**Windows sans Redis.** Redis n'a pas de portage officiellement maintenu sous
+Windows. Pour développer ou vérifier l'automatisation sans installer WSL ni
+un portage Redis abandonné, Celery peut utiliser le transport fichier de
+Kombu (déjà une dépendance de Celery, aucune installation supplémentaire hors
+`pywin32`, nécessaire au verrouillage de fichiers sous Windows) :
+
+```powershell
+$env:CELERY_BROKER_URL = 'filesystem://'
+celery -A config worker -l info --pool=solo   # --pool=solo : requis sous Windows
+celery -A config beat -l info
+```
+
+Le dossier de file d'attente (`var/celery-filequeue/`, ignoré par git) est
+créé automatiquement dès que `CELERY_BROKER_URL` commence par
+`filesystem://` (voir `config/settings/base.py`). Sans effet sur la
+production, où `CELERY_BROKER_URL` continue de pointer vers Redis par
+défaut.
+
 ## 4. Campagne de tests (chapitre 6)
 
 ```bash

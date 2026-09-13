@@ -131,12 +131,15 @@ CELERY_TIMEZONE = TIME_ZONE
 # développement sur une machine où Redis n'est pas installable (ex. Windows
 # sans WSL). Sans objet en production, où CELERY_BROKER_URL pointe Redis.
 if CELERY_BROKER_URL.startswith('filesystem://'):
+    # Un seul dossier partagé : ce que le producteur (beat) écrit dans
+    # `data_folder_out` doit être exactement ce que le consommateur (worker)
+    # lit dans `data_folder_in` — les deux doivent donc être identiques.
     _dossier_file_attente = BASE_DIR / 'var' / 'celery-filequeue'
-    for _sous_dossier in ('entree', 'sortie', 'traitees'):
+    for _sous_dossier in ('file', 'traitees'):
         (_dossier_file_attente / _sous_dossier).mkdir(parents=True, exist_ok=True)
     CELERY_BROKER_TRANSPORT_OPTIONS = {
-        'data_folder_in': str(_dossier_file_attente / 'entree'),
-        'data_folder_out': str(_dossier_file_attente / 'sortie'),
+        'data_folder_in': str(_dossier_file_attente / 'file'),
+        'data_folder_out': str(_dossier_file_attente / 'file'),
         'data_folder_processed': str(_dossier_file_attente / 'traitees'),
     }
     CELERY_RESULT_BACKEND = None  # résultats non nécessaires : effets observés en base
