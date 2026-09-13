@@ -125,3 +125,18 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+# Transport fichier (Kombu) : à activer explicitement (jamais par défaut) pour
+# faire tourner un vrai worker/beat sans dépendre de Redis — utile en
+# développement sur une machine où Redis n'est pas installable (ex. Windows
+# sans WSL). Sans objet en production, où CELERY_BROKER_URL pointe Redis.
+if CELERY_BROKER_URL.startswith('filesystem://'):
+    _dossier_file_attente = BASE_DIR / 'var' / 'celery-filequeue'
+    for _sous_dossier in ('entree', 'sortie', 'traitees'):
+        (_dossier_file_attente / _sous_dossier).mkdir(parents=True, exist_ok=True)
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
+        'data_folder_in': str(_dossier_file_attente / 'entree'),
+        'data_folder_out': str(_dossier_file_attente / 'sortie'),
+        'data_folder_processed': str(_dossier_file_attente / 'traitees'),
+    }
+    CELERY_RESULT_BACKEND = None  # résultats non nécessaires : effets observés en base

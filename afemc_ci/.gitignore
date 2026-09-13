@@ -7,3 +7,4 @@ staticfiles/
 htmlcov/
 .coverage
 media/
+var/
