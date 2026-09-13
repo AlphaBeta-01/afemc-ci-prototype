@@ -199,14 +199,27 @@ et les tests ont depuis été corrigés) :
   attestation d'exercice ou diplôme — formats PDF/JPG/PNG, 5 Mo maximum), et
   l'ensemble des champs du formulaire public sont obligatoires.
 
-Point encore ouvert, non résolu par la seule lecture du chapitre 4 : le
-périmètre du responsable de section et du responsable financier (accès aux
-cotisations, adhésions et relances) a été délibérément resserré cette
-session, à la demande explicite de l'utilisateur. Si le chapitre 5 du
-mémoire (implémentation), non revu ici, décrit encore l'ancien comportement,
-il doit être mis à jour en conséquence — ce n'est pas une régression du
-code, mais une divergence entre le document et le comportement actuel du
-prototype.
+**Périmètre du responsable de section et du responsable financier — vérifié,
+aucune divergence.** Confronté aux chapitres 3, 4 et 5 du mémoire : § 3.2.4
+(responsable de section) ne mentionne que la consultation des membres de sa
+section ; § 3.2.5 (responsable financier) limite son rôle aux cotisations,
+échéances et retards, sans jamais mentionner les adhésions ; le tableau 6
+(§ 4.6.2) confirme la même délimitation pour la « Coordinatrice de section »
+et la « Trésorière » ; § 5.5 ne décrit qu'un filtrage des *membres* par
+section. Le resserrement de périmètre effectué cette session (retrait des
+cotisations/adhésions/relances pour ces deux rôles) était donc déjà conforme
+au texte du mémoire — c'était une omission du contrôle d'accès dans le code
+d'origine, pas un écart avec la spécification, maintenant corrigée.
+
+Une seule formulation reste ambiguë et mérite d'être relue avec attention :
+l'interprétation du diagramme de cas d'utilisation (§ 4.6.2) indique que
+« les tableaux de bord... se déclinent en deux niveaux... restituant l'état
+des adhésions, l'effectif, les cotisations, les retards... », ce qui peut se
+lire soit comme l'ensemble des indicateurs disponibles à travers les deux
+niveaux combinés (cohérent avec le tableau de bord de section actuel,
+effectif uniquement), soit comme suggérant que le niveau section affiche
+aussi adhésions et cotisations (ce qui contredirait l'implémentation). À
+clarifier côté rédaction si le doute subsiste.
 
 ### Revue de sécurité
 
