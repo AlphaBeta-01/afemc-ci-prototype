@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from apps.notifications.models import Notification
 from apps.notifications.services import (ErreurEnvoi, acheminer_notifications_en_attente,
-                                         creer_notification)
+                                         creer_notification, rendre_gabarit)
 
 
 def notification_test(destinataire='membre@exemple.org'):
@@ -47,3 +47,16 @@ class TestAcheminement(TestCase):
         notification = Notification.objects.first()
         self.assertEqual(notification.statut, Notification.Statut.ECHEC)
         self.assertEqual(notification.tentatives, 3)
+
+
+class TestRenduDuGabarit(TestCase):
+    """Un courriel en texte brut ne doit pas subir l'échappement HTML."""
+
+    def test_une_apostrophe_n_est_pas_echappee(self):
+        corps = rendre_gabarit('notifications/relance.txt', {
+            'membre': "KOUAME O'Neil", 'exercice': 2026, 'montant_du': '25000',
+            'reste': '25000', 'echeance': '31/12/2026', 'jours': 5,
+            'section': "Section d'Abidjan", 'niveau': 'Relance 1'})
+        self.assertIn("Section d'Abidjan", corps)
+        self.assertNotIn('&#x27;', corps)
+        self.assertNotIn('&amp;', corps)

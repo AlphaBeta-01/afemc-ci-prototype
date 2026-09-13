@@ -1,7 +1,8 @@
 """Composition et acheminement des messages (§ 5.6.3)."""
 from django.conf import settings
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
+from django.template import Context, Template
+from django.template.loader import get_template
 from django.utils import timezone
 
 from .models import Notification
@@ -20,7 +21,17 @@ def creer_notification(destinataire, type_notification, objet, gabarit, contexte
 
 
 def rendre_gabarit(gabarit, contexte):
-    return render_to_string(gabarit, contexte)
+    """Rend un gabarit de courriel en texte brut.
+
+    Django échappe le HTML par défaut même dans un fichier `.txt` (via
+    `render_to_string`) : une simple apostrophe dans un nom de section
+    devenait « &#x27; » dans le corps du message. Sans objet pour un
+    courriel en texte brut — l'échappement est donc désactivé ici, une fois
+    pour tous les gabarits, plutôt que dans chacun d'eux.
+    """
+    source = get_template(gabarit).template.source
+    return Template('{% autoescape off %}' + source + '{% endautoescape %}').render(
+        Context(contexte))
 
 
 def envoyer_courriel(destinataire, objet, corps):
