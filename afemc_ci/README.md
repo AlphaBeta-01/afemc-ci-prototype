@@ -196,9 +196,13 @@ par le responsable administratif au moment du traitement
 (`/adhesions/<id>/traiter/`), ainsi que dans l'administration Django.
 
 Les fichiers sont stockés sous `media/adhesions/pieces/<id de la demande>/` ;
-`MEDIA_ROOT`/`MEDIA_URL` sont définis dans `config/settings/base.py`. En
-développement, `runserver` les sert directement ; un déploiement réel doit
-les servir via le serveur web ou un stockage dédié (hors périmètre du prototype).
+`MEDIA_ROOT` est défini dans `config/settings/base.py`. `MEDIA_URL` n'est
+volontairement montée nulle part dans `config/urls.py` — ce sont des documents
+d'identité, jamais accessibles par lien direct, y compris en développement.
+Ils ne sont servis que par la vue authentifiée `adhesions:telecharger_piece`,
+réservée à `ADMIN`/`RESP_ADMIN` (revue de sécurité). Un déploiement réel doit
+appliquer la même règle : ne jamais faire servir `MEDIA_ROOT` tel quel par le
+serveur web ou un stockage public.
 
 La couverture exclut les migrations, les fichiers de test eux-mêmes et le script de
 chargement des données de démonstration (voir `.coveragerc`).
@@ -223,10 +227,20 @@ chargement des données de démonstration (voir `.coveragerc`).
 | E.8 | Journal des opérations | `/admin/core/journaloperation/` |
 | E.9 | Rapport de couverture des tests | `htmlcov/index.html` |
 | E.10 | Affichage sur terminal mobile | mode mobile du navigateur |
+| E.11 | Tableau de bord du responsable de section | `/tableau-de-bord/` (connecté en responsable de section) |
+| E.12 | Gestion des comptes responsables | `/comptes/responsables/` |
+| E.13 | Création d'un compte responsable | `/comptes/responsables/nouveau/` |
+| E.14 | Activation de compte / définition du mot de passe | lien reçu par courriel (création de compte ou adhésion validée) |
+| E.15 | Mot de passe oublié | `/comptes/mot-de-passe-oublie/` |
 
 Les figures 20, 21 et 28 (architecture en couches, enchaînement du moteur,
 architecture de déploiement) sont des schémas à réaliser sous StarUML ou draw.io,
 et non des captures d'écran.
+
+La figure E.5 (formulaire public d'adhésion) doit désormais montrer la
+section « Pièces justificatives » ajoutée au formulaire. La figure 26
+(traitement des demandes d'adhésion) gagne à montrer un dossier avec au
+moins un document déposé, visible via le lien « Ouvrir ».
 
 Pour obtenir des relances à afficher (figures 27 et 29), exécuter
 `python manage.py detecter_retards` après le chargement des données.
