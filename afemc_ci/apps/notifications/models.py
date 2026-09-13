@@ -18,7 +18,7 @@ class Notification(models.Model):
                                on_delete=models.SET_NULL, related_name='notifications')
     relance = models.ForeignKey('relances.Relance', null=True, blank=True,
                                 on_delete=models.SET_NULL, related_name='notifications')
-    type = models.CharField(max_length=25)
+    type = models.CharField(max_length=40)
     canal = models.CharField(max_length=15, choices=Canal.choices, default=Canal.EMAIL)
     objet = models.CharField(max_length=200)
     gabarit = models.CharField(max_length=80)
