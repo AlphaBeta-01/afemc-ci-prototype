@@ -3,6 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
+from apps.core.decorators import role_requis
 from apps.cotisations.services import indicateurs_exercice
 
 from .models import Section
@@ -17,6 +18,7 @@ def liste(requete):
 
 
 @login_required
+@role_requis('ADMIN', 'RESP_ADMIN', 'RESP_FINANCIER', 'RESP_SECTION')
 def detail(requete, pk):
     section = get_object_or_404(Section, pk=pk)
     if not requete.user.voit_toutes_les_sections and requete.user.section_id != section.pk:

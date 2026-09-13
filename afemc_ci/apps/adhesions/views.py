@@ -1,8 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.core.decorators import role_requis
+from apps.core.services import journaliser
 from apps.core.utils import paginer
 
 from .forms import FormsetPiecesJustificatives, FormulaireDemande
@@ -66,3 +68,16 @@ def traiter(requete, pk):
         'demande': demande,
         'transitions': sorted(TRANSITIONS[demande.statut]),
     })
+
+
+@login_required
+@role_requis('ADMIN', 'RESP_ADMIN')
+def telecharger_piece(requete, pk):
+    """Sert une pièce justificative (revue de sécurité) : le fichier déposé
+    par une candidate ne doit jamais être accessible par un lien direct vers
+    `MEDIA_URL`, seulement via cette vue authentifiée et journalisée."""
+    piece = get_object_or_404(PieceJustificative, pk=pk)
+    journaliser(requete.user, 'CONSULTATION_PIECE_JUSTIFICATIVE',
+               f'{piece.demande.nom_complet()} — {piece.get_type_piece_display()}', requete)
+    return FileResponse(piece.fichier.open('rb'),
+                        filename=piece.fichier.name.rsplit('/', 1)[-1])

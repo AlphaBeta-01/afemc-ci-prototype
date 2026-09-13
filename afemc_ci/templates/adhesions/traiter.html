@@ -22,7 +22,7 @@
       {% for piece in demande.pieces.all %}
         <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
           <span>{{ piece.get_type_piece_display }}</span>
-          <a href="{{ piece.fichier.url }}" target="_blank" rel="noopener"
+          <a href="{% url 'adhesions:telecharger_piece' piece.pk %}" target="_blank" rel="noopener"
              class="btn btn-outline-secondary btn-sm py-0">Ouvrir</a>
         </div>
       {% empty %}

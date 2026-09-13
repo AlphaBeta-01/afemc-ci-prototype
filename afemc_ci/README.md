@@ -153,19 +153,38 @@ Résultats attendus — ce sont les chiffres repris au chapitre 6 du mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 99 | core, accounts, membres, adhesions, cotisations, notifications, dashboard |
+| Tests unitaires | 106 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections |
 | Scénarios du moteur (SC01-SC24) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration (TI01-TI13) | 13 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF25) | 25 | `apps/core/tests/test_fonctionnels.py` (dont TF08 et TF16b, adaptés) |
 | Tests de sécurité (TS01-TS10) | 10 | `apps/core/tests/test_securite.py` |
-| **Total** | **174** | couverture : **95 %** du code applicatif |
+| **Total** | **181** | couverture : **95 %** du code applicatif |
 
-Les 38 tests unitaires supplémentaires (par rapport aux 126 initiaux du chapitre 6)
-couvrent l'activation de compte, le rattrapage des comptes manquants
-(§ 2, « Compte du membre admis », et § 3, `regulariser_comptes_membres`),
-le périmètre resserré du responsable financier et du responsable de section
-(RG08), et les pièces justificatives exigées à la soumission d'une demande
-d'adhésion (RG01, ci-dessous).
+Les 45 tests unitaires supplémentaires (par rapport aux 126 initiaux du chapitre 6)
+couvrent l'activation de compte et la réinitialisation de mot de passe, le
+rattrapage des comptes manquants (§ 2, « Compte du membre admis », et § 3,
+`regulariser_comptes_membres`), le périmètre resserré du responsable
+financier et du responsable de section (RG08), les pièces justificatives
+exigées à la soumission d'une demande d'adhésion (RG01, ci-dessous), et les
+deux correctifs de la revue de sécurité ci-dessous.
+
+### Revue de sécurité
+
+Deux failles de contrôle d'accès identifiées et corrigées :
+
+- **`/sections/<id>/`** n'était protégée que par la connexion, pas par le
+  rôle : un simple membre pouvait consulter les indicateurs financiers et le
+  registre de sa section (jusqu'à 50 fiches). Restreint aux responsables
+  (`role_requis`), cohérent avec le reste de l'application.
+- **Pièces justificatives d'adhésion** : le lien affiché à la personne qui
+  traite une demande pointait directement vers `MEDIA_URL`, sans aucune
+  vérification de rôle sur le fichier lui-même — n'importe qui connaissant
+  ou devinant l'URL pouvait télécharger les pièces d'identité déposées.
+  `MEDIA_URL` n'est plus servie par Django ; les documents ne sont
+  accessibles que via `adhesions:telecharger_piece`, une vue authentifiée,
+  restreinte à `ADMIN`/`RESP_ADMIN` et journalisée (RG09). Un déploiement
+  réel doit appliquer la même règle : ne jamais faire servir `MEDIA_ROOT`
+  tel quel par le serveur web ou un stockage public.
 
 ### Pièces justificatives d'une demande d'adhésion
 

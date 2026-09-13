@@ -1,6 +1,4 @@
 """Routage principal de l'application."""
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
@@ -17,7 +15,10 @@ urlpatterns = [
     path('tableau-de-bord/', include('apps.dashboard.urls')),
 ]
 
-if settings.DEBUG:
-    # Sert les pièces justificatives déposées, uniquement hors production
-    # (un vrai déploiement les sert via le serveur web ou un stockage dédié).
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# `MEDIA_URL`/`MEDIA_ROOT` (config/settings/base.py) ne sont volontairement PAS
+# montés ici, même en développement : les pièces justificatives d'adhésion
+# (§ 5.5.4) sont des documents d'identité sensibles et ne doivent être
+# accessibles que via la vue authentifiée `adhesions:telecharger_piece`
+# (revue de sécurité) — jamais par un lien direct, non protégé, vers le
+# stockage. Un déploiement réel doit appliquer la même règle : ne jamais
+# faire servir `MEDIA_ROOT` tel quel par le serveur web ou un bucket public.

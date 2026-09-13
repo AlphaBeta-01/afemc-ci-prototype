@@ -262,6 +262,52 @@ class TestDepotPiecesJustificatives(TestCase):
         self.assertContains(reponse, "n'est pas justifiée")
 
 
+class TestAccesPiecesJustificatives(TestCase):
+    """Un document déposé n'est accessible que via la vue authentifiée
+    dédiée — jamais par un lien direct vers le stockage (revue de sécurité)."""
+
+    def setUp(self):
+        self.section = Section.objects.create(code='ABJ', libelle='Abidjan')
+        self.demande = DemandeAdhesion.objects.create(
+            nom='DIABATE', prenoms='Salimata', email='salimata@exemple.org',
+            section=self.section)
+        self.piece = PieceJustificative.objects.create(
+            demande=self.demande, type_piece=PieceJustificative.TypePiece.DIPLOME,
+            fichier=SimpleUploadedFile('diplome.pdf', b'%PDF-1.4 contenu factice',
+                                       content_type='application/pdf'))
+
+    def test_acces_refuse_sans_authentification(self):
+        reponse = self.client.get(reverse('adhesions:telecharger_piece', args=[self.piece.pk]))
+        self.assertEqual(reponse.status_code, 302)          # redirigé vers la connexion
+
+    def test_acces_refuse_a_un_role_non_habilite(self):
+        financier = Utilisateur.objects.create_user(
+            email='financier@afemc-ci.org', password='MotDePasse2026!', nom='TRAORE',
+            prenoms='Mariam', role=Utilisateur.Role.RESP_FINANCIER)
+        self.client.force_login(financier)
+        reponse = self.client.get(reverse('adhesions:telecharger_piece', args=[self.piece.pk]))
+        self.assertEqual(reponse.status_code, 403)
+
+    def test_le_responsable_administratif_peut_telecharger_le_document(self):
+        from apps.core.models import JournalOperation
+
+        admin = Utilisateur.objects.create_user(
+            email='administratif@afemc-ci.org', password='MotDePasse2026!',
+            nom='KONE', prenoms='Aya', role=Utilisateur.Role.RESP_ADMIN)
+        self.client.force_login(admin)
+
+        reponse = self.client.get(reverse('adhesions:telecharger_piece', args=[self.piece.pk]))
+        self.assertEqual(reponse.status_code, 200)
+        self.assertEqual(b''.join(reponse.streaming_content), b'%PDF-1.4 contenu factice')
+        self.assertTrue(JournalOperation.objects
+                        .filter(type_operation='CONSULTATION_PIECE_JUSTIFICATIVE').exists())
+
+    def test_le_fichier_n_est_plus_accessible_par_un_lien_direct_vers_media(self):
+        # Confirme que config/urls.py ne monte plus MEDIA_URL directement.
+        reponse = self.client.get(f'/media/{self.piece.fichier.name}')
+        self.assertEqual(reponse.status_code, 404)
+
+
 class TestChampsObligatoiresDemande(TestCase):
     """Tous les renseignements du formulaire public sont exigés (RG01).
 

@@ -13,7 +13,9 @@
             <div class="intitule">Membres actifs</div>
             <div class="h4 mb-0">{{ section.effectif_actif }}</div>
           </div>
-          <a href="{% url 'sections:detail' section.pk %}" class="btn btn-outline-primary btn-sm">Détail</a>
+          {% if user.role != 'MEMBRE' %}
+            <a href="{% url 'sections:detail' section.pk %}" class="btn btn-outline-primary btn-sm">Détail</a>
+          {% endif %}
         </div>
       </div></div>
     </div>
