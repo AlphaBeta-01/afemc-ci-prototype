@@ -108,6 +108,22 @@ LOGOUT_REDIRECT_URL = 'accounts:connexion'
 SESSION_COOKIE_AGE = 60 * 60 * 4
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
+# Sans ceci, une exception non gérée (500) ne s'affiche nulle part une fois
+# DEBUG=False : le handler « console » par défaut de Django est filtré par
+# require_debug_true, et « mail_admins » ne fait rien tant qu'ADMINS est
+# vide. Un handler console explicite, non filtré, garantit que le traceback
+# atteint toujours stderr — donc les journaux de l'hébergeur (Render, etc.).
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'loggers': {
+        'django.request': {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
+    },
+}
+
 # ----- Paramètres fonctionnels de l'association -----
 EMAIL_EXPEDITEUR = os.environ.get('EMAIL_EXPEDITEUR', 'gestion@afemc-ci.org')
 COTISATION_MONTANT_DEFAUT = int(os.environ.get('COTISATION_MONTANT_DEFAUT', 25000))
