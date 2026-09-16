@@ -123,15 +123,12 @@ des relances est donc visible sans configurer de service de messagerie.
 
 ### Service de messagerie (production)
 
-`config/settings/prod.py` utilise le backend SMTP standard de Django — compatible
-avec n'importe quel service transactionnel, sans modification de code, en
-renseignant simplement les variables `EMAIL_*` de `.env` :
+`config/settings/prod.py` envoie les courriels via l'**API HTTP de Brevo**
+(bibliothèque `django-anymail`), pas en SMTP : il suffit de renseigner deux
+variables dans `.env` :
 
 ```
-EMAIL_HOST=smtp-relay.brevo.com
-EMAIL_PORT=587
-EMAIL_HOST_USER=<login SMTP fourni par Brevo>
-EMAIL_HOST_PASSWORD=<clé SMTP générée dans Brevo, pas le mot de passe du compte>
+BREVO_API_KEY=<clé API v3 générée dans Brevo>
 EMAIL_EXPEDITEUR=<adresse vérifiée dans Brevo>
 ```
 
@@ -139,16 +136,18 @@ EMAIL_EXPEDITEUR=<adresse vérifiée dans Brevo>
 prototype — gratuit jusqu'à 300 courriels/jour, largement suffisant pour une
 association de cette taille. Après création d'un compte gratuit :
 
-1. **Paramètres du compte → SMTP & API → onglet SMTP** : récupérer le login et
-   générer une clé SMTP (distincte du mot de passe du compte).
+1. **Paramètres du compte → Clés API** : générer une clé API v3 (distincte des
+   identifiants SMTP).
 2. **Onglet Expéditeurs** : vérifier l'adresse qui sera utilisée comme
    `EMAIL_EXPEDITEUR` — Brevo refuse d'envoyer depuis une adresse non vérifiée.
 
-Vérifié en conditions réelles (16/09) : envoi effectif d'un courriel d'activation
-via ce mécanisme, reçu avec succès. D'autres services SMTP standards
-conviendraient tout aussi bien (SendGrid, Amazon SES, Mailgun, ou la messagerie
-propre à l'hébergement du domaine `afemc-ci.org` si elle existe déjà) — seuls
-`EMAIL_HOST`/`EMAIL_PORT` changent.
+Le SMTP sortant (port 587) a été essayé en premier mais s'est révélé peu fiable
+depuis le réseau gratuit de Render : les connexions restaient bloquées en
+`socket.connect()` jusqu'à ce que gunicorn tue le worker (timeout), avant même
+qu'une erreur propre ne remonte — voir § 7, incident du 16/09. L'API HTTP
+(port 443) n'a pas ce problème : les hébergeurs bloquent rarement le HTTPS
+standard, contrairement aux ports SMTP. Vérifié en conditions réelles :
+envoi effectif d'un courriel d'activation via ce mécanisme, reçu avec succès.
 
 ### Exécution automatique (Celery)
 
@@ -381,9 +380,9 @@ services et les crée en un seul clic, plutôt que de les configurer un par un.
    détecte `render.yaml` et propose de créer deux ressources : la base
    PostgreSQL et le service web (Gunicorn).
 3. Render demande de compléter les variables marquées `sync: false` dans
-   `render.yaml` — les trois informations Brevo (`EMAIL_HOST_USER`,
-   `EMAIL_HOST_PASSWORD`, `EMAIL_EXPEDITEUR`, voir § 3 « Service de
-   messagerie ») et les identifiants du premier compte administrateur
+   `render.yaml` — les informations Brevo (`BREVO_API_KEY`, `EMAIL_EXPEDITEUR`,
+   voir § 3 « Service de messagerie ») et les identifiants du premier compte
+   administrateur
    (`SUPERUSER_BOOTSTRAP_EMAIL`, `SUPERUSER_BOOTSTRAP_PASSWORD`). Tout le
    reste (secret Django, connexion PostgreSQL, jeton `CRON_SECRET`, nom
    d'hôte, `SITE_URL`) est déduit ou généré automatiquement.

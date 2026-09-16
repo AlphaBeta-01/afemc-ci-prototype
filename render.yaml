@@ -10,11 +10,8 @@ services:
     plan: free
     rootDir: afemc_ci
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
-    # --timeout 90 : Brevo (smtp-relay.brevo.com) résout vers plusieurs IP ;
-    # socket.create_connection() les essaie l'une après l'autre, chacune
-    # bornée par EMAIL_TIMEOUT (prod.py) — cumulées, ça peut dépasser les
-    # 30 s par défaut de gunicorn et tuer le worker avant qu'une exception
-    # propre ne soit levée côté smtplib (observé en production).
+    # --timeout 90 : marge de sécurité pour /taches/executer/, qui peut
+    # traiter plusieurs notifications en un seul appel HTTP.
     startCommand: "gunicorn config.wsgi:application --timeout 90"
     envVars:
       - key: PYTHON_VERSION
@@ -44,14 +41,10 @@ services:
         fromDatabase: {name: afemc-ci-db, property: host}
       - key: POSTGRES_PORT
         fromDatabase: {name: afemc-ci-db, property: port}
-      - key: EMAIL_HOST
-        value: smtp-relay.brevo.com
-      - key: EMAIL_PORT
-        value: "587"
-      - key: EMAIL_HOST_USER
-        sync: false          # renseigné manuellement dans le tableau de bord Render (secret)
-      - key: EMAIL_HOST_PASSWORD
-        sync: false          # idem — clé SMTP Brevo, jamais dans ce fichier
+      - key: BREVO_API_KEY
+        sync: false          # clé API v3 Brevo (Paramètres > Clés API) — jamais dans ce fichier ;
+                              # renseignée manuellement dans le tableau de bord Render (secret).
+                              # Envoi via l'API HTTP (443), pas SMTP (587) : voir § 7 du README.
       - key: EMAIL_EXPEDITEUR
         sync: false          # adresse vérifiée dans Brevo
       - key: COTISATION_MONTANT_DEFAUT

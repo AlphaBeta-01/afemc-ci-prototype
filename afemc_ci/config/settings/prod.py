@@ -13,21 +13,13 @@ STORAGES = {
     'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_TLS = True
-# Sans ceci, smtplib bloque indéfiniment si la connexion TCP sortante
-# n'aboutit pas (observé sur Render : le worker gunicorn se fait tuer par
-# son propre timeout pendant que smtplib attend encore). Un échec rapide
-# retombe proprement dans le circuit ECHEC/réessai existant plutôt que de
-# faire planter tout le worker. smtp-relay.brevo.com résout vers plusieurs
-# IP essayées une à une (§ startCommand dans render.yaml) : 8 s par adresse
-# laisse une marge confortable sous le --timeout 90 de gunicorn même si
-# plusieurs adresses échouent avant qu'une ne réponde.
-EMAIL_TIMEOUT = 8
+# Envoi via l'API HTTP de Brevo (port 443), pas en SMTP : le SMTP sortant
+# (port 587) s'est révélé peu fiable depuis le réseau gratuit de Render —
+# connexions qui restaient bloquées en `socket.connect()` jusqu'à ce que
+# gunicorn tue le worker (timeout), avant même qu'une erreur propre ne
+# remonte. Le HTTPS standard n'a pas ce problème.
+EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
+ANYMAIL = {'BREVO_API_KEY': os.environ.get('BREVO_API_KEY', '')}
 
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
