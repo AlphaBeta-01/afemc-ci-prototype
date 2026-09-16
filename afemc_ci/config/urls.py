@@ -12,6 +12,7 @@ urlpatterns = [
     path('adhesions/', include('apps.adhesions.urls')),
     path('cotisations/', include('apps.cotisations.urls')),
     path('relances/', include('apps.relances.urls')),
+    path('notifications/', include('apps.notifications.urls')),
     path('tableau-de-bord/', include('apps.dashboard.urls')),
 ]
 
