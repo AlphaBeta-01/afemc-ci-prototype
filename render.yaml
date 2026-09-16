@@ -12,6 +12,9 @@ services:
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod   # manage.py utilise dev.py par défaut sinon,
+                                       # y compris pendant collectstatic au build
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DJANGO_ALLOWED_HOSTS
