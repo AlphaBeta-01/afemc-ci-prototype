@@ -126,4 +126,17 @@ def diagnostiquer_smtp(requete):
             resultats[f'connexion_{nom}'] = (
                 f'echec apres {time.monotonic() - debut:.2f}s : {err}')
 
+    resultats['email_timeout_configure'] = settings.EMAIL_TIMEOUT
+
+    from django.core.mail import get_connection
+    debut = time.monotonic()
+    try:
+        connexion = get_connection()
+        connexion.open()
+        resultats['smtplib_open'] = f'ok en {time.monotonic() - debut:.2f}s'
+        connexion.close()
+    except Exception as err:                # noqa: BLE001
+        resultats['smtplib_open'] = (
+            f'echec apres {time.monotonic() - debut:.2f}s : {type(err).__name__}: {err}')
+
     return JsonResponse(resultats)
