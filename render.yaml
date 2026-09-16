@@ -12,6 +12,10 @@ services:
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.13"   # runtime.txt n'était visiblement pas pris en compte : Render
+                           # utilisait Python 3.14, incompatible avec Django 5.0 (AttributeError
+                           # dans template/context.py — bug connu de cette combinaison de versions)
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.prod   # manage.py utilise dev.py par défaut sinon,
                                        # y compris pendant collectstatic au build
