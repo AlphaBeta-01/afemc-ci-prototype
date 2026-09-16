@@ -2,6 +2,13 @@
 """Point d'entrée des commandes d'administration du projet AFEMC-CI."""
 import os
 import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Charge .env s'il existe (jamais commité, voir .env.example) ; sans effet
+# sur une variable déjà présente dans l'environnement, qui reste prioritaire.
+load_dotenv(Path(__file__).resolve().parent / '.env')
 
 
 def main():

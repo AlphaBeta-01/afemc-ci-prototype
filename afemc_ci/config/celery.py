@@ -1,7 +1,12 @@
 """Planification des traitements automatisés (§ 5.6.1)."""
 import os
+from pathlib import Path
+
 from celery import Celery
 from celery.schedules import crontab
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent / '.env')
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.prod')
 
