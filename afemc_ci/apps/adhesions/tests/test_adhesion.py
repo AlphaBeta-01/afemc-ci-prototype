@@ -8,6 +8,7 @@ from apps.adhesions.services import (TransitionInterdite, changer_statut,
                                      regulariser_comptes_membres)
 from apps.cotisations.models import Cotisation
 from apps.membres.models import Membre
+from apps.notifications.models import Notification
 from apps.sections.models import Section
 
 S = DemandeAdhesion.Statut
@@ -296,6 +297,57 @@ class TestDepotPiecesJustificatives(TestCase):
 
         reponse = self.client.get(reverse('adhesions:traiter', args=[demande.pk]))
         self.assertContains(reponse, "n'est pas justifiée")
+
+
+class TestNotificationNouvelleDemande(TestCase):
+    """L'administratrice et le responsable administratif sont prévenus d'un dépôt."""
+
+    def setUp(self):
+        self.section = Section.objects.create(code='ABJ', libelle='Abidjan')
+        self.admin = Utilisateur.objects.create_user(
+            email='admin@afemc-ci.org', password='MotDePasse2026!',
+            nom='KOUADIO', prenoms='Jean', role=Utilisateur.Role.ADMIN)
+        self.administratif = Utilisateur.objects.create_user(
+            email='administratif@afemc-ci.org', password='MotDePasse2026!',
+            nom='KONE', prenoms='Aya', role=Utilisateur.Role.RESP_ADMIN)
+        self.financier = Utilisateur.objects.create_user(
+            email='financier@afemc-ci.org', password='MotDePasse2026!',
+            nom='TRAORE', prenoms='Mariam', role=Utilisateur.Role.RESP_FINANCIER)
+
+    def _soumettre(self):
+        donnees = {
+            'nom': 'DIABATE', 'prenoms': 'Salimata', 'email': 'salimata@exemple.org',
+            'telephone': '+225 07 00 00 00 00', 'grade': 'Maître-Assistante',
+            'etablissement': 'UFHB', 'section': self.section.pk,
+            'motivation': "Je souhaite adhérer.",
+            'pieces-TOTAL_FORMS': '2', 'pieces-INITIAL_FORMS': '0',
+            'pieces-MIN_NUM_FORMS': '0', 'pieces-MAX_NUM_FORMS': '1000',
+            'pieces-0-type_piece': PieceJustificative.TypePiece.DIPLOME,
+            'pieces-0-fichier': SimpleUploadedFile('diplome.pdf', b'%PDF-1.4 test',
+                                                   content_type='application/pdf'),
+            'pieces-1-type_piece': '',
+        }
+        return self.client.post(reverse('adhesions:soumettre'), donnees)
+
+    def test_administratrice_et_responsable_administratif_sont_notifies(self):
+        self._soumettre()
+        notifs = Notification.objects.filter(type='NOUVELLE_DEMANDE_ADHESION')
+        destinataires = set(notifs.values_list('destinataire', flat=True))
+        self.assertEqual(destinataires, {self.admin.email, self.administratif.email})
+
+    def test_le_responsable_financier_n_est_pas_notifie(self):
+        self._soumettre()
+        notifs = Notification.objects.filter(type='NOUVELLE_DEMANDE_ADHESION')
+        self.assertNotIn(self.financier.email,
+                         notifs.values_list('destinataire', flat=True))
+
+    def test_un_compte_inactif_n_est_pas_notifie(self):
+        self.administratif.is_active = False
+        self.administratif.save()
+        self._soumettre()
+        notifs = Notification.objects.filter(type='NOUVELLE_DEMANDE_ADHESION')
+        self.assertNotIn(self.administratif.email,
+                         notifs.values_list('destinataire', flat=True))
 
 
 class TestAccesPiecesJustificatives(TestCase):

@@ -9,7 +9,7 @@ from apps.core.utils import paginer
 
 from .forms import FormsetPiecesJustificatives, FormulaireDemande
 from .models import DemandeAdhesion, PieceJustificative
-from .services import TransitionInterdite, changer_statut
+from .services import TransitionInterdite, changer_statut, notifier_nouvelle_demande
 
 
 def soumettre(requete):
@@ -30,6 +30,7 @@ def soumettre(requete):
                 PieceJustificative.objects.create(
                     demande=demande, type_piece=piece.cleaned_data['type_piece'],
                     fichier=fichier)
+        notifier_nouvelle_demande(demande)
         return render(requete, 'adhesions/confirmation.html')
     return render(requete, 'adhesions/soumettre.html',
                   {'formulaire': formulaire, 'formset': formset})

@@ -126,6 +126,31 @@ def changer_statut(demande, nouveau_statut, utilisateur=None, motif=''):
     return demande
 
 
+def notifier_nouvelle_demande(demande):
+    """Prévient l'administratrice et le responsable administratif d'un dépôt.
+
+    Sans ce signal, une demande peut rester longtemps invisible : personne ne
+    consulte spontanément l'écran des adhésions en l'absence d'une raison de
+    le faire.
+    """
+    from apps.accounts.models import Utilisateur
+
+    destinataires = Utilisateur.objects.filter(
+        role__in=[Utilisateur.Role.ADMIN, Utilisateur.Role.RESP_ADMIN], is_active=True)
+    notifications = []
+    for responsable in destinataires:
+        notifications.append(creer_notification(
+            destinataire=responsable.email,
+            type_notification='NOUVELLE_DEMANDE_ADHESION',
+            objet=f"Nouvelle demande d'adhésion — {demande.nom_complet()}",
+            gabarit='notifications/nouvelle_demande.txt',
+            contexte={'candidate': demande.nom_complet(),
+                      'section': demande.section.libelle,
+                      'etablissement': demande.etablissement,
+                      'date_soumission': demande.date_soumission.strftime('%d/%m/%Y')}))
+    return notifications
+
+
 def notifier_candidate(demande):
     return creer_notification(
         destinataire=demande.email,

@@ -1,0 +1,14 @@
+Madame, Cher confrère,
+
+Une nouvelle demande d'adhésion vient d'être soumise sur la plateforme de
+gestion de l'AFEMC-CI.
+
+Candidate : {{ candidate }}
+Section souhaitée : {{ section }}
+Établissement : {{ etablissement|default:'—' }}
+Déposée le : {{ date_soumission }}
+
+Vous pouvez l'examiner depuis votre espace de gestion, rubrique « Adhésions ».
+
+Le système de gestion
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire
