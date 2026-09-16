@@ -118,6 +118,12 @@ MAX_TENTATIVES_NOTIFICATION = 3
 # construits hors du contexte d'une requête HTTP.
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
 
+# Jeton attendu par apps.core.views.executer_taches_planifiees, appelée par un
+# ordonnanceur externe (§ 7 du README) là où aucun worker Celery en arrière-plan
+# n'est disponible (plan gratuit Render notamment). Vide par défaut : la vue
+# refuse alors toute requête, y compris avec un jeton vide côté appelant.
+CRON_SECRET = os.environ.get('CRON_SECRET', '')
+
 # ----- File de tâches asynchrones (Celery/Redis, § 5.6.1) -----
 # Redis sert à la fois de courtier de messages et de stockage des résultats.
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')

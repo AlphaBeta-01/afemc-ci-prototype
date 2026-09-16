@@ -1,0 +1,38 @@
+name: Tâches planifiées AFEMC-CI
+
+# Remplace Celery Beat, indisponible sur le plan gratuit Render (§ 7 du
+# README) : ce workflow appelle /taches/executer/ à intervalle régulier,
+# comme le ferait normalement un worker en arrière-plan.
+
+on:
+  schedule:
+    # Détection des retards + acheminement des notifications, toutes les 15 min
+    - cron: '*/15 * * * *'
+    # Synthèse hebdomadaire aux responsables, le lundi à 7h UTC
+    - cron: '0 7 * * 1'
+  workflow_dispatch:  # déclenchement manuel depuis l'onglet Actions, pour tester
+
+jobs:
+  appeler:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déterminer si cet appel inclut la synthèse hebdomadaire
+        id: parametres
+        run: |
+          if [ "${{ github.event.schedule }}" = "0 7 * * 1" ]; then
+            echo "requete=?synthese=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "requete=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Appeler /taches/executer/
+        run: |
+          reponse=$(curl -sS -o /tmp/reponse.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ vars.RENDER_URL }}/taches/executer/${{ steps.parametres.outputs.requete }}")
+          echo "statut HTTP : $reponse"
+          cat /tmp/reponse.json
+          if [ "$reponse" != "200" ]; then
+            echo "::error::La tâche planifiée a échoué (statut $reponse)."
+            exit 1
+          fi

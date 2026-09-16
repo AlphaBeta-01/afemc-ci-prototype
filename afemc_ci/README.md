@@ -378,15 +378,13 @@ services et les crée en un seul clic, plutôt que de les configurer un par un.
 
 1. Créer un compte Render, connecté à ce dépôt GitHub.
 2. **New + → Blueprint**, sélectionner le dépôt `afemc-ci-prototype`. Render
-   détecte `render.yaml` et propose de créer quatre ressources : la base
-   PostgreSQL, un service Redis, le service web (Gunicorn) et un worker Celery
-   (qui embarque aussi Beat, via `celery -A config worker -B`, pour éviter un
-   cinquième service payant sur le plan gratuit).
+   détecte `render.yaml` et propose de créer deux ressources : la base
+   PostgreSQL et le service web (Gunicorn).
 3. Render demande de compléter les variables marquées `sync: false` dans
    `render.yaml` — uniquement les trois informations Brevo (`EMAIL_HOST_USER`,
    `EMAIL_HOST_PASSWORD`, `EMAIL_EXPEDITEUR`, voir § 3 « Service de
-   messagerie »). Tout le reste (secret Django, connexion PostgreSQL, URL Redis,
-   nom d'hôte, `SITE_URL`) est déduit automatiquement.
+   messagerie »). Tout le reste (secret Django, connexion PostgreSQL, jeton
+   `CRON_SECRET`, nom d'hôte, `SITE_URL`) est déduit ou généré automatiquement.
 4. Une fois déployé, créer un compte administrateur :
    **Dashboard → afemc-ci-web → Shell** :
    ```bash
@@ -395,12 +393,45 @@ services et les crée en un seul clic, plutôt que de les configurer un par un.
    python manage.py charger_donnees_demo
    ```
 
+### Tâches planifiées sans worker (Background Workers indisponibles en gratuit)
+
+Les « Background Workers » de Render — nécessaires à un worker Celery — ne
+sont **pas proposés sur le plan gratuit** (seuls la base de données et un
+service web le sont). Plutôt que de payer un service dédié, la détection des
+retards et l'acheminement des notifications sont déclenchés par un appel HTTP
+planifié depuis GitHub Actions (`.github/workflows/cron.yml`, déjà dans le
+dépôt) vers `GET /taches/executer/`, une vue protégée par le jeton
+`CRON_SECRET` (en-tête `Authorization: Bearer <jeton>`) — toutes les 15 min,
+plus un appel supplémentaire le lundi à 7h UTC pour la synthèse hebdomadaire.
+
+Pour l'activer, une fois le service web déployé :
+
+1. **Dashboard Render → afemc-ci-web → Environment** : copier la valeur
+   générée pour `CRON_SECRET`.
+2. **Sur GitHub → Settings du dépôt → Secrets and variables → Actions** :
+   - Onglet *Secrets* → *New repository secret* → nom `CRON_SECRET`, valeur
+     collée à l'étape précédente.
+   - Onglet *Variables* → *New repository variable* → nom `RENDER_URL`,
+     valeur `https://afemc-ci-web.onrender.com` (l'URL réelle attribuée par
+     Render, visible en haut du tableau de bord du service).
+3. **Onglet Actions du dépôt → « Tâches planifiées AFEMC-CI » → Run workflow**
+   pour vérifier manuellement avant d'attendre la première exécution planifiée.
+
+Si le worker Celery est préféré malgré son coût (~7 $/mois sur Render), rien
+n'empêche de le recréer manuellement (« New + → Background Worker », racine
+`afemc_ci`, commande `celery -A config worker -B --loglevel=info`, mêmes
+variables d'environnement que le service web) et de désactiver le workflow
+GitHub Actions.
+
 ### Limites du plan gratuit à connaître
 
 - **PostgreSQL gratuit** : expire au bout de 90 jours (à renouveler ou migrer
   vers un plan payant, ~7 $/mois, avant l'échéance).
 - **Service web gratuit** : se met en veille après une période d'inactivité ;
-  la requête suivante prend 30 à 60 s le temps du réveil (« cold start »).
+  la requête suivante prend 30 à 60 s le temps du réveil (« cold start ») —
+  y compris pour l'appel de GitHub Actions, qui peut donc occasionnellement
+  échouer sur un réveil trop lent (le workflow le signale sans bloquer les
+  exécutions suivantes).
 - **Fichiers déposés (`MEDIA_ROOT`)** : stockés sur un disque **éphémère** par
   défaut — les pièces justificatives déposées par les candidates seraient
   perdues à chaque redéploiement. Pour un usage réel au-delà d'une
@@ -410,10 +441,8 @@ services et les crée en un seul clic, plutôt que de les configurer un par un.
 ### Déploiement manuel (sans Blueprint)
 
 Si le Blueprint échoue ou pour garder la main sur chaque étape, les mêmes
-services peuvent être créés un par un dans le tableau de bord Render : une
-base PostgreSQL, un Redis, un « Web Service » (racine `afemc_ci`, commande de
+ressources peuvent être créées à la main dans le tableau de bord Render : une
+base PostgreSQL, puis un « Web Service » (racine `afemc_ci`, commande de
 build `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`,
-commande de démarrage `gunicorn config.wsgi:application`) et un « Background
-Worker » (mêmes racine et build, commande de démarrage
-`celery -A config worker -B --loglevel=info`) — en reportant manuellement les
-variables d'environnement listées dans `render.yaml` sur les deux services.
+commande de démarrage `gunicorn config.wsgi:application`) — en reportant
+manuellement les variables d'environnement listées dans `render.yaml`.
