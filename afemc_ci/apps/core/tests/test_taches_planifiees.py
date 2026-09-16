@@ -1,4 +1,7 @@
 """Point d'entrée pour l'ordonnanceur externe (§ 7 du README, GitHub Actions)."""
+import socket
+from unittest.mock import patch
+
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -84,3 +87,33 @@ class TestAmorcageAdministrateur(TestCase):
     def test_refuse_si_non_configuree(self):
         reponse = self._appeler()
         self.assertEqual(reponse.status_code, 500)
+
+
+@override_settings(CRON_SECRET='jeton-de-test')
+class TestDiagnosticSmtp(TestCase):
+    """Diagnostic temporaire (§ blocage réseau sortant sur Render) —
+    les tests se contentent de vérifier la protection par jeton et la forme
+    de la réponse, sans réseau réel (non déterministe en CI)."""
+
+    def _appeler(self, jeton='jeton-de-test'):
+        entetes = {'HTTP_AUTHORIZATION': f'Bearer {jeton}'} if jeton is not None else {}
+        return self.client.get(reverse('core:diagnostiquer_smtp'), **entetes)
+
+    def test_refuse_sans_jeton(self):
+        reponse = self._appeler(jeton=None)
+        self.assertEqual(reponse.status_code, 403)
+
+    def test_rapporte_la_resolution_et_les_tentatives_de_connexion(self):
+        adresses = [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, '', ('1.2.3.4', 587)),
+            (socket.AF_INET6, socket.SOCK_STREAM, 6, '', ('::1', 587, 0, 0)),
+        ]
+        with patch('socket.getaddrinfo', return_value=adresses), \
+             patch('socket.socket') as socket_factice:
+            socket_factice.return_value.connect.return_value = None
+            reponse = self._appeler()
+        self.assertEqual(reponse.status_code, 200)
+        corps = reponse.json()
+        self.assertEqual(len(corps['resolution']), 2)
+        self.assertIn('connexion_IPv4', corps)
+        self.assertIn('connexion_IPv6', corps)

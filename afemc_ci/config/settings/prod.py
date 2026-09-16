@@ -19,6 +19,12 @@ EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = True
+# Sans ceci, smtplib bloque indéfiniment si la connexion TCP sortante
+# n'aboutit pas (observé sur Render : le worker gunicorn se fait tuer par
+# son propre timeout de 30 s pendant que smtplib attend encore). Un échec
+# rapide retombe proprement dans le circuit ECHEC/réessai existant plutôt
+# que de faire planter tout le worker.
+EMAIL_TIMEOUT = 10
 
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
