@@ -121,6 +121,35 @@ python manage.py regulariser_comptes_membres
 En développement, les courriels sont affichés dans la console : le contenu exact
 des relances est donc visible sans configurer de service de messagerie.
 
+### Service de messagerie (production)
+
+`config/settings/prod.py` utilise le backend SMTP standard de Django — compatible
+avec n'importe quel service transactionnel, sans modification de code, en
+renseignant simplement les variables `EMAIL_*` de `.env` :
+
+```
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=<login SMTP fourni par Brevo>
+EMAIL_HOST_PASSWORD=<clé SMTP générée dans Brevo, pas le mot de passe du compte>
+EMAIL_EXPEDITEUR=<adresse vérifiée dans Brevo>
+```
+
+**[Brevo](https://www.brevo.com)** (ex-Sendinblue) est le service retenu pour ce
+prototype — gratuit jusqu'à 300 courriels/jour, largement suffisant pour une
+association de cette taille. Après création d'un compte gratuit :
+
+1. **Paramètres du compte → SMTP & API → onglet SMTP** : récupérer le login et
+   générer une clé SMTP (distincte du mot de passe du compte).
+2. **Onglet Expéditeurs** : vérifier l'adresse qui sera utilisée comme
+   `EMAIL_EXPEDITEUR` — Brevo refuse d'envoyer depuis une adresse non vérifiée.
+
+Vérifié en conditions réelles (16/09) : envoi effectif d'un courriel d'activation
+via ce mécanisme, reçu avec succès. D'autres services SMTP standards
+conviendraient tout aussi bien (SendGrid, Amazon SES, Mailgun, ou la messagerie
+propre à l'hébergement du domaine `afemc-ci.org` si elle existe déjà) — seuls
+`EMAIL_HOST`/`EMAIL_PORT` changent.
+
 ### Exécution automatique (Celery)
 
 Les commandes ci-dessus peuvent être lancées à la main, ou automatiquement par
