@@ -10,7 +10,12 @@ services:
     plan: free
     rootDir: afemc_ci
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
-    startCommand: "gunicorn config.wsgi:application"
+    # --timeout 90 : Brevo (smtp-relay.brevo.com) résout vers plusieurs IP ;
+    # socket.create_connection() les essaie l'une après l'autre, chacune
+    # bornée par EMAIL_TIMEOUT (prod.py) — cumulées, ça peut dépasser les
+    # 30 s par défaut de gunicorn et tuer le worker avant qu'une exception
+    # propre ne soit levée côté smtplib (observé en production).
+    startCommand: "gunicorn config.wsgi:application --timeout 90"
     envVars:
       - key: PYTHON_VERSION
         value: "3.13.13"   # runtime.txt n'était visiblement pas pris en compte : Render

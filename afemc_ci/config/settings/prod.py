@@ -21,10 +21,13 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = True
 # Sans ceci, smtplib bloque indéfiniment si la connexion TCP sortante
 # n'aboutit pas (observé sur Render : le worker gunicorn se fait tuer par
-# son propre timeout de 30 s pendant que smtplib attend encore). Un échec
-# rapide retombe proprement dans le circuit ECHEC/réessai existant plutôt
-# que de faire planter tout le worker.
-EMAIL_TIMEOUT = 10
+# son propre timeout pendant que smtplib attend encore). Un échec rapide
+# retombe proprement dans le circuit ECHEC/réessai existant plutôt que de
+# faire planter tout le worker. smtp-relay.brevo.com résout vers plusieurs
+# IP essayées une à une (§ startCommand dans render.yaml) : 8 s par adresse
+# laisse une marge confortable sous le --timeout 90 de gunicorn même si
+# plusieurs adresses échouent avant qu'une ne réponde.
+EMAIL_TIMEOUT = 8
 
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
