@@ -9,7 +9,7 @@ from apps.core.utils import paginer
 
 from .forms import FormsetPiecesJustificatives, FormulaireDemande
 from .models import DemandeAdhesion, PieceJustificative
-from .services import TransitionInterdite, changer_statut, notifier_nouvelle_demande
+from .services import MembreExistant, TransitionInterdite, changer_statut, notifier_nouvelle_demande
 
 
 def soumettre(requete):
@@ -59,7 +59,7 @@ def traiter(requete, pk):
         try:
             changer_statut(demande, requete.POST.get('statut'), requete.user,
                            requete.POST.get('motif', ''))
-        except (TransitionInterdite, KeyError) as err:
+        except (TransitionInterdite, KeyError, MembreExistant) as err:
             messages.error(requete, str(err))
         else:
             messages.success(requete, 'Demande mise à jour.')

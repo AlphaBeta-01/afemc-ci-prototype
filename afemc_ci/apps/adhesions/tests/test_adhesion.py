@@ -4,7 +4,7 @@ from django.urls import reverse
 
 from apps.accounts.models import Utilisateur
 from apps.adhesions.models import DemandeAdhesion, PieceJustificative
-from apps.adhesions.services import (TransitionInterdite, changer_statut,
+from apps.adhesions.services import (MembreExistant, TransitionInterdite, changer_statut,
                                      regulariser_comptes_membres)
 from apps.cotisations.models import Cotisation
 from apps.membres.models import Membre
@@ -48,6 +48,16 @@ class TestCycleAdhesion(TestCase):
         changer_statut(self.demande, S.VALIDEE)
         with self.assertRaises(TransitionInterdite):
             changer_statut(self.demande, S.EN_EXAMEN)
+
+    def test_validation_refusee_si_l_email_appartient_deja_a_un_membre(self):
+        Membre.objects.create(nom='DIABATE', prenoms='Salimata',
+                              email='salimata@exemple.org', section=self.section)
+        changer_statut(self.demande, S.EN_EXAMEN)
+        with self.assertRaises(MembreExistant):
+            changer_statut(self.demande, S.VALIDEE)
+        self.demande.refresh_from_db()
+        self.assertEqual(self.demande.statut, S.EN_EXAMEN)
+        self.assertEqual(Membre.objects.count(), 1)
 
     def test_le_traitement_est_journalise(self):
         from apps.core.models import JournalOperation

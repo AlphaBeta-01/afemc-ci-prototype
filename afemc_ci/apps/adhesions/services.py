@@ -26,6 +26,10 @@ class TransitionInterdite(Exception):
     """Transition non prévue par le processus statutaire."""
 
 
+class MembreExistant(Exception):
+    """Un membre porte déjà cette adresse (contrainte d'unicité, § 5.2.2)."""
+
+
 def creer_membre_depuis_demande(demande):
     membre = Membre.objects.create(
         nom=demande.nom, prenoms=demande.prenoms, email=demande.email,
@@ -113,6 +117,10 @@ def changer_statut(demande, nouveau_statut, utilisateur=None, motif=''):
     demande.date_traitement = timezone.now()
     demande.motif = motif
     if nouveau_statut == S.VALIDEE:
+        if Membre.objects.filter(email=demande.email).exists():
+            raise MembreExistant(
+                f'{demande.email} est déjà l\'adresse d\'un membre existant — '
+                'vérifiez qu\'il ne s\'agit pas d\'une demande en double.')
         membre = creer_membre_depuis_demande(demande)
         emettre_cotisation_initiale(membre)
         compte = creer_compte_acces(membre)
