@@ -367,3 +367,53 @@ apps/notifications file de messages et acheminement
 apps/dashboard   indicateurs de pilotage
 templates/       gabarits HTML (Bootstrap 5)
 ```
+
+## 7. Déploiement en production (Render)
+
+Hébergeur retenu : **[Render](https://render.com)**. Le dépôt contient un fichier
+`render.yaml` (Blueprint) à la racine — Render y lit la définition complète des
+services et les crée en un seul clic, plutôt que de les configurer un par un.
+
+### Première mise en service
+
+1. Créer un compte Render, connecté à ce dépôt GitHub.
+2. **New + → Blueprint**, sélectionner le dépôt `afemc-ci-prototype`. Render
+   détecte `render.yaml` et propose de créer quatre ressources : la base
+   PostgreSQL, un service Redis, le service web (Gunicorn) et un worker Celery
+   (qui embarque aussi Beat, via `celery -A config worker -B`, pour éviter un
+   cinquième service payant sur le plan gratuit).
+3. Render demande de compléter les variables marquées `sync: false` dans
+   `render.yaml` — uniquement les trois informations Brevo (`EMAIL_HOST_USER`,
+   `EMAIL_HOST_PASSWORD`, `EMAIL_EXPEDITEUR`, voir § 3 « Service de
+   messagerie »). Tout le reste (secret Django, connexion PostgreSQL, URL Redis,
+   nom d'hôte, `SITE_URL`) est déduit automatiquement.
+4. Une fois déployé, créer un compte administrateur :
+   **Dashboard → afemc-ci-web → Shell** :
+   ```bash
+   python manage.py createsuperuser
+   # ou, pour repartir avec des données de démonstration :
+   python manage.py charger_donnees_demo
+   ```
+
+### Limites du plan gratuit à connaître
+
+- **PostgreSQL gratuit** : expire au bout de 90 jours (à renouveler ou migrer
+  vers un plan payant, ~7 $/mois, avant l'échéance).
+- **Service web gratuit** : se met en veille après une période d'inactivité ;
+  la requête suivante prend 30 à 60 s le temps du réveil (« cold start »).
+- **Fichiers déposés (`MEDIA_ROOT`)** : stockés sur un disque **éphémère** par
+  défaut — les pièces justificatives déposées par les candidates seraient
+  perdues à chaque redéploiement. Pour un usage réel au-delà d'une
+  démonstration, attacher un [disque persistant Render](https://render.com/docs/disks)
+  au service web (quelques dollars/mois) et y faire pointer `MEDIA_ROOT`.
+
+### Déploiement manuel (sans Blueprint)
+
+Si le Blueprint échoue ou pour garder la main sur chaque étape, les mêmes
+services peuvent être créés un par un dans le tableau de bord Render : une
+base PostgreSQL, un Redis, un « Web Service » (racine `afemc_ci`, commande de
+build `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`,
+commande de démarrage `gunicorn config.wsgi:application`) et un « Background
+Worker » (mêmes racine et build, commande de démarrage
+`celery -A config worker -B --loglevel=info`) — en reportant manuellement les
+variables d'environnement listées dans `render.yaml` sur les deux services.
