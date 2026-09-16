@@ -140,6 +140,12 @@ SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
 # refuse alors toute requête, y compris avec un jeton vide côté appelant.
 CRON_SECRET = os.environ.get('CRON_SECRET', '')
 
+# Identifiants du compte administrateur créé par apps.core.views.amorcer_administrateur
+# (protégée par le même CRON_SECRET) — seul moyen de créer le premier compte
+# sans accès Shell, indisponible sur le plan gratuit Render (§ 7 du README).
+SUPERUSER_BOOTSTRAP_EMAIL = os.environ.get('SUPERUSER_BOOTSTRAP_EMAIL', '')
+SUPERUSER_BOOTSTRAP_PASSWORD = os.environ.get('SUPERUSER_BOOTSTRAP_PASSWORD', '')
+
 # ----- File de tâches asynchrones (Celery/Redis, § 5.6.1) -----
 # Redis sert à la fois de courtier de messages et de stockage des résultats.
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')

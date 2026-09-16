@@ -21,6 +21,10 @@ services:
         value: ""
       - key: CRON_SECRET
         generateValue: true    # jeton attendu par /taches/executer/ (§ 7 du README)
+      - key: SUPERUSER_BOOTSTRAP_EMAIL
+        sync: false             # email du premier compte administrateur (§ 7 du README)
+      - key: SUPERUSER_BOOTSTRAP_PASSWORD
+        sync: false             # mot de passe correspondant
       - key: POSTGRES_DB
         fromDatabase: {name: afemc-ci-db, property: database}
       - key: POSTGRES_USER

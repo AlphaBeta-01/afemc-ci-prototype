@@ -381,17 +381,22 @@ services et les crée en un seul clic, plutôt que de les configurer un par un.
    détecte `render.yaml` et propose de créer deux ressources : la base
    PostgreSQL et le service web (Gunicorn).
 3. Render demande de compléter les variables marquées `sync: false` dans
-   `render.yaml` — uniquement les trois informations Brevo (`EMAIL_HOST_USER`,
+   `render.yaml` — les trois informations Brevo (`EMAIL_HOST_USER`,
    `EMAIL_HOST_PASSWORD`, `EMAIL_EXPEDITEUR`, voir § 3 « Service de
-   messagerie »). Tout le reste (secret Django, connexion PostgreSQL, jeton
-   `CRON_SECRET`, nom d'hôte, `SITE_URL`) est déduit ou généré automatiquement.
-4. Une fois déployé, créer un compte administrateur :
-   **Dashboard → afemc-ci-web → Shell** :
+   messagerie ») et les identifiants du premier compte administrateur
+   (`SUPERUSER_BOOTSTRAP_EMAIL`, `SUPERUSER_BOOTSTRAP_PASSWORD`). Tout le
+   reste (secret Django, connexion PostgreSQL, jeton `CRON_SECRET`, nom
+   d'hôte, `SITE_URL`) est déduit ou généré automatiquement.
+4. Une fois déployé, créer effectivement ce compte administrateur — le Shell
+   Render exige le plan payant Starter, indisponible en gratuit ; un point
+   d'entrée HTTP protégé par jeton en tient lieu :
    ```bash
-   python manage.py createsuperuser
-   # ou, pour repartir avec des données de démonstration :
-   python manage.py charger_donnees_demo
+   curl -H "Authorization: Bearer <CRON_SECRET, onglet Environment du service>" \
+        https://afemc-ci-web.onrender.com/taches/amorcer-admin/
    ```
+   Idempotente : ne fait rien si un compte administrateur existe déjà, donc
+   sans risque à rappeler par erreur. Se connecter ensuite avec
+   `SUPERUSER_BOOTSTRAP_EMAIL` / `SUPERUSER_BOOTSTRAP_PASSWORD`.
 
 ### Tâches planifiées sans worker (Background Workers indisponibles en gratuit)
 

@@ -50,3 +50,32 @@ def executer_taches_planifiees(requete):
         'notifications_envoyees': envoyees,
         'notifications_echouees': echecs,
     })
+
+
+@require_GET
+def amorcer_administrateur(requete):
+    """Crée le premier compte administrateur, sans accès Shell (§ 7 du README).
+
+    Le Shell Render (seul autre moyen d'exécuter `createsuperuser`) exige le
+    plan payant Starter. Idempotente : ne fait rien si un compte
+    administrateur existe déjà, donc sans risque à laisser en place au-delà
+    de la mise en service initiale.
+    """
+    if not _jeton_valide(requete):
+        return JsonResponse({'erreur': 'jeton invalide'}, status=403)
+
+    from apps.accounts.models import Utilisateur
+
+    if Utilisateur.objects.filter(is_superuser=True).exists():
+        return JsonResponse({'info': 'un compte administrateur existe déjà'})
+
+    if not (settings.SUPERUSER_BOOTSTRAP_EMAIL and settings.SUPERUSER_BOOTSTRAP_PASSWORD):
+        return JsonResponse(
+            {'erreur': 'SUPERUSER_BOOTSTRAP_EMAIL / SUPERUSER_BOOTSTRAP_PASSWORD non configurés'},
+            status=500)
+
+    compte = Utilisateur.objects.create_superuser(
+        email=settings.SUPERUSER_BOOTSTRAP_EMAIL,
+        password=settings.SUPERUSER_BOOTSTRAP_PASSWORD,
+        nom='Administratrice', prenoms='Principale')
+    return JsonResponse({'cree': compte.email})
