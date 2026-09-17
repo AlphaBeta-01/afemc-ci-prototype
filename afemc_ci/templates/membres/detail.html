@@ -17,7 +17,7 @@
     <div class="card"><div class="card-body">
       <h2 class="h6 mb-3">Identité et rattachement</h2>
       <dl class="row small mb-0">
-        <dt class="col-5">Adresse électronique</dt><dd class="col-7">{{ membre.email }}</dd>
+        <dt class="col-5">Adresse électronique</dt><dd class="col-7 text-break">{{ membre.email }}</dd>
         <dt class="col-5">Téléphone</dt><dd class="col-7">{{ membre.telephone|default:'—' }}</dd>
         <dt class="col-5">Grade</dt><dd class="col-7">{{ membre.grade|default:'—' }}</dd>
         <dt class="col-5">Établissement</dt><dd class="col-7">{{ membre.etablissement|default:'—' }}</dd>
@@ -30,21 +30,25 @@
 
   {% if user.role != 'RESP_SECTION' %}
   <div class="col-lg-8">
-    <div class="card mb-3"><div class="card-body">
-      <h2 class="h6 mb-3">Historique des cotisations</h2>
+    <div class="card mb-3">
+      <div class="card-body pb-0"><h2 class="h6 mb-3">Historique des cotisations</h2></div>
+      <div class="table-responsive">
       <table class="table table-sm align-middle mb-0">
         <thead class="table-light">
-          <tr><th>Exercice</th><th class="text-end">Dû</th><th class="text-end">Payé</th>
-              <th class="text-end">Reste</th><th>Échéance</th><th>Statut</th><th></th></tr>
+          <tr><th>Exercice</th>
+              <th class="text-end d-none d-md-table-cell">Dû</th>
+              <th class="text-end d-none d-md-table-cell">Payé</th>
+              <th class="text-end">Reste</th>
+              <th class="d-none d-md-table-cell">Échéance</th><th>Statut</th><th></th></tr>
         </thead>
         <tbody>
         {% for cotisation in cotisations %}
           <tr>
             <td>{{ cotisation.exercice }}</td>
-            <td class="text-end">{{ cotisation.montant_du|floatformat:0 }}</td>
-            <td class="text-end">{{ cotisation.montant_paye|floatformat:0 }}</td>
+            <td class="text-end d-none d-md-table-cell">{{ cotisation.montant_du|floatformat:0 }}</td>
+            <td class="text-end d-none d-md-table-cell">{{ cotisation.montant_paye|floatformat:0 }}</td>
             <td class="text-end">{{ cotisation.reste_a_payer|floatformat:0 }}</td>
-            <td class="small">{{ cotisation.date_echeance|date:'d/m/Y' }}</td>
+            <td class="small d-none d-md-table-cell">{{ cotisation.date_echeance|date:'d/m/Y' }}</td>
             <td>
               {% if cotisation.statut == 'PAYEE' %}<span class="badge text-bg-success">Payée</span>
               {% elif cotisation.statut == 'EN_RETARD' %}<span class="badge text-bg-danger">En retard</span>
@@ -66,18 +70,21 @@
         {% endfor %}
         </tbody>
       </table>
-    </div></div>
+      </div>
+    </div>
 
-    <div class="card"><div class="card-body">
-      <h2 class="h6 mb-3">Relances reçues</h2>
+    <div class="card">
+      <div class="card-body pb-0"><h2 class="h6 mb-3">Relances reçues</h2></div>
+      <div class="table-responsive">
       <table class="table table-sm mb-0">
-        <thead class="table-light"><tr><th>Date</th><th>Règle</th><th>Niveau</th><th>Écart</th></tr></thead>
+        <thead class="table-light"><tr><th>Date</th><th>Règle</th>
+            <th class="d-none d-md-table-cell">Niveau</th><th>Écart</th></tr></thead>
         <tbody>
         {% for relance in relances %}
           <tr>
             <td class="small">{{ relance.date_emission|date:'d/m/Y H:i' }}</td>
             <td>{{ relance.regle.code }} — {{ relance.regle.libelle }}</td>
-            <td>{{ relance.regle.get_niveau_display }}</td>
+            <td class="d-none d-md-table-cell">{{ relance.regle.get_niveau_display }}</td>
             <td>{{ relance.jours_ecart }} j</td>
           </tr>
         {% empty %}
@@ -85,7 +92,8 @@
         {% endfor %}
         </tbody>
       </table>
-    </div></div>
+      </div>
+    </div>
   </div>
   {% endif %}
 </div>
