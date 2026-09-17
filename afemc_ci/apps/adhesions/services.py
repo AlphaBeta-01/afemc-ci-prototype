@@ -135,11 +135,19 @@ def changer_statut(demande, nouveau_statut, utilisateur=None, motif=''):
 
 
 def notifier_nouvelle_demande(demande):
-    """Prévient l'administratrice et le responsable administratif d'un dépôt.
+    """Prévient la Présidente et la Secrétaire générale d'un dépôt.
 
     Sans ce signal, une demande peut rester longtemps invisible : personne ne
     consulte spontanément l'écran des adhésions en l'absence d'une raison de
     le faire.
+
+    Chaque notification tente un envoi immédiat (§ 5.6.3) : sans risque ici
+    pour le délai de la requête HTTP de la candidate, car les destinataires
+    (Présidente + Secrétaire générale) sont des rôles du bureau national, en
+    nombre naturellement restreint — pas un par section. Si ce périmètre
+    s'élargissait un jour à des rôles proportionnels au nombre de sections,
+    il faudrait alors plafonner les envois immédiats comme
+    `acheminer_notifications_en_attente` plafonne son temps total.
     """
     from apps.accounts.models import Utilisateur
 

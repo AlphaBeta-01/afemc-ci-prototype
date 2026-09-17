@@ -22,12 +22,22 @@ class VueConnexion(auth_views.LoginView):
 
     def form_valid(self, form):
         reponse = super().form_valid(form)
+        self.request.user.reinitialiser_tentatives_connexion()
         journaliser(self.request.user, 'CONNEXION_REUSSIE', '', self.request)
         return reponse
 
     def form_invalid(self, form):
-        journaliser(None, 'CONNEXION_ECHOUEE',
-                    f"identifiant : {form.data.get('username', '')[:80]}", self.request)
+        identifiant = form.data.get('username', '')[:80]
+        # Comptabilisé seulement si l'adresse correspond à un compte existant
+        # (RG10) : impossible de verrouiller un compte qui n'existe pas, et
+        # ça n'indique rien à l'appelant sur l'existence ou non de l'adresse
+        # — le message d'erreur reste identique dans les deux cas.
+        utilisateur = Utilisateur.objects.filter(email__iexact=identifiant).first()
+        if utilisateur is not None:
+            utilisateur.enregistrer_echec_connexion()
+            if utilisateur.est_verrouille:
+                journaliser(None, 'COMPTE_VERROUILLE', identifiant, self.request)
+        journaliser(None, 'CONNEXION_ECHOUEE', f"identifiant : {identifiant}", self.request)
         return super().form_invalid(form)
 
 

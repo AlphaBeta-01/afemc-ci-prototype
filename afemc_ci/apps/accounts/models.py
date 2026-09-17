@@ -1,6 +1,10 @@
 """Authentification, rôles et permissions (§ 5.5.1)."""
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils import timezone
 
 
 class GestionnaireUtilisateur(BaseUserManager):
@@ -71,3 +75,28 @@ class Utilisateur(AbstractUser):
     @property
     def voit_toutes_les_sections(self):
         return self.role in (self.Role.ADMIN, self.Role.RESP_ADMIN, self.Role.RESP_FINANCIER)
+
+    @property
+    def est_verrouille(self):
+        return bool(self.verrouille_jusqua and self.verrouille_jusqua > timezone.now())
+
+    def enregistrer_echec_connexion(self):
+        """Comptabilise une tentative échouée ; verrouille au-delà du seuil (RG10).
+
+        `MAX_TENTATIVES_CONNEXION` était déclaré dans les réglages et
+        `tentatives_echouees`/`verrouille_jusqua` sur ce modèle, mais rien ne
+        les reliait jusqu'ici : un mot de passe pouvait être deviné sans
+        limite. Verrouillage de 15 minutes, glissant à chaque nouvel échec
+        pendant la fenêtre de verrouillage — une tentative continue pendant
+        le blocage ne raccourcit jamais la durée restante.
+        """
+        self.tentatives_echouees += 1
+        if self.tentatives_echouees >= settings.MAX_TENTATIVES_CONNEXION:
+            self.verrouille_jusqua = timezone.now() + timedelta(minutes=15)
+        self.save(update_fields=['tentatives_echouees', 'verrouille_jusqua'])
+
+    def reinitialiser_tentatives_connexion(self):
+        if self.tentatives_echouees or self.verrouille_jusqua:
+            self.tentatives_echouees = 0
+            self.verrouille_jusqua = None
+            self.save(update_fields=['tentatives_echouees', 'verrouille_jusqua'])

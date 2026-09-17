@@ -53,6 +53,59 @@ class TestAuthentification(TestCase):
         self.assertTrue(responsable.est_responsable)
 
 
+class TestVerrouillageApresEchecsRepetes(TestCase):
+    """RG10 : un mot de passe ne doit pas pouvoir être deviné sans limite."""
+
+    def setUp(self):
+        self.utilisateur = Utilisateur.objects.create_user(
+            email='resp@afemc-ci.org', password='MotDePasse2026!',
+            nom='KOFFI', prenoms='Awa', role=Utilisateur.Role.RESP_ADMIN)
+
+    def _echouer(self):
+        return self.client.post(reverse('accounts:connexion'),
+                                {'username': 'resp@afemc-ci.org', 'password': 'mauvais'})
+
+    def test_les_tentatives_echouees_sont_comptabilisees(self):
+        self._echouer()
+        self.utilisateur.refresh_from_db()
+        self.assertEqual(self.utilisateur.tentatives_echouees, 1)
+        self.assertFalse(self.utilisateur.est_verrouille)
+
+    def test_verrouillage_au_cinquieme_echec(self):
+        for _ in range(5):
+            self._echouer()
+        self.utilisateur.refresh_from_db()
+        self.assertEqual(self.utilisateur.tentatives_echouees, 5)
+        self.assertTrue(self.utilisateur.est_verrouille)
+        self.assertTrue(JournalOperation.objects
+                        .filter(type_operation='COMPTE_VERROUILLE').exists())
+
+    def test_bon_mot_de_passe_refuse_pendant_le_verrouillage(self):
+        for _ in range(5):
+            self._echouer()
+        reponse = self.client.post(reverse('accounts:connexion'),
+                                   {'username': 'resp@afemc-ci.org',
+                                    'password': 'MotDePasse2026!'})
+        self.assertEqual(reponse.status_code, 200)          # pas de redirection : refusé
+        self.assertContains(reponse, 'verrouillé')
+
+    def test_une_connexion_reussie_reinitialise_le_compteur(self):
+        self._echouer()
+        self._echouer()
+        reponse = self.client.post(reverse('accounts:connexion'),
+                                   {'username': 'resp@afemc-ci.org',
+                                    'password': 'MotDePasse2026!'})
+        self.assertEqual(reponse.status_code, 302)
+        self.utilisateur.refresh_from_db()
+        self.assertEqual(self.utilisateur.tentatives_echouees, 0)
+        self.assertIsNone(self.utilisateur.verrouille_jusqua)
+
+    def test_une_adresse_inexistante_ne_leve_aucune_erreur(self):
+        reponse = self.client.post(reverse('accounts:connexion'),
+                                   {'username': 'personne@afemc-ci.org',
+                                    'password': 'peu-importe'})
+        self.assertEqual(reponse.status_code, 200)
+
 class TestActivationCompte(TestCase):
     """Prise de mot de passe par un membre nouvellement admis (RG11)."""
 

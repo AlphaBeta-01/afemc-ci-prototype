@@ -19,6 +19,15 @@ class FormulaireConnexion(AuthenticationForm):
         'inactive': "Ce compte est désactivé.",
     }
 
+    def confirm_login_allowed(self, user):
+        if user.est_verrouille:
+            raise forms.ValidationError(
+                "Compte temporairement verrouillé après plusieurs tentatives "
+                "de connexion échouées. Réessayez dans quelques minutes ou "
+                "utilisez « Mot de passe oublié ».",
+                code='verrouille')
+        super().confirm_login_allowed(user)
+
 
 class FormulaireActivation(SetPasswordForm):
     """Définition du mot de passe lors de l'activation d'un compte (RG11)."""

@@ -7,9 +7,9 @@
       <div class="card-body p-4">
         <h1 class="h5 text-center mb-4">Connexion à votre espace</h1>
 
-        {% if form.errors %}
+        {% if form.non_field_errors %}
           <div class="alert alert-danger py-2 small">
-            Adresse électronique ou mot de passe incorrect.
+            {% for erreur in form.non_field_errors %}{{ erreur }}{% endfor %}
           </div>
         {% endif %}
 

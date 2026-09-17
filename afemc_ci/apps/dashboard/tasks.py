@@ -7,7 +7,14 @@ except ImportError:
 
 @shared_task
 def envoyer_synthese():
-    """Synthèse hebdomadaire adressée aux responsables (§ 5.6.1)."""
+    """Synthèse hebdomadaire adressée aux responsables (§ 5.6.1).
+
+    Destinataires = Présidente + Secrétaire générale + Trésorière : rôles du
+    bureau national, en nombre naturellement restreint (pas un par section)
+    — l'envoi immédiat par destinataire (§ 5.6.3) reste donc sans risque
+    pour le délai de la requête planifiée qui déclenche cette synthèse. Voir
+    le commentaire équivalent dans apps.adhesions.services.notifier_nouvelle_demande.
+    """
     from django.utils import timezone
 
     from apps.accounts.models import Utilisateur

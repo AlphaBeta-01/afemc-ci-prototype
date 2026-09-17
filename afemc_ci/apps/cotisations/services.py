@@ -57,6 +57,17 @@ def enregistrer_paiement(cotisation, montant, mode, reference='', utilisateur=No
     montant = Decimal(montant)
     if montant <= 0:
         raise ValidationError("Le montant doit être strictement positif.")
+
+    # Reverrouille la ligne au tout début de la transaction plutôt que de
+    # se fier à l'objet passé par l'appelant, potentiellement chargé avant
+    # que la transaction ne commence : sans ce verrou, deux saisies
+    # simultanées sur la même cotisation peuvent lire le même reste à
+    # payer, passer toutes deux la validation, puis s'écraser l'une
+    # l'autre à l'enregistrement — le paiement resterait tracé dans
+    # Paiement, mais montant_paye/statut de la cotisation perdrait l'une
+    # des deux mises à jour.
+    cotisation = Cotisation.objects.select_for_update().get(pk=cotisation.pk)
+
     reste = cotisation.montant_du - cotisation.montant_paye
     if montant > reste:
         raise ValidationError(

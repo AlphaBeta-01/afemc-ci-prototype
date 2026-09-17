@@ -52,6 +52,20 @@ class TestAcheminement(TestCase):
         self.assertEqual(notification.statut, Notification.Statut.ECHEC)
         self.assertEqual(notification.tentatives, 3)
 
+    def test_le_budget_de_temps_est_respecte(self):
+        """Un lot volumineux ne doit jamais dépasser le budget de temps
+        alloué (--timeout de gunicorn en production, § 7 du README) : le
+        reliquat reste EN_ATTENTE pour le passage suivant plutôt que de
+        faire planter la requête en cours."""
+        with patch('apps.notifications.services.envoyer_courriel',
+                   side_effect=ErreurEnvoi('service indisponible')):
+            notification_test('a@exemple.org')
+            notification_test('b@exemple.org')
+        envoyees, echecs = acheminer_notifications_en_attente(budget_secondes=-1)
+        self.assertEqual((envoyees, echecs), (0, 0))
+        self.assertTrue(Notification.objects.filter(
+            statut=Notification.Statut.EN_ATTENTE).exists())
+
 
 class TestRenduDuGabarit(TestCase):
     """Un courriel en texte brut ne doit pas subir l'échappement HTML."""

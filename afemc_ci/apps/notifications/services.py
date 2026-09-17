@@ -1,4 +1,6 @@
 """Composition et acheminement des messages (§ 5.6.3)."""
+import time
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template import Context, Template
@@ -82,18 +84,30 @@ def _tenter_envoi(notification):
     return True
 
 
-def acheminer_notifications_en_attente(taille_lot=100):
+def acheminer_notifications_en_attente(taille_lot=100, budget_secondes=60):
     """Rattrape ce que l'envoi immédiat de `creer_notification` n'a pas pu
     délivrer (panne passagère, notification créée avant ce mécanisme…).
     Filet de sécurité plutôt que voie normale — voir § 5.6.3 et le README § 7.
+
+    `budget_secondes` borne le temps total, pas seulement `taille_lot` le
+    nombre d'éléments : un grand nombre de notifications en échec (chacune
+    pouvant consommer jusqu'à REQUESTS_TIMEOUT secondes côté fournisseur)
+    cumulerait sinon un temps largement supérieur au délai du serveur
+    d'application (--timeout de gunicorn, voir render.yaml), faisant
+    planter la requête HTTP qui a déclenché cet acheminement (§ 7 du
+    README). Le reliquat non traité reste EN_ATTENTE et sera repris au
+    passage suivant (toutes les 15 min), sans rien perdre.
     """
     maximum = settings.MAX_TENTATIVES_NOTIFICATION
     en_attente = (Notification.objects
                   .filter(statut=Notification.Statut.EN_ATTENTE,
                           tentatives__lt=maximum)
                   .order_by('cree_le')[:taille_lot])
+    debut = time.monotonic()
     envoyees, echecs = 0, 0
     for notification in en_attente:
+        if time.monotonic() - debut > budget_secondes:
+            break
         if _tenter_envoi(notification):
             envoyees += 1
         else:

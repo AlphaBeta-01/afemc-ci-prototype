@@ -102,6 +102,21 @@ class TestEnregistrementPaiement(TestCase):
         self.assertTrue(JournalOperation.objects
                         .filter(type_operation='ENREGISTREMENT_PAIEMENT').exists())
 
+    def test_le_solde_reel_prevaut_sur_un_objet_perime(self):
+        """Deux saisies quasi simultanées ne doivent jamais s'écraser :
+        même si l'objet transmis est périmé, le reste à payer vérifié est
+        toujours celui réellement en base au moment de l'écriture."""
+        perime = Cotisation.objects.get(pk=self.cotisation.pk)
+        enregistrer_paiement(self.cotisation, Decimal('10000'), 'ESPECES')
+        # `perime` ignore encore ce premier paiement (montant_paye=0 en mémoire) ;
+        # le reste réel n'est plus que 15000, pas 25000.
+        with self.assertRaises(ValidationError):
+            enregistrer_paiement(perime, Decimal('20000'), 'ESPECES')
+        enregistrer_paiement(perime, Decimal('15000'), 'ESPECES')
+        self.cotisation.refresh_from_db()
+        self.assertEqual(self.cotisation.montant_paye, Decimal('25000'))
+        self.assertEqual(self.cotisation.statut, Cotisation.Statut.PAYEE)
+
 
 class TestEmissionCotisations(TestCase):
 
