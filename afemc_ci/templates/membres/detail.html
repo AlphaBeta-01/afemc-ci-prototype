@@ -7,9 +7,14 @@
     <h1 class="h4 mb-0">{{ membre.nom_complet }}</h1>
     <span class="text-muted font-monospace small">{{ membre.matricule }}</span>
   </div>
-  {% if user.role == 'ADMIN' or user.role == 'RESP_ADMIN' or user.role == 'RESP_SECTION' %}
-    <a href="{% url 'membres:modifier' membre.pk %}" class="btn btn-outline-primary btn-sm">Modifier la fiche</a>
-  {% endif %}
+  <div class="d-flex gap-2 flex-wrap">
+    {% if user.role == 'ADMIN' or user.role == 'RESP_FINANCIER' %}
+      <a href="{% url 'cotisations:exempter' membre.pk %}" class="btn btn-outline-secondary btn-sm">Accorder une exemption</a>
+    {% endif %}
+    {% if user.role == 'ADMIN' or user.role == 'RESP_ADMIN' or user.role == 'RESP_SECTION' %}
+      <a href="{% url 'membres:modifier' membre.pk %}" class="btn btn-outline-primary btn-sm">Modifier la fiche</a>
+    {% endif %}
+  </div>
 </div>
 
 <div class="row g-3">

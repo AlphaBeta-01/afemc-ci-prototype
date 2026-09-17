@@ -9,9 +9,10 @@ from apps.core.decorators import role_requis
 from apps.core.utils import paginer
 from apps.membres.models import Membre
 
-from .forms import FormulaireEmission, FormulairePaiement
+from .forms import FormulaireEmission, FormulaireExemption, FormulairePaiement
 from .models import Cotisation
-from .services import emettre_cotisations_exercice, enregistrer_paiement, indicateurs_exercice
+from .services import (accorder_exemption, emettre_cotisations_exercice,
+                       enregistrer_paiement, indicateurs_exercice)
 
 RESPONSABLES = ('ADMIN', 'RESP_ADMIN', 'RESP_FINANCIER')          # pas RESP_SECTION
 
@@ -54,6 +55,24 @@ def saisir_paiement(requete, pk):
             return redirect('cotisations:liste')
     return render(requete, 'cotisations/paiement.html',
                   {'formulaire': formulaire, 'cotisation': cotisation})
+
+
+@login_required
+@role_requis('ADMIN', 'RESP_FINANCIER')
+def accorder_exemption_vue(requete, pk):
+    membre = get_object_or_404(Membre, pk=pk)
+    formulaire = FormulaireExemption(requete.POST or None,
+                                     initial={'exercice': timezone.localdate().year})
+    if requete.method == 'POST' and formulaire.is_valid():
+        accorder_exemption(membre, formulaire.cleaned_data['exercice'],
+                           formulaire.cleaned_data['motif'], requete.user)
+        messages.success(
+            requete,
+            f"Exemption accordée à {membre.nom_complet()} pour l'exercice "
+            f"{formulaire.cleaned_data['exercice']}.")
+        return redirect('membres:detail', pk=membre.pk)
+    return render(requete, 'cotisations/exemption.html',
+                  {'formulaire': formulaire, 'membre': membre})
 
 
 @login_required

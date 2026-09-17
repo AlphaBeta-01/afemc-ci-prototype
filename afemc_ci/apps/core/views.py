@@ -77,5 +77,5 @@ def amorcer_administrateur(requete):
     compte = Utilisateur.objects.create_superuser(
         email=settings.SUPERUSER_BOOTSTRAP_EMAIL,
         password=settings.SUPERUSER_BOOTSTRAP_PASSWORD,
-        nom='Administratrice', prenoms='Principale')
+        nom='Présidente', prenoms='Principale')
     return JsonResponse({'cree': compte.email})

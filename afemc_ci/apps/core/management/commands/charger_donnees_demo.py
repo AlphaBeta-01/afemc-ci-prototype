@@ -78,10 +78,10 @@ class Command(BaseCommand):
             f"{DemandeAdhesion.objects.count()} demandes."))
         self.stdout.write(
             "Comptes de démonstration (mot de passe : Afemc2026!Demo) :\n"
-            "  admin@afemc-ci.org           — Administrateur\n"
-            "  administratif@afemc-ci.org   — Responsable administratif\n"
-            "  financier@afemc-ci.org       — Responsable financier\n"
-            "  section.abj@afemc-ci.org     — Responsable de section (Abidjan)")
+            "  admin@afemc-ci.org           — Présidente\n"
+            "  administratif@afemc-ci.org   — Secrétaire générale\n"
+            "  financier@afemc-ci.org       — Trésorière\n"
+            "  section.abj@afemc-ci.org     — Coordinatrice de section (Abidjan)")
 
     # ------------------------------------------------------------------
     def _vider(self):

@@ -28,9 +28,9 @@ def generer_lien_activation(compte):
 def creer_compte_responsable(nom, prenoms, email, role, section=None, cree_par=None):
     """Crée un compte de responsable, inactif jusqu'à activation par courriel.
 
-    Réservé à l'Administrateur (RG08) : seuls RESP_ADMIN, RESP_SECTION et
-    RESP_FINANCIER sont attribuables ici — un compte Administrateur reste du
-    ressort de l'administration Django (`createsuperuser`).
+    Réservé à la Présidente (RG08) : seuls Secrétaire générale, Coordinatrice
+    de section et Trésorière sont attribuables ici — un compte Présidente
+    reste du ressort de l'administration Django (`createsuperuser`).
     """
     compte = Utilisateur.objects.create_user(
         email=email, password=None, nom=nom, prenoms=prenoms,

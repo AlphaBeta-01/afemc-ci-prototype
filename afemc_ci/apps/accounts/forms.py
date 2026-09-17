@@ -41,7 +41,7 @@ class FormulaireMotDePasseOublie(forms.Form):
 
 
 class FormulaireCompteResponsable(forms.ModelForm):
-    """Création d'un compte responsable (RG08), réservée à l'Administrateur.
+    """Création d'un compte responsable (RG08), réservée à la Présidente.
 
     N'appelle jamais `.save()` : la création passe par
     `apps.accounts.services.creer_compte_responsable`, seule à savoir fixer

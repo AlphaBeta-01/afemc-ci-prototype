@@ -22,3 +22,9 @@ class FormulaireEmission(forms.Form):
                                  widget=forms.NumberInput(attrs=CLASSE))
     date_echeance = forms.DateField(label="Date d'échéance",
                                     widget=forms.DateInput(attrs={**CLASSE, 'type': 'date'}))
+
+
+class FormulaireExemption(forms.Form):
+    exercice = forms.IntegerField(label='Exercice', widget=forms.NumberInput(attrs=CLASSE))
+    motif = forms.CharField(label='Motif', max_length=200,
+                            widget=forms.TextInput(attrs=CLASSE))

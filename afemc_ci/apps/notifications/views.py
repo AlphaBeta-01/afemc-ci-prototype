@@ -1,4 +1,4 @@
-"""Écran de suivi de la file de notifications, réservé à l'Administrateur."""
+"""Écran de suivi de la file de notifications, réservé à la Présidente."""
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render

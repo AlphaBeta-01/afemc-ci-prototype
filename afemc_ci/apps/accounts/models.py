@@ -32,10 +32,10 @@ class Utilisateur(AbstractUser):
 
     class Role(models.TextChoices):
         MEMBRE = 'MEMBRE', 'Membre'
-        RESP_ADMIN = 'RESP_ADMIN', 'Responsable administratif'
-        RESP_SECTION = 'RESP_SECTION', 'Responsable de section'
-        RESP_FINANCIER = 'RESP_FINANCIER', 'Responsable financier'
-        ADMIN = 'ADMIN', 'Administrateur'
+        RESP_ADMIN = 'RESP_ADMIN', 'Secrétaire générale'
+        RESP_SECTION = 'RESP_SECTION', 'Coordinatrice de section'
+        RESP_FINANCIER = 'RESP_FINANCIER', 'Trésorière'
+        ADMIN = 'ADMIN', 'Présidente'
 
     username = None
     email = models.EmailField('adresse électronique', unique=True)

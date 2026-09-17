@@ -8,5 +8,6 @@ urlpatterns = [
     path('', views.liste, name='liste'),
     path('emettre/', views.emettre, name='emettre'),
     path('<int:pk>/paiement/', views.saisir_paiement, name='paiement'),
+    path('membres/<int:pk>/exempter/', views.accorder_exemption_vue, name='exempter'),
     path('export/', views.exporter_csv, name='export'),
 ]

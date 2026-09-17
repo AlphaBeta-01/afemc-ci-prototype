@@ -59,20 +59,25 @@ Mot de passe commun : `Afemc2026!Demo`
 
 | Adresse                        | Rôle                       |
 |--------------------------------|----------------------------|
-| `admin@afemc-ci.org`           | Administrateur             |
-| `administratif@afemc-ci.org`   | Responsable administratif  |
-| `financier@afemc-ci.org`       | Responsable financier      |
-| `section.abj@afemc-ci.org`     | Responsable de section     |
+| `admin@afemc-ci.org`           | Présidente                 |
+| `administratif@afemc-ci.org`   | Secrétaire générale        |
+| `financier@afemc-ci.org`       | Trésorière                 |
+| `section.abj@afemc-ci.org`     | Coordinatrice de section   |
+
+Ces libellés (Présidente, Secrétaire générale, Trésorière, Coordinatrice de
+section) sont ceux affichés dans l'interface ; les rôles internes
+(`ADMIN`, `RESP_ADMIN`, `RESP_FINANCIER`, `RESP_SECTION`) n'ont pas changé,
+pour ne pas affecter les comptes déjà créés en base.
 
 ### Gestion des comptes responsables
 
-Écran réservé à l'Administrateur (`/comptes/responsables/`) pour créer les
-comptes des autres responsables — administratif, financier, de section —
-sans passer par l'administration Django. Un compte Administrateur ne peut
-pas être créé ici : cela reste du ressort de `createsuperuser`. Comme pour
-un membre admis, le compte est créé inactif et un courriel avec lien
-d'activation est envoyé ; l'Administrateur peut aussi désactiver/réactiver
-un compte existant (sauf le sien).
+Écran réservé à la Présidente (`/comptes/responsables/`) pour créer les
+comptes des autres responsables — Secrétaire générale, Trésorière,
+Coordinatrice de section — sans passer par l'administration Django. Un
+compte Présidente ne peut pas être créé ici : cela reste du ressort de
+`createsuperuser`. Comme pour un membre admis, le compte est créé inactif
+et un courriel avec lien d'activation est envoyé ; la Présidente peut aussi
+désactiver/réactiver un compte existant (sauf le sien).
 
 ### Compte du membre admis (activation par courriel)
 
