@@ -10,16 +10,18 @@
 <div class="card"><div class="table-responsive">
   <table class="table table-hover table-sm align-middle mb-0">
     <thead class="table-light">
-      <tr><th>Nom et prénoms</th><th>Adresse électronique</th><th>Rôle</th>
-          <th>Section</th><th>Statut</th><th></th></tr>
+      <tr><th>Nom et prénoms</th>
+          <th class="d-none d-lg-table-cell">Adresse électronique</th>
+          <th class="d-none d-md-table-cell">Rôle</th>
+          <th class="d-none d-lg-table-cell">Section</th><th>Statut</th><th></th></tr>
     </thead>
     <tbody>
     {% for compte in comptes %}
       <tr>
         <td>{{ compte.nom_complet }}</td>
-        <td class="small">{{ compte.email }}</td>
-        <td>{{ compte.get_role_display }}</td>
-        <td class="small">{{ compte.section|default:'—' }}</td>
+        <td class="small d-none d-lg-table-cell">{{ compte.email }}</td>
+        <td class="d-none d-md-table-cell">{{ compte.get_role_display }}</td>
+        <td class="small d-none d-lg-table-cell">{{ compte.section|default:'—' }}</td>
         <td>
           {% if compte.is_active %}
             <span class="badge text-bg-success">Actif</span>

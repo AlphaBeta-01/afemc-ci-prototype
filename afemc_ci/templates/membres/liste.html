@@ -43,8 +43,9 @@
 <div class="card"><div class="table-responsive">
   <table class="table table-hover table-sm align-middle mb-0">
     <thead class="table-light">
-      <tr><th>Matricule</th><th>Nom et prénoms</th><th>Section</th><th>Grade</th>
-          <th>Adhésion</th><th>Statut</th></tr>
+      <tr><th>Matricule</th><th>Nom et prénoms</th><th>Section</th>
+          <th class="d-none d-md-table-cell">Grade</th>
+          <th class="d-none d-md-table-cell">Adhésion</th><th>Statut</th></tr>
     </thead>
     <tbody>
     {% for membre in page %}
@@ -52,8 +53,8 @@
         <td class="font-monospace small">{{ membre.matricule }}</td>
         <td><a href="{% url 'membres:detail' membre.pk %}">{{ membre.nom_complet }}</a></td>
         <td>{{ membre.section.libelle }}</td>
-        <td class="small">{{ membre.grade|default:'—' }}</td>
-        <td class="small">{{ membre.date_adhesion|date:'d/m/Y' }}</td>
+        <td class="small d-none d-md-table-cell">{{ membre.grade|default:'—' }}</td>
+        <td class="small d-none d-md-table-cell">{{ membre.date_adhesion|date:'d/m/Y' }}</td>
         <td>
           {% if membre.statut == 'ACTIF' %}<span class="badge text-bg-success badge-statut">Actif</span>
           {% elif membre.statut == 'SUSPENDU' %}<span class="badge text-bg-danger badge-statut">Suspendu</span>

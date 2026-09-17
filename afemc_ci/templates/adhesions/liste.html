@@ -20,16 +20,17 @@
 <div class="card"><div class="table-responsive">
   <table class="table table-hover table-sm align-middle mb-0">
     <thead class="table-light">
-      <tr><th>Candidate</th><th>Section</th><th>Établissement</th>
-          <th>Déposée le</th><th>Statut</th><th></th></tr>
+      <tr><th>Candidate</th><th class="d-none d-md-table-cell">Section</th>
+          <th class="d-none d-md-table-cell">Établissement</th>
+          <th class="d-none d-md-table-cell">Déposée le</th><th>Statut</th><th></th></tr>
     </thead>
     <tbody>
     {% for demande in page %}
       <tr>
-        <td>{{ demande.nom_complet }}<div class="text-muted small">{{ demande.email }}</div></td>
-        <td>{{ demande.section.libelle }}</td>
-        <td class="small">{{ demande.etablissement|default:'—' }}</td>
-        <td class="small">{{ demande.date_soumission|date:'d/m/Y' }}</td>
+        <td>{{ demande.nom_complet }}<div class="text-muted small text-break">{{ demande.email }}</div></td>
+        <td class="d-none d-md-table-cell">{{ demande.section.libelle }}</td>
+        <td class="small d-none d-md-table-cell">{{ demande.etablissement|default:'—' }}</td>
+        <td class="small d-none d-md-table-cell">{{ demande.date_soumission|date:'d/m/Y' }}</td>
         <td>
           {% if demande.statut == 'VALIDEE' %}<span class="badge text-bg-success">Validée</span>
           {% elif demande.statut == 'REJETEE' %}<span class="badge text-bg-danger">Rejetée</span>

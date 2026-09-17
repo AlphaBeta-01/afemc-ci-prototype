@@ -135,6 +135,16 @@ a.card, .card.h-100 { transition: box-shadow .2s ease, transform .2s ease; }
 }
 .table-hover > tbody > tr:hover > * { background-color: rgba(224, 18, 126, .045); }
 
+/* Sur mobile, les colonnes secondaires sont masquées (d-none d-md-table-cell
+   dans les gabarits) pour que l'essentiel (nom, statut, action) tienne sans
+   défilement. Sur les petits écrans, badges et boutons d'action des tableaux
+   compacts sont aussi resserrés pour laisser la place à la dernière colonne
+   (bouton « Traiter », « Paiement »…) plutôt que de la faire déborder. */
+@media (max-width: 767.98px) {
+  .table-sm .badge { padding: .3em .5em; font-size: .7rem; }
+  .table-sm .btn-sm { padding-left: .4rem; padding-right: .4rem; font-size: .78rem; }
+}
+
 /* ----- Badges de statut : pastille douce plutôt que solide ----- */
 .badge-statut { font-weight: 600; letter-spacing: .01em; }
 
