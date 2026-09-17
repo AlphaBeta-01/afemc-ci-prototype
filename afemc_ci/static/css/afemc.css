@@ -165,9 +165,6 @@ a.card, .card.h-100 { transition: box-shadow .2s ease, transform .2s ease; }
 /* ----- Alertes : coins adoucis, cohérents avec le reste ----- */
 .alert { border-radius: var(--afemc-radius); border: none; }
 
-/* ----- Pied de page ----- */
-footer { border-top: 1px solid rgba(18, 32, 79, .08); }
-
 /* ----- Cartes des pages publiques (connexion, activation…) : un peu de faste ----- */
 .afemc-entete-publique + main .card {
   box-shadow: var(--afemc-ombre-hover);
