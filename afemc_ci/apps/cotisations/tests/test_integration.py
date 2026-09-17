@@ -134,8 +134,7 @@ class TestProcessusComplets(TestCase):
            side_effect=ErreurEnvoi('service indisponible'))
     def test_ti10_les_notifications_ne_sont_pas_perdues(self, _):
         fabrique.cotisation(jours_ecart=20)
-        executer_detection()
-        acheminer_notifications_en_attente()
+        executer_detection()             # tentative immédiate (échoue, service patché)
         notification = Notification.objects.first()
         self.assertEqual(notification.statut, Notification.Statut.EN_ATTENTE)
         self.assertEqual(notification.tentatives, 1)

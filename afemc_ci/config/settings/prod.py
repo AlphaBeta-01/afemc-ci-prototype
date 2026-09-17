@@ -19,7 +19,15 @@ STORAGES = {
 # gunicorn tue le worker (timeout), avant même qu'une erreur propre ne
 # remonte. Le HTTPS standard n'a pas ce problème.
 EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
-ANYMAIL = {'BREVO_API_KEY': os.environ.get('BREVO_API_KEY', '')}
+ANYMAIL = {
+    'BREVO_API_KEY': os.environ.get('BREVO_API_KEY', ''),
+    # `creer_notification` (apps.notifications.services) tente désormais un
+    # envoi immédiat dans le cycle requête/réponse (RG « envoi instantané ») :
+    # sans timeout explicite, `requests` attend indéfiniment une Brevo lente,
+    # ce qui bloquerait la page de la personne qui vient de soumettre une
+    # demande. Un échec rapide retombe proprement dans le circuit de réessai.
+    'REQUESTS_TIMEOUT': 10,
+}
 
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True

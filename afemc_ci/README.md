@@ -402,11 +402,20 @@ services et les crée en un seul clic, plutôt que de les configurer un par un.
 Les « Background Workers » de Render — nécessaires à un worker Celery — ne
 sont **pas proposés sur le plan gratuit** (seuls la base de données et un
 service web le sont). Plutôt que de payer un service dédié, la détection des
-retards et l'acheminement des notifications sont déclenchés par un appel HTTP
-planifié depuis GitHub Actions (`.github/workflows/cron.yml`, déjà dans le
-dépôt) vers `GET /taches/executer/`, une vue protégée par le jeton
-`CRON_SECRET` (en-tête `Authorization: Bearer <jeton>`) — toutes les 15 min,
-plus un appel supplémentaire le lundi à 7h UTC pour la synthèse hebdomadaire.
+retards est déclenchée par un appel HTTP planifié depuis GitHub Actions
+(`.github/workflows/cron.yml`, déjà dans le dépôt) vers `GET /taches/executer/`,
+une vue protégée par le jeton `CRON_SECRET` (en-tête `Authorization: Bearer
+<jeton>`) — toutes les 15 min, plus un appel supplémentaire le lundi à 7h UTC
+pour la synthèse hebdomadaire.
+
+L'envoi des notifications, lui, ne dépend pas de ce cron : `creer_notification`
+(§ 5.6.3) tente un envoi immédiat dès la création, dans le cycle
+requête/réponse — un candidat ou un responsable reçoit son courriel en
+quelques secondes, sans attendre le prochain passage planifié. Cet appel HTTP
+reste le filet de sécurité qui réessaie ce qui n'a pas pu partir du premier
+coup (panne passagère du fournisseur, etc.), plafonné à `MAX_TENTATIVES_NOTIFICATION`
+tentatives avant de passer en échec définitif (visible et renvoyable depuis
+l'écran `/notifications/`).
 
 Pour l'activer, une fois le service web déployé :
 

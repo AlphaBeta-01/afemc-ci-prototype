@@ -14,10 +14,22 @@ class ErreurEnvoi(Exception):
 
 def creer_notification(destinataire, type_notification, objet, gabarit, contexte,
                        membre=None, relance=None, canal=Notification.Canal.EMAIL):
-    return Notification.objects.create(
+    """Persiste la notification puis tente aussitôt de l'envoyer (§ 5.6.3).
+
+    L'échec de cette tentative immédiate — panne du fournisseur, gabarit
+    invalide, etc. — est toujours absorbé par `_tenter_envoi`, jamais
+    propagé : la personne qui vient de soumettre une demande d'adhésion ou
+    de créer un compte ne doit jamais voir sa page échouer à cause d'un
+    problème d'envoi de courriel. `acheminer_notifications_en_attente` reste
+    le filet de sécurité qui réessaiera ce qui n'est pas parti du premier
+    coup (§ 7 du README, cron toutes les 15 min).
+    """
+    notification = Notification.objects.create(
         destinataire=destinataire, membre=membre, relance=relance,
         type=type_notification, canal=canal, objet=objet,
         gabarit=gabarit, contexte=contexte)
+    _tenter_envoi(notification)
+    return notification
 
 
 def rendre_gabarit(gabarit, contexte):
@@ -45,8 +57,36 @@ def envoyer_courriel(destinataire, objet, corps):
     return envoyes
 
 
+def _tenter_envoi(notification):
+    """Une tentative d'envoi ; met à jour et sauvegarde la notification.
+
+    Capture largement (pas seulement `ErreurEnvoi`) : un gabarit invalide
+    (`rendre_gabarit`) ne doit pas plus faire échouer l'appelant qu'une
+    panne du fournisseur de messagerie — les deux sont un échec d'envoi du
+    point de vue de cette notification, à comptabiliser et à réessayer.
+    """
+    maximum = settings.MAX_TENTATIVES_NOTIFICATION
+    try:
+        corps = rendre_gabarit(notification.gabarit, notification.contexte)
+        envoyer_courriel(notification.destinataire, notification.objet, corps)
+    except Exception as err:                # noqa: BLE001
+        notification.tentatives += 1
+        notification.derniere_erreur = str(err)[:255]
+        if notification.tentatives >= maximum:
+            notification.statut = Notification.Statut.ECHEC
+        notification.save()
+        return False
+    notification.statut = Notification.Statut.ENVOYEE
+    notification.date_envoi = timezone.now()
+    notification.save()
+    return True
+
+
 def acheminer_notifications_en_attente(taille_lot=100):
-    """Achemine la file en attente ; réémission plafonnée (§ 5.6.3)."""
+    """Rattrape ce que l'envoi immédiat de `creer_notification` n'a pas pu
+    délivrer (panne passagère, notification créée avant ce mécanisme…).
+    Filet de sécurité plutôt que voie normale — voir § 5.6.3 et le README § 7.
+    """
     maximum = settings.MAX_TENTATIVES_NOTIFICATION
     en_attente = (Notification.objects
                   .filter(statut=Notification.Statut.EN_ATTENTE,
@@ -54,17 +94,8 @@ def acheminer_notifications_en_attente(taille_lot=100):
                   .order_by('cree_le')[:taille_lot])
     envoyees, echecs = 0, 0
     for notification in en_attente:
-        try:
-            corps = rendre_gabarit(notification.gabarit, notification.contexte)
-            envoyer_courriel(notification.destinataire, notification.objet, corps)
-            notification.statut = Notification.Statut.ENVOYEE
-            notification.date_envoi = timezone.now()
+        if _tenter_envoi(notification):
             envoyees += 1
-        except ErreurEnvoi as err:
-            notification.tentatives += 1
-            notification.derniere_erreur = str(err)[:255]
-            if notification.tentatives >= maximum:
-                notification.statut = Notification.Statut.ECHEC
+        else:
             echecs += 1
-        notification.save()
     return envoyees, echecs

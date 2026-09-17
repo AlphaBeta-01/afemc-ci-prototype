@@ -13,6 +13,6 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 # sécurisés...) casseraient le serveur de développement, servi en HTTP simple.
 if os.environ.get('BREVO_API_KEY'):
     EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
-    ANYMAIL = {'BREVO_API_KEY': os.environ['BREVO_API_KEY']}
+    ANYMAIL = {'BREVO_API_KEY': os.environ['BREVO_API_KEY'], 'REQUESTS_TIMEOUT': 10}
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

@@ -237,12 +237,11 @@ class TestScenariosComplementaires(BaseMoteur):
                                                  acheminer_notifications_en_attente)
 
         cot = self.cotisation(20)
-        executer_detection(aujourdhui=REFERENCE)
-        self.assertGreaterEqual(Notification.objects.count(), 1)
-
         with patch('apps.notifications.services.envoyer_courriel',
                    side_effect=ErreurEnvoi('adresse invalide')):
-            for _essai in range(3):
+            executer_detection(aujourdhui=REFERENCE)    # tentative n°1, échoue
+            self.assertGreaterEqual(Notification.objects.count(), 1)
+            for _essai in range(2):                      # tentatives n°2 et n°3
                 acheminer_notifications_en_attente()
 
         notification = Notification.objects.filter(membre=cot.membre).first()

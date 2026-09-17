@@ -18,31 +18,35 @@ def notification_test(destinataire='membre@exemple.org'):
 
 class TestAcheminement(TestCase):
 
-    def test_une_notification_est_creee_en_attente(self):
+    def test_une_notification_est_envoyee_des_sa_creation(self):
+        """Envoi immédiat (pas d'attente du prochain passage du cron)."""
+        notification = notification_test()
+        self.assertEqual(notification.statut, Notification.Statut.ENVOYEE)
+        self.assertIsNotNone(notification.date_envoi)
+
+    @patch('apps.notifications.services.envoyer_courriel',
+           side_effect=ErreurEnvoi('service indisponible'))
+    def test_une_notification_en_echec_reste_en_attente_pour_reessai(self, _):
         notification = notification_test()
         self.assertEqual(notification.statut, Notification.Statut.EN_ATTENTE)
+        self.assertEqual(notification.tentatives, 1)
 
-    def test_acheminement_reussi(self):
-        notification_test()
+    def test_acheminement_rattrape_ce_que_l_envoi_immediat_n_a_pas_delivre(self):
+        """`acheminer_notifications_en_attente` est le filet de sécurité :
+        une notification déjà ENVOYEE à la création n'est pas retraitée."""
+        with patch('apps.notifications.services.envoyer_courriel',
+                   side_effect=ErreurEnvoi('service indisponible')):
+            notification_test()          # échoue à la tentative immédiate
         envoyees, echecs = acheminer_notifications_en_attente()
         self.assertEqual((envoyees, echecs), (1, 0))
         self.assertEqual(Notification.objects.first().statut,
                          Notification.Statut.ENVOYEE)
 
     @patch('apps.notifications.services.envoyer_courriel',
-           side_effect=ErreurEnvoi('service indisponible'))
-    def test_les_messages_ne_sont_pas_perdus_en_cas_de_panne(self, _):
-        notification_test()
-        acheminer_notifications_en_attente()
-        notification = Notification.objects.first()
-        self.assertEqual(notification.statut, Notification.Statut.EN_ATTENTE)
-        self.assertEqual(notification.tentatives, 1)
-
-    @patch('apps.notifications.services.envoyer_courriel',
            side_effect=ErreurEnvoi('adresse invalide'))
     def test_echec_definitif_apres_trois_tentatives(self, _):
-        notification_test()
-        for _essai in range(3):
+        notification_test()              # tentative n°1 (immédiate, échoue)
+        for _essai in range(2):          # tentatives n°2 et n°3
             acheminer_notifications_en_attente()
         notification = Notification.objects.first()
         self.assertEqual(notification.statut, Notification.Statut.ECHEC)
