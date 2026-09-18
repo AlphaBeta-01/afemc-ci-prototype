@@ -3,6 +3,10 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+admin.site.site_header = 'AFEMC-CI — Administration'
+admin.site.site_title = 'AFEMC-CI'
+admin.site.index_title = "Panneau d'administration"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(pattern_name='dashboard:accueil'), name='racine'),

@@ -1,0 +1,67 @@
+/* Palette AFEMC-CI appliquée à l'admin Django (bleu marine institutionnel,
+   rose magenta — mêmes teintes que static/css/afemc.css) : ne redéfinit que
+   les variables de couleur du thème natif (base.css, dark_mode.css),
+   chargée après elles pour l'emporter dans la cascade — la mise en page de
+   l'admin, elle, reste entièrement celle de Django. */
+
+:root,
+html[data-theme="light"] {
+  --primary: #12204f;              /* afemc-marine */
+  --secondary: #2c3e78;            /* afemc-marine-claire */
+  --accent: #e0127e;               /* afemc-rose */
+  --primary-fg: #fff;
+
+  --header-color: #fff;
+  --header-branding-color: var(--accent);
+  --header-bg: linear-gradient(115deg, #12204f 0%, #0a1636 100%);
+  --header-link-color: #fff;
+
+  --breadcrumbs-fg: rgba(255, 255, 255, 0.82);
+  --breadcrumbs-link-fg: #fff;
+  --breadcrumbs-bg: #0a1636;       /* afemc-marine-fonce */
+
+  --link-fg: #e0127e;
+  --link-hover-color: #b30e64;
+  --link-selected-fg: #b30e64;
+
+  --button-bg: #e0127e;
+  --button-hover-bg: #b30e64;
+  --default-button-bg: #12204f;
+  --default-button-hover-bg: #2c3e78;
+
+  --object-tools-bg: #e0127e;
+  --object-tools-hover-bg: #b30e64;
+
+  --selected-bg: #fbe4f0;          /* afemc-rose-claire */
+  --selected-row: #fbe4f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #2c3e78;
+    --header-bg: linear-gradient(115deg, #12204f 0%, #0a1636 100%);
+    --breadcrumbs-bg: #0a1636;
+    --link-fg: #ff5fb8;
+    --link-hover-color: #ff8fd0;
+    --link-selected-fg: #ff8fd0;
+    --button-bg: #e0127e;
+    --button-hover-bg: #b30e64;
+    --object-tools-bg: #e0127e;
+    --object-tools-hover-bg: #b30e64;
+  }
+}
+
+html[data-theme="dark"] {
+  --primary: #2c3e78;
+  --header-bg: linear-gradient(115deg, #12204f 0%, #0a1636 100%);
+  --breadcrumbs-bg: #0a1636;
+  --link-fg: #ff5fb8;
+  --link-hover-color: #ff8fd0;
+  --link-selected-fg: #ff8fd0;
+  --button-bg: #e0127e;
+  --button-hover-bg: #b30e64;
+  --object-tools-bg: #e0127e;
+  --object-tools-hover-bg: #b30e64;
+}
+
+#site-name a { font-weight: 600; }

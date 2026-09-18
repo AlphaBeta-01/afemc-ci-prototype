@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{# Contenu d'origine de admin/base_site.html (Django) recopié tel quel —
+   on ne peut pas l'étendre directement (même chemin de gabarit), donc on
+   reproduit ses blocs title/branding/nav-global pour ne rien perdre, et on
+   n'ajoute que le bloc extrastyle : la palette de afemc.css (bleu marine,
+   rose) surcharge juste les variables de couleur du thème natif (base.css,
+   dark_mode.css), chargée après elles pour l'emporter dans la cascade — la
+   mise en page de l'admin reste entièrement celle de Django. #}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/afemc_admin.css' %}?v=1">
+{% endblock %}
