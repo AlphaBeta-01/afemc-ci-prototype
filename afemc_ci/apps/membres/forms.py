@@ -1,5 +1,6 @@
 from django import forms
 
+from apps.accounts.models import Utilisateur
 from apps.sections.models import Section
 
 from .models import Membre
@@ -45,3 +46,18 @@ class FormulaireMembre(forms.ModelForm):
             raise forms.ValidationError(
                 "Cette adresse électronique est déjà associée à un autre membre.")
         return email
+
+    def save(self, commit=True):
+        membre = super().save(commit=False)
+        # La Présidente, la Secrétaire générale, la Trésorière et les
+        # Coordinatrices de section paient elles aussi leur cotisation : leur
+        # compte de connexion (créé sans fiche membre, cf. creer_compte_responsable)
+        # est rattaché automatiquement s'il existe déjà avec la même adresse —
+        # jamais créé ici, seulement relié, pour ne pas dupliquer l'identité.
+        if not membre.utilisateur_id:
+            compte = Utilisateur.objects.filter(email__iexact=membre.email).first()
+            if compte:
+                membre.utilisateur = compte
+        if commit:
+            membre.save()
+        return membre

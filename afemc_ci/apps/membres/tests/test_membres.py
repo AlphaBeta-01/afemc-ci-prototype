@@ -62,3 +62,61 @@ class TestMembre(TestCase):
         inactif.statut = Membre.Statut.INACTIF
         inactif.save()
         self.assertEqual(self.abidjan.effectif_actif(), 1)
+
+
+class TestLiaisonCompteExistant(TestCase):
+    """La Présidente, la Secrétaire générale, la Trésorière et les
+    Coordinatrices de section paient elles aussi leur cotisation : leur
+    fiche membre doit se rattacher à leur compte de connexion existant
+    (créé sans fiche membre par creer_compte_responsable) plutôt que de
+    rester une identité séparée, invisible du système de cotisations."""
+
+    def setUp(self):
+        self.section = Section.objects.create(code='ABJ', libelle='Abidjan')
+
+    def test_la_fiche_se_rattache_a_un_compte_existant_de_meme_email(self):
+        from apps.membres.forms import FormulaireMembre
+
+        compte = Utilisateur.objects.create_user(
+            email='presidente@afemc-ci.org', password='MotDePasse2026!',
+            nom='KOUADIO', prenoms='Jean', role=Utilisateur.Role.ADMIN)
+        formulaire = FormulaireMembre({
+            'nom': 'KOUADIO', 'prenoms': 'Jean', 'email': 'presidente@afemc-ci.org',
+            'section': self.section.pk, 'date_adhesion': '2026-01-01',
+            'statut': 'ACTIF'})
+        self.assertTrue(formulaire.is_valid(), formulaire.errors)
+        membre = formulaire.save()
+        self.assertEqual(membre.utilisateur, compte)
+
+    def test_aucune_liaison_si_aucun_compte_ne_correspond(self):
+        from apps.membres.forms import FormulaireMembre
+
+        formulaire = FormulaireMembre({
+            'nom': 'YAO', 'prenoms': 'Adjoua', 'email': 'inconnue@exemple.org',
+            'section': self.section.pk, 'date_adhesion': '2026-01-01',
+            'statut': 'ACTIF'})
+        self.assertTrue(formulaire.is_valid(), formulaire.errors)
+        membre = formulaire.save()
+        self.assertIsNone(membre.utilisateur)
+
+    def test_une_liaison_existante_n_est_jamais_ecrasee(self):
+        from apps.membres.forms import FormulaireMembre
+
+        compte_initial = Utilisateur.objects.create_user(
+            email='ancien@afemc-ci.org', password='MotDePasse2026!',
+            nom='KOUAME', prenoms='Akissi', role=Utilisateur.Role.MEMBRE)
+        Utilisateur.objects.create_user(
+            email='nouveau@afemc-ci.org', password='MotDePasse2026!',
+            nom='KOUAME', prenoms='Akissi', role=Utilisateur.Role.MEMBRE)
+        membre = Membre.objects.create(nom='KOUAME', prenoms='Akissi',
+                                       email='ancien@afemc-ci.org',
+                                       section=self.section, utilisateur=compte_initial)
+
+        formulaire = FormulaireMembre({
+            'nom': 'KOUAME', 'prenoms': 'Akissi', 'email': 'nouveau@afemc-ci.org',
+            'section': self.section.pk, 'date_adhesion': '2026-01-01',
+            'statut': 'ACTIF'}, instance=membre)
+        self.assertTrue(formulaire.is_valid(), formulaire.errors)
+        formulaire.save()
+        membre.refresh_from_db()
+        self.assertEqual(membre.utilisateur, compte_initial)

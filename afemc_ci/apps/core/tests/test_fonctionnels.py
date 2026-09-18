@@ -207,6 +207,21 @@ class TestCotisationsEtPaiements(BaseFonctionnelle):
         self.cotisation.refresh_from_db()
         self.assertEqual(self.cotisation.montant_paye, Decimal('0'))
 
+    def test_la_presidente_ne_peut_pas_enregistrer_un_paiement(self):
+        """La Trésorière est seule habilitée à valider/modifier un paiement —
+        la Présidente garde la vue globale (liste, export), pas la saisie."""
+        self.connecter(self.admin)
+        reponse = self.client.post(
+            reverse('cotisations:paiement', args=[self.cotisation.pk]),
+            {'montant': '25000', 'mode': 'ESPECES', 'reference': ''})
+        self.assertEqual(reponse.status_code, 403)
+        self.assertEqual(Paiement.objects.count(), 0)
+
+    def test_la_presidente_garde_la_vue_globale_des_cotisations(self):
+        self.connecter(self.admin)
+        reponse = self.client.get(reverse('cotisations:liste'))
+        self.assertEqual(reponse.status_code, 200)
+
     def test_tf13_consultation_des_cotisations_en_retard(self):
         retard = fabrique.cotisation(membre_lie=self.membre_krg, jours_ecart=30,
                                      statut=Cotisation.Statut.EN_RETARD)

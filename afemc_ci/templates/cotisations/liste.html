@@ -77,7 +77,7 @@
           {% else %}<span class="badge text-bg-light text-dark">En attente</span>{% endif %}
         </td>
         <td class="text-end">
-          {% if user.role == 'ADMIN' or user.role == 'RESP_FINANCIER' %}
+          {% if user.role == 'RESP_FINANCIER' %}
             {% if cotisation.reste_a_payer > 0 %}
               <a class="btn btn-outline-success btn-sm py-0"
                  href="{% url 'cotisations:paiement' cotisation.pk %}">Paiement</a>

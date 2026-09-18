@@ -36,8 +36,8 @@ def liste(requete):
 
 
 @login_required
-@role_requis('ADMIN', 'RESP_FINANCIER')
-def saisir_paiement(requete, pk):
+@role_requis('RESP_FINANCIER')          # seule la Trésorière enregistre un paiement ;
+def saisir_paiement(requete, pk):        # la Présidente garde la vue globale, pas la saisie
     cotisation = get_object_or_404(Cotisation.objects.select_related('membre'), pk=pk)
     formulaire = FormulairePaiement(requete.POST or None)
     if requete.method == 'POST' and formulaire.is_valid():
