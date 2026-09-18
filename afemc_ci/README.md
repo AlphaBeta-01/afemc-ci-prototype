@@ -365,7 +365,7 @@ apps/accounts    authentification, rôles et permissions
 apps/sections    organisation territoriale
 apps/membres     registre des membres
 apps/adhesions   demandes d'adhésion et machine à états
-apps/cotisations cotisations, paiements, exemptions
+apps/cotisations cotisations, paiements
 apps/relances    moteur de détection et règles de relance
 apps/notifications file de messages et acheminement
 apps/dashboard   indicateurs de pilotage

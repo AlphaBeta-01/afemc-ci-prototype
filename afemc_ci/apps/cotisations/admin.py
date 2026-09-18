@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Cotisation, Exemption, Paiement
+from .models import Cotisation, Paiement
 
 
 @admin.register(Cotisation)
@@ -15,9 +15,3 @@ class CotisationAdmin(admin.ModelAdmin):
 class PaiementAdmin(admin.ModelAdmin):
     list_display = ('cotisation', 'montant', 'mode', 'date_paiement', 'enregistre_par')
     list_filter = ('mode',)
-
-
-@admin.register(Exemption)
-class ExemptionAdmin(admin.ModelAdmin):
-    list_display = ('membre', 'exercice', 'motif', 'date_decision')
-    list_filter = ('exercice',)

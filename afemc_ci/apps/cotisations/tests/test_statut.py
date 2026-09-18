@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from freezegun import freeze_time
 
-from apps.cotisations.models import Cotisation, Exemption
+from apps.cotisations.models import Cotisation
 from apps.cotisations.services import calculer_statut, enregistrer_paiement
 from apps.membres.models import Membre
 from apps.sections.models import Section
@@ -48,14 +48,6 @@ class TestCalculStatutCotisation(TestCase):
                        date_echeance=date(2026, 3, 31))
         with freeze_time('2026-03-31'):
             self.assertNotEqual(calculer_statut(c), Cotisation.Statut.EN_RETARD)
-
-    def test_exemption_prioritaire_sur_le_retard(self):
-        Exemption.objects.create(membre=self.membre, exercice=2026, motif='Statutaire')
-        c = Cotisation.objects.create(membre=self.membre, exercice=2026,
-                                      montant_du=Decimal('25000'),
-                                      date_echeance=date(2026, 1, 1))
-        with freeze_time('2026-06-01'):
-            self.assertEqual(calculer_statut(c), Cotisation.Statut.EXEMPTEE)
 
     def test_cotisation_neuve_est_en_attente(self):
         c = Cotisation(membre=self.membre, montant_du=Decimal('25000'),
@@ -141,14 +133,6 @@ class TestEmissionCotisations(TestCase):
         self.assertEqual(len(creees), 0)
         self.assertEqual(ignorees, 5)
         self.assertEqual(Cotisation.objects.count(), 5)
-
-    def test_les_membres_exemptes_sont_ecartes(self):
-        from apps.cotisations.services import emettre_cotisations_exercice
-        Exemption.objects.create(membre=Membre.objects.first(), exercice=2026,
-                                 motif='Statutaire')
-        creees, _ = emettre_cotisations_exercice(2026, Decimal('25000'),
-                                                 date(2026, 12, 31))
-        self.assertEqual(len(creees), 4)
 
     def test_les_membres_inactifs_sont_ecartes(self):
         from apps.cotisations.services import emettre_cotisations_exercice

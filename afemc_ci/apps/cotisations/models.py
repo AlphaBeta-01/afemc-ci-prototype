@@ -1,4 +1,4 @@
-"""Cotisations, paiements et exemptions (§ 5.4.3, § 5.5.5)."""
+"""Cotisations et paiements (§ 5.4.3, § 5.5.5)."""
 from django.conf import settings
 from django.db import models
 from django.db.models import F, Q
@@ -11,7 +11,6 @@ class Cotisation(models.Model):
         PARTIEL = 'PARTIEL', 'Partiellement payée'
         PAYEE = 'PAYEE', 'Payée'
         EN_RETARD = 'EN_RETARD', 'En retard'
-        EXEMPTEE = 'EXEMPTEE', 'Exemptée'
 
     membre = models.ForeignKey('membres.Membre', on_delete=models.PROTECT,
                                related_name='cotisations')
@@ -49,11 +48,6 @@ class Cotisation(models.Model):
     def reste_a_payer(self):
         return self.montant_du - self.montant_paye
 
-    @property
-    def est_exemptee(self):
-        return Exemption.objects.filter(membre_id=self.membre_id,
-                                        exercice=self.exercice).exists()
-
 
 class Paiement(models.Model):
 
@@ -83,24 +77,3 @@ class Paiement(models.Model):
 
     def __str__(self):
         return f'{self.montant} FCFA — {self.get_mode_display()}'
-
-
-class Exemption(models.Model):
-    membre = models.ForeignKey('membres.Membre', on_delete=models.PROTECT,
-                               related_name='exemptions')
-    exercice = models.PositiveIntegerField()
-    motif = models.CharField(max_length=200)
-    accordee_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
-                                     on_delete=models.SET_NULL)
-    date_decision = models.DateField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = 'exemption'
-        verbose_name_plural = 'exemptions'
-        constraints = [
-            models.UniqueConstraint(fields=['membre', 'exercice'],
-                                    name='unicite_exemption_membre_exercice'),
-        ]
-
-    def __str__(self):
-        return f'{self.membre.nom_complet()} — exercice {self.exercice}'

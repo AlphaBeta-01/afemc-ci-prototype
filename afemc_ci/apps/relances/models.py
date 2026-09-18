@@ -53,7 +53,7 @@ class RegleRelance(models.Model):
         from apps.cotisations.models import Cotisation
         from apps.membres.models import Membre
 
-        if cotisation.statut in (Cotisation.Statut.PAYEE, Cotisation.Statut.EXEMPTEE):
+        if cotisation.statut == Cotisation.Statut.PAYEE:
             return None
         if cotisation.membre.statut == Membre.Statut.SUSPENDU:
             return None        # aucune relance adressée à un membre suspendu

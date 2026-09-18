@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.core.management import call_command
 from django.test import TestCase
 
-from apps.cotisations.models import Cotisation, Exemption
+from apps.cotisations.models import Cotisation
 from apps.membres.models import Membre
 from apps.notifications.models import Notification
 from apps.relances.models import Relance, RegleRelance
@@ -103,15 +103,6 @@ class TestScenariosMoteur(BaseMoteur):
         notification = Notification.objects.filter(membre=cot.membre).first()
         self.assertEqual(notification.contexte['reste'], '15000.00')
 
-    def test_sc12_membre_exempte_aucune_action(self):
-        membre = self.membre()
-        Exemption.objects.create(membre=membre, exercice=2026, motif='Statutaire')
-        cot = self.cotisation(30, membre=membre)
-        executer_detection(aujourdhui=REFERENCE)
-        cot.refresh_from_db()
-        self.assertEqual(cot.statut, Cotisation.Statut.EXEMPTEE)
-        self.assertEqual(cot.relances.count(), 0)
-
     def test_sc13_membre_suspendu_aucune_relance(self):
         membre = self.membre(statut=Membre.Statut.SUSPENDU)
         cot = self.cotisation(30, membre=membre)
@@ -139,16 +130,6 @@ class TestScenariosMoteur(BaseMoteur):
         cot.refresh_from_db()
         self.assertEqual(cot.statut, Cotisation.Statut.EN_RETARD)
         self.assertGreaterEqual(resultat['relances'], 1)
-
-    def test_sc20_exemption_apres_relance_arrete_les_envois(self):
-        from apps.cotisations.services import accorder_exemption
-        membre = self.membre()
-        cot = self.cotisation(20, membre=membre)
-        executer_detection(aujourdhui=REFERENCE)
-        nombre = cot.relances.count()
-        accorder_exemption(membre, 2026, 'Congé de maternité')
-        executer_detection(aujourdhui=REFERENCE + timedelta(days=40))
-        self.assertEqual(cot.relances.count(), nombre)
 
     def test_sc21_modification_du_seuil_d_une_regle(self):
         regle = RegleRelance.objects.get(code='R04')
@@ -181,13 +162,10 @@ class TestScenariosMoteur(BaseMoteur):
 
 
 class TestAbsenceDeFauxPositifs(BaseMoteur):
-    """Aucune relance ne doit viser un membre à jour, exempté ou suspendu (§ 6.5)."""
+    """Aucune relance ne doit viser un membre à jour ou suspendu (§ 6.5)."""
 
     def test_aucun_faux_positif(self):
         self.cotisation(-30, paye=25000, statut=Cotisation.Statut.PAYEE)
-        exempte = self.membre()
-        Exemption.objects.create(membre=exempte, exercice=2026, motif='Statutaire')
-        self.cotisation(30, membre=exempte)
         self.cotisation(30, membre=self.membre(statut=Membre.Statut.SUSPENDU))
         executer_detection(aujourdhui=REFERENCE)
         self.assertEqual(Relance.objects.count(), 0)

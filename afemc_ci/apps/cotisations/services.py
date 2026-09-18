@@ -10,7 +10,7 @@ from django.utils import timezone
 from apps.core.services import journaliser
 from apps.membres.models import Membre
 
-from .models import Cotisation, Exemption, Paiement
+from .models import Cotisation, Paiement
 
 
 def calculer_statut(cotisation, aujourdhui=None):
@@ -19,8 +19,6 @@ def calculer_statut(cotisation, aujourdhui=None):
     Fonction pure : elle ne dépend que de l'état de la cotisation et de la date.
     """
     aujourdhui = aujourdhui or date.today()
-    if cotisation.est_exemptee:
-        return Cotisation.Statut.EXEMPTEE
     if cotisation.montant_paye >= cotisation.montant_du:
         return Cotisation.Statut.PAYEE
     if cotisation.date_echeance < aujourdhui:
@@ -33,8 +31,7 @@ def calculer_statut(cotisation, aujourdhui=None):
 @transaction.atomic
 def emettre_cotisations_exercice(exercice, montant, date_echeance, utilisateur=None):
     """Émet les appels de cotisation d'un exercice (RG04)."""
-    membres = (Membre.objects.actifs()
-               .exclude(exemptions__exercice=exercice))
+    membres = Membre.objects.actifs()
     creees, ignorees = [], 0
     for membre in membres:
         cotisation, cree = Cotisation.objects.get_or_create(
@@ -87,21 +84,6 @@ def enregistrer_paiement(cotisation, montant, mode, reference='', utilisateur=No
     return paiement
 
 
-@transaction.atomic
-def accorder_exemption(membre, exercice, motif, utilisateur=None):
-    """Accorde une exemption et réévalue la cotisation correspondante."""
-    exemption, _ = Exemption.objects.get_or_create(
-        membre=membre, exercice=exercice,
-        defaults={'motif': motif, 'accordee_par': utilisateur})
-    cotisation = Cotisation.objects.filter(membre=membre, exercice=exercice).first()
-    if cotisation:
-        cotisation.statut = calculer_statut(cotisation)
-        cotisation.save(update_fields=['statut'])
-    journaliser(utilisateur, 'EXEMPTION_ACCORDEE',
-                f'{membre.matricule} — exercice {exercice}')
-    return exemption
-
-
 def indicateurs_exercice(exercice, section=None):
     """Agrégats financiers de l'exercice, en une seule requête (§ 5.7.2)."""
     cotisations = Cotisation.objects.filter(exercice=exercice)
@@ -115,7 +97,6 @@ def indicateurs_exercice(exercice, section=None):
         nb_payees=Count('id', filter=Q(statut=Cotisation.Statut.PAYEE)),
         nb_retard=Count('id', filter=Q(statut=Cotisation.Statut.EN_RETARD)),
         nb_partiel=Count('id', filter=Q(statut=Cotisation.Statut.PARTIEL)),
-        nb_exemptees=Count('id', filter=Q(statut=Cotisation.Statut.EXEMPTEE)),
     )
     total_du = agr['total_du'] or Decimal('0')
     total_paye = agr['total_paye'] or Decimal('0')

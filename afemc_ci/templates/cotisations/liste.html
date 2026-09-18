@@ -74,7 +74,6 @@
           {% if cotisation.statut == 'PAYEE' %}<span class="badge text-bg-success">Payée</span>
           {% elif cotisation.statut == 'EN_RETARD' %}<span class="badge text-bg-danger">En retard</span>
           {% elif cotisation.statut == 'PARTIEL' %}<span class="badge text-bg-info">Partielle</span>
-          {% elif cotisation.statut == 'EXEMPTEE' %}<span class="badge text-bg-secondary">Exemptée</span>
           {% else %}<span class="badge text-bg-light text-dark">En attente</span>{% endif %}
         </td>
         <td class="text-end">

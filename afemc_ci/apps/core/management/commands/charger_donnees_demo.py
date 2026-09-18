@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from apps.accounts.models import Utilisateur
 from apps.adhesions.models import DemandeAdhesion
-from apps.cotisations.models import Cotisation, Exemption, Paiement
+from apps.cotisations.models import Cotisation, Paiement
 from apps.cotisations.services import calculer_statut
 from apps.membres.models import Membre
 from apps.sections.models import Section
@@ -38,9 +38,6 @@ PRENOMS = ['Akissi', 'Adjoua', 'Aya', 'Affoue', 'Amenan', 'Ahou', 'Awa', 'Mariam
 GRADES = ['Maître-Assistante', 'Maître de Conférences', 'Professeure Titulaire',
           'Assistante', 'Chargée de Recherche', 'Directrice de Recherche']
 
-MOTIFS_EXEMPTION = ['Congé de maternité', 'Membre fondatrice honoraire',
-                    'Détachement à l\'étranger', 'Décision du bureau']
-
 
 class Command(BaseCommand):
     help = "Charge un jeu de données de démonstration reproductible."
@@ -67,7 +64,6 @@ class Command(BaseCommand):
         self._creer_utilisateurs(sections)
         membres = self._creer_membres(options['membres'], sections)
         self._creer_demandes(sections)
-        self._creer_exemptions(membres)
         self._creer_cotisations(membres, options['exercices'])
 
         self.stdout.write(self.style.SUCCESS(
@@ -94,7 +90,6 @@ class Command(BaseCommand):
         Paiement.objects.all().delete()
         DemandeAdhesion.objects.all().delete()
         Cotisation.objects.all().delete()
-        Exemption.objects.all().delete()
         Membre.objects.all().delete()
         Utilisateur.objects.all().update(section=None)
         Utilisateur.objects.filter(is_superuser=False).delete()
@@ -171,12 +166,6 @@ class Command(BaseCommand):
                 date_traitement=(timezone.now() - timedelta(days=random.randint(1, 200))
                                  if statut in (DemandeAdhesion.Statut.VALIDEE,
                                                DemandeAdhesion.Statut.REJETEE) else None))
-
-    def _creer_exemptions(self, membres):
-        for membre in random.sample(membres, min(18, len(membres))):
-            Exemption.objects.get_or_create(
-                membre=membre, exercice=self.aujourdhui.year,
-                defaults={'motif': random.choice(MOTIFS_EXEMPTION)})
 
     def _creer_cotisations(self, membres, exercices):
         montant = Decimal('25000')

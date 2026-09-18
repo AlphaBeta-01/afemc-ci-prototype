@@ -11,9 +11,8 @@ from django.test import TestCase
 from apps.adhesions.models import DemandeAdhesion
 from apps.adhesions.services import changer_statut
 from apps.core.tests import fabrique
-from apps.cotisations.models import Cotisation, Exemption
-from apps.cotisations.services import (accorder_exemption, emettre_cotisations_exercice,
-                                       enregistrer_paiement)
+from apps.cotisations.models import Cotisation
+from apps.cotisations.services import emettre_cotisations_exercice, enregistrer_paiement
 from apps.dashboard.services import indicateurs_globaux
 from apps.membres.models import Membre
 from apps.notifications.models import Notification
@@ -113,21 +112,6 @@ class TestProcessusComplets(TestCase):
         self.assertEqual(Relance.objects.count(), 0)
         self.assertEqual(Notification.objects.count(), 0)
         self.assertGreaterEqual(resultat['relances'], 1)
-
-    # ---------------- TI09 : exemption tardive ----------------
-    def test_ti09_exemption_enregistree_apres_emission(self):
-        membre = fabrique.membre()
-        cot = fabrique.cotisation(membre_lie=membre, jours_ecart=20)
-        executer_detection()
-        nombre = cot.relances.count()
-        self.assertGreaterEqual(nombre, 1)
-
-        accorder_exemption(membre, 2026, 'Congé de maternité', self.responsable)
-        cot.refresh_from_db()
-        self.assertEqual(cot.statut, Cotisation.Statut.EXEMPTEE)
-
-        executer_detection()
-        self.assertEqual(cot.relances.count(), nombre)
 
     # ---------------- TI10 : indisponibilité du service de messagerie ----------------
     @patch('apps.notifications.services.envoyer_courriel',

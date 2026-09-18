@@ -55,13 +55,11 @@ def accueil(requete):
         'montants': [float(p['total']) for p in evolution if p['mois']],
     }
     donnees_statuts = {
-        'libelles': ['Payées', 'Partielles', 'En retard', 'En attente', 'Exemptées'],
+        'libelles': ['Payées', 'Partielles', 'En retard', 'En attente'],
         'valeurs': [indicateurs['nb_payees'], indicateurs['nb_partiel'],
                     indicateurs['nb_retard'],
                     indicateurs['nb_total'] - indicateurs['nb_payees']
-                    - indicateurs['nb_partiel'] - indicateurs['nb_retard']
-                    - indicateurs['nb_exemptees'],
-                    indicateurs['nb_exemptees']],
+                    - indicateurs['nb_partiel'] - indicateurs['nb_retard']],
     }
 
     return render(requete, 'dashboard/accueil.html', {
