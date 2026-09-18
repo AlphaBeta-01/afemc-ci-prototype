@@ -38,6 +38,10 @@
   --selected-row: #fbe4f0;
 }
 
+/* La fine bande rose sous la barre de navigation est la même signature
+   visuelle que .navbar.bg-primary dans afemc.css (reste de l'application). */
+#header { border-bottom: 3px solid #e0127e; }
+
 #site-name a {
   display: flex;
   align-items: center;
