@@ -1,11 +1,13 @@
 /* Palette AFEMC-CI appliquée à l'admin Django (bleu marine institutionnel,
    rose magenta — mêmes teintes que static/css/afemc.css) : ne redéfinit que
-   les variables de couleur du thème natif (base.css, dark_mode.css),
-   chargée après elles pour l'emporter dans la cascade — la mise en page de
-   l'admin, elle, reste entièrement celle de Django. */
+   les variables de couleur du thème clair natif (base.css), chargée après
+   pour l'emporter dans la cascade — la mise en page de l'admin, elle, reste
+   entièrement celle de Django. Le mode sombre de Django est désactivé
+   (templates/admin/base_site.html, bloc dark-mode-vars vide) : le reste de
+   l'application n'en a pas non plus, l'admin doit rester cohérent avec elle
+   quel que soit le thème système du visiteur — pas de bloc sombre ici. */
 
-:root,
-html[data-theme="light"] {
+:root {
   --primary: #12204f;              /* afemc-marine */
   --secondary: #2c3e78;            /* afemc-marine-claire */
   --accent: #e0127e;               /* afemc-rose */
@@ -36,32 +38,19 @@ html[data-theme="light"] {
   --selected-row: #fbe4f0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --primary: #2c3e78;
-    --header-bg: linear-gradient(115deg, #12204f 0%, #0a1636 100%);
-    --breadcrumbs-bg: #0a1636;
-    --link-fg: #ff5fb8;
-    --link-hover-color: #ff8fd0;
-    --link-selected-fg: #ff8fd0;
-    --button-bg: #e0127e;
-    --button-hover-bg: #b30e64;
-    --object-tools-bg: #e0127e;
-    --object-tools-hover-bg: #b30e64;
-  }
+#site-name a {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  font-weight: 600;
+}
+#site-name img {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .35);
 }
 
-html[data-theme="dark"] {
-  --primary: #2c3e78;
-  --header-bg: linear-gradient(115deg, #12204f 0%, #0a1636 100%);
-  --breadcrumbs-bg: #0a1636;
-  --link-fg: #ff5fb8;
-  --link-hover-color: #ff8fd0;
-  --link-selected-fg: #ff8fd0;
-  --button-bg: #e0127e;
-  --button-hover-bg: #b30e64;
-  --object-tools-bg: #e0127e;
-  --object-tools-hover-bg: #b30e64;
-}
-
-#site-name a { font-weight: 600; }
+/* Le bouton de bascule de thème (icônes auto/sombre/clair) n'a plus de
+   styles à lui puisque dark_mode.css n'est plus chargé (mode sombre
+   désactivé, voir base_site.html) : sans ça, il s'affiche comme un gros
+   pavé gris vide avec trois icônes superposées au lieu de disparaître. */
+.theme-toggle { display: none !important; }

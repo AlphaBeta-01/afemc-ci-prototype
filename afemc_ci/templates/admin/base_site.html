@@ -4,23 +4,31 @@
 {# Contenu d'origine de admin/base_site.html (Django) recopié tel quel —
    on ne peut pas l'étendre directement (même chemin de gabarit), donc on
    reproduit ses blocs title/branding/nav-global pour ne rien perdre, et on
-   n'ajoute que le bloc extrastyle : la palette de afemc.css (bleu marine,
-   rose) surcharge juste les variables de couleur du thème natif (base.css,
-   dark_mode.css), chargée après elles pour l'emporter dans la cascade — la
-   mise en page de l'admin reste entièrement celle de Django. #}
+   ajoute : le logo dans l'en-tête, la feuille de style de la palette
+   (bleu marine, rose — mêmes variables que afemc.css), et la désactivation
+   du mode sombre natif de Django. Le reste de l'application (afemc.css)
+   n'a pas de variante sombre : l'admin ne doit pas non plus en avoir, pour
+   rester visuellement cohérent quel que soit le thème système du visiteur. #}
 
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
 {% block branding %}
-<div id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></div>
-{% if user.is_anonymous %}
-  {% include "admin/color_theme_toggle.html" %}
-{% endif %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}">
+    <img src="{% static 'img/logo-afemc.png' %}" alt="" height="32">
+    {{ site_header|default:_('Django administration') }}
+  </a>
+</div>
 {% endblock %}
 
 {% block nav-global %}{% endblock %}
 
+{# Retire le lien vers dark_mode.css et le bouton de bascule de thème :
+   sans eux, seules les variables « claires » de base.css s'appliquent,
+   jamais celles de prefers-color-scheme/data-theme. #}
+{% block dark-mode-vars %}{% endblock %}
+
 {% block extrastyle %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'admin/css/afemc_admin.css' %}?v=1">
+  <link rel="stylesheet" href="{% static 'admin/css/afemc_admin.css' %}?v=2">
 {% endblock %}
