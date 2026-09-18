@@ -4,8 +4,8 @@ from django.urls import reverse
 
 from apps.accounts.models import Utilisateur
 from apps.adhesions.models import DemandeAdhesion, PieceJustificative
-from apps.adhesions.services import (MembreExistant, TransitionInterdite, changer_statut,
-                                     regulariser_comptes_membres)
+from apps.adhesions.services import (TRANSITIONS, MembreExistant, TransitionInterdite,
+                                     changer_statut, regulariser_comptes_membres)
 from apps.cotisations.models import Cotisation
 from apps.membres.models import Membre
 from apps.notifications.models import Notification
@@ -48,6 +48,13 @@ class TestCycleAdhesion(TestCase):
         changer_statut(self.demande, S.VALIDEE)
         with self.assertRaises(TransitionInterdite):
             changer_statut(self.demande, S.EN_EXAMEN)
+
+    def test_infos_requises_retire_du_processus(self):
+        """Le processus ne propose plus que Validée/Rejetée depuis En examen."""
+        changer_statut(self.demande, S.EN_EXAMEN)
+        with self.assertRaises(TransitionInterdite):
+            changer_statut(self.demande, S.INFOS_REQUISES)
+        self.assertEqual(TRANSITIONS[S.EN_EXAMEN], {S.VALIDEE, S.REJETEE})
 
     def test_validation_refusee_si_l_email_appartient_deja_a_un_membre(self):
         Membre.objects.create(nom='DIABATE', prenoms='Salimata',
@@ -414,13 +421,14 @@ class TestChampsObligatoiresDemande(TestCase):
     """
 
     def setUp(self):
-        self.section = Section.objects.create(code='ABJ', libelle='Abidjan')
+        self.section = Section.objects.create(code='ABJ', libelle='Abidjan',
+                                              etablissement='UFHB')
 
     def _donnees_completes(self):
         return {
             'nom': 'DIABATE', 'prenoms': 'Salimata', 'email': 'salimata@exemple.org',
             'telephone': '+225 07 00 00 00 00', 'grade': 'Maître-Assistante',
-            'etablissement': 'UFHB', 'section': self.section.pk,
+            'section': self.section.pk,
             'motivation': "Je souhaite adhérer.",
             'pieces-TOTAL_FORMS': '2', 'pieces-INITIAL_FORMS': '0',
             'pieces-MIN_NUM_FORMS': '0', 'pieces-MAX_NUM_FORMS': '1000',
@@ -433,11 +441,13 @@ class TestChampsObligatoiresDemande(TestCase):
     def test_le_dossier_complet_est_accepte(self):
         reponse = self.client.post(reverse('adhesions:soumettre'), self._donnees_completes())
         self.assertEqual(reponse.status_code, 200)
-        self.assertTrue(DemandeAdhesion.objects.filter(email='salimata@exemple.org').exists())
+        demande = DemandeAdhesion.objects.filter(email='salimata@exemple.org').first()
+        self.assertIsNotNone(demande)
+        self.assertEqual(demande.etablissement, 'UFHB')          # dérivé de la section choisie
 
     def test_chaque_champ_est_obligatoire(self):
         champs_obligatoires = ['nom', 'prenoms', 'email', 'telephone', 'grade',
-                               'etablissement', 'section', 'motivation']
+                               'section', 'motivation']
         for champ in champs_obligatoires:
             with self.subTest(champ=champ):
                 donnees = self._donnees_completes()

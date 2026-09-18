@@ -40,7 +40,7 @@
             <label class="form-label">Décision</label>
             <select name="statut" class="form-select">
               {% for statut in transitions %}
-                <option value="{{ statut }}">{{ statut }}</option>
+                <option value="{{ statut }}">{{ statut.label }}</option>
               {% endfor %}
             </select>
             <div class="form-text">
@@ -48,7 +48,7 @@
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Motif (en cas de rejet ou de demande d'informations)</label>
+            <label class="form-label">Motif (en cas de rejet)</label>
             <textarea name="motif" rows="3" class="form-control"></textarea>
           </div>
           <button class="btn btn-primary">Valider la décision</button>

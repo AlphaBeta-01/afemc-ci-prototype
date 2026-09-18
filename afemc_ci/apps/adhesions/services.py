@@ -15,7 +15,11 @@ S = DemandeAdhesion.Statut
 
 TRANSITIONS = {
     S.EN_ATTENTE: {S.EN_EXAMEN, S.REJETEE},
-    S.EN_EXAMEN: {S.VALIDEE, S.REJETEE, S.INFOS_REQUISES},
+    S.EN_EXAMEN: {S.VALIDEE, S.REJETEE},
+    # INFOS_REQUISES n'est plus proposé pour une nouvelle demande (retiré du
+    # processus à la demande de la Présidente/Secrétaire générale) — cette
+    # ligne reste uniquement pour qu'une demande déjà dans cet état avant ce
+    # changement ne se retrouve pas bloquée sans transition possible.
     S.INFOS_REQUISES: {S.EN_EXAMEN, S.REJETEE},
     S.VALIDEE: set(),      # état terminal
     S.REJETEE: set(),      # état terminal

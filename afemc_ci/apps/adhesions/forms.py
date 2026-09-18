@@ -2,26 +2,49 @@ from django import forms
 from django.conf import settings
 from django.core.validators import FileExtensionValidator
 
+from apps.sections.models import Section
+
 from .models import EXTENSIONS_AUTORISEES, DemandeAdhesion, PieceJustificative
 
 CLASSE = {'class': 'form-control'}
 
 
+class ChampUniversite(forms.ModelChoiceField):
+    """Affiche l'université de chaque section plutôt que son libellé
+    administratif — la candidate choisit son université, pas une section."""
+
+    def label_from_instance(self, section):
+        return section.etablissement or section.libelle
+
+
 class FormulaireDemande(forms.ModelForm):
+    # Une seule sélection détermine à la fois l'université et la section
+    # (ex. « Université Félix Houphouët-Boigny de Cocody » = section
+    # Cocody) : plus de champ « établissement » saisi à la main, et donc
+    # plus d'incohérence possible entre les deux — voir `save()` ci-dessous.
+    section = ChampUniversite(
+        queryset=Section.objects.filter(active=True).order_by('etablissement'),
+        label='Université', empty_label='Sélectionnez votre université',
+        widget=forms.Select(attrs={'class': 'form-select'}))
+
     class Meta:
         model = DemandeAdhesion
-        fields = ['nom', 'prenoms', 'email', 'telephone', 'grade',
-                  'etablissement', 'section', 'motivation']
+        fields = ['nom', 'prenoms', 'email', 'telephone', 'grade', 'section', 'motivation']
         widgets = {
             'nom': forms.TextInput(attrs=CLASSE),
             'prenoms': forms.TextInput(attrs=CLASSE),
             'email': forms.EmailInput(attrs=CLASSE),
             'telephone': forms.TextInput(attrs=CLASSE),
             'grade': forms.TextInput(attrs=CLASSE),
-            'etablissement': forms.TextInput(attrs=CLASSE),
-            'section': forms.Select(attrs={'class': 'form-select'}),
             'motivation': forms.Textarea(attrs={**CLASSE, 'rows': 4}),
         }
+
+    def save(self, commit=True):
+        demande = super().save(commit=False)
+        demande.etablissement = demande.section.etablissement
+        if commit:
+            demande.save()
+        return demande
 
 
 class FormulairePieceJustificative(forms.Form):

@@ -16,8 +16,8 @@ from apps.membres.models import Membre
 from apps.sections.models import Section
 
 SECTIONS = [
-    ('ABJ', 'Section d\'Abidjan', 'Abidjan', 'Université Félix Houphouët-Boigny'),
-    ('COC', 'Section de Cocody', 'Abidjan', 'Université Félix Houphouët-Boigny'),
+    ('ABJ', 'Section d\'Abidjan', 'Abidjan', 'Université Félix Houphouët-Boigny (site principal)'),
+    ('COC', 'Section de Cocody', 'Abidjan', 'Université Félix Houphouët-Boigny de Cocody'),
     ('ABO', 'Section d\'Abobo-Adjamé', 'Abidjan', 'Université Nangui Abrogoua'),
     ('BKE', 'Section de Bouaké', 'Bouaké', 'Université Alassane Ouattara'),
     ('KRG', 'Section de Korhogo', 'Korhogo', 'Université Peleforo Gon Coulibaly'),
