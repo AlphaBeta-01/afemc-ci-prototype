@@ -94,6 +94,19 @@ class TestEnregistrementPaiement(TestCase):
         self.assertTrue(JournalOperation.objects
                         .filter(type_operation='ENREGISTREMENT_PAIEMENT').exists())
 
+    def test_un_recu_est_envoye_au_membre(self):
+        from apps.notifications.models import Notification
+
+        enregistrer_paiement(self.cotisation, Decimal('10000'), 'MOBILE_MONEY',
+                             reference='REC-77')
+        notification = Notification.objects.get(type='RECU_PAIEMENT')
+        self.assertEqual(notification.destinataire, self.membre.email)
+        self.assertEqual(notification.statut, Notification.Statut.ENVOYEE)
+        self.assertEqual(notification.contexte['montant_verse'], '10000')
+        self.assertEqual(notification.contexte['mode'], 'Monnaie électronique mobile')
+        self.assertEqual(notification.contexte['reference'], 'REC-77')
+        self.assertEqual(notification.contexte['reste'], '15000.00')
+
     def test_le_solde_reel_prevaut_sur_un_objet_perime(self):
         """Deux saisies quasi simultanées ne doivent jamais s'écraser :
         même si l'objet transmis est périmé, le reste à payer vérifié est

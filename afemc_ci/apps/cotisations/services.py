@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from apps.core.services import journaliser
 from apps.membres.models import Membre
+from apps.notifications.services import creer_notification
 
 from .models import Cotisation, Paiement
 
@@ -81,7 +82,31 @@ def enregistrer_paiement(cotisation, montant, mode, reference='', utilisateur=No
 
     journaliser(utilisateur, 'ENREGISTREMENT_PAIEMENT',
                 f'cotisation {cotisation.pk} : +{montant} FCFA')
+    notifier_recu_paiement(paiement, cotisation)
     return paiement
+
+
+def notifier_recu_paiement(paiement, cotisation):
+    """Envoie au membre un reçu du versement qu'il vient d'effectuer (RG05)."""
+    creer_notification(
+        destinataire=cotisation.membre.email,
+        type_notification='RECU_PAIEMENT',
+        objet=f"Reçu de cotisation {cotisation.exercice} — AFEMC-CI",
+        gabarit='notifications/recu_paiement.txt',
+        contexte={
+            'membre': cotisation.membre.nom_complet(),
+            'matricule': cotisation.membre.matricule,
+            'exercice': cotisation.exercice,
+            'montant_verse': str(paiement.montant),
+            'mode': paiement.get_mode_display(),
+            'reference': paiement.reference or '—',
+            'date_paiement': paiement.date_paiement.strftime('%d/%m/%Y'),
+            'montant_du': str(cotisation.montant_du),
+            'montant_paye_cumule': str(cotisation.montant_paye),
+            'reste': str(cotisation.reste_a_payer),
+            'statut': cotisation.get_statut_display(),
+        },
+        membre=cotisation.membre)
 
 
 def indicateurs_exercice(exercice, section=None):
