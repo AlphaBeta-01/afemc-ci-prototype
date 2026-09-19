@@ -87,7 +87,8 @@ def enregistrer_paiement(cotisation, montant, mode, reference='', utilisateur=No
 
 
 def notifier_recu_paiement(paiement, cotisation):
-    """Envoie au membre un reçu du versement qu'il vient d'effectuer (RG05)."""
+    """Envoie au membre un reçu du versement qu'il vient d'effectuer (RG05),
+    avec le même reçu joint en PDF (voir `generer_recu_pdf`)."""
     creer_notification(
         destinataire=cotisation.membre.email,
         type_notification='RECU_PAIEMENT',
@@ -106,7 +107,90 @@ def notifier_recu_paiement(paiement, cotisation):
             'reste': str(cotisation.reste_a_payer),
             'statut': cotisation.get_statut_display(),
         },
-        membre=cotisation.membre)
+        membre=cotisation.membre,
+        piece_jointe_generateur='apps.cotisations.services.generer_recu_pdf')
+
+
+_CARACTERES_HORS_LATIN1 = {
+    '—': '-', '–': '-',              # tirets cadratin/demi-cadratin
+    '‘': "'", '’': "'",              # apostrophes courbes
+    '“': '"', '”': '"',              # guillemets courbes
+    '…': '...',                           # points de suspension
+}
+
+
+def _texte_pdf(valeur):
+    """Les polices de base de fpdf2 (Helvetica) ne supportent que Latin-1 :
+    un tiret cadratin ou une apostrophe courbe suffit à faire échouer toute
+    la génération (`FPDFUnicodeEncodingException`). Remplace les caractères
+    typographiques usuels par leur équivalent ASCII plutôt que de risquer
+    qu'un texte imprévu (référence de paiement, nom d'un membre…) casse le
+    reçu — les accents français, eux, sont bien dans Latin-1 et inchangés.
+    """
+    texte = str(valeur)
+    for cherche, remplace in _CARACTERES_HORS_LATIN1.items():
+        texte = texte.replace(cherche, remplace)
+    return texte
+
+
+def generer_recu_pdf(contexte):
+    """Reçu de cotisation en PDF, à partir du même `contexte` que le courriel.
+
+    Résolue dynamiquement par `apps.notifications.services` (via le chemin
+    stocké dans `piece_jointe_generateur`), jamais importée ni stockée :
+    régénérée à chaque tentative d'envoi, comme le corps du courriel.
+    """
+    from fpdf import FPDF, XPos, YPos
+
+    pdf = FPDF(format='A4')
+    pdf.set_margin(20)
+    pdf.add_page()
+
+    pdf.set_font('Helvetica', 'B', 16)
+    pdf.set_text_color(18, 32, 79)                       # afemc-marine
+    pdf.cell(0, 10, 'AFEMC-CI', new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.set_font('Helvetica', '', 10)
+    pdf.set_text_color(90, 90, 90)
+    pdf.cell(0, 6, _texte_pdf("Association des Femmes Enseignantes Chercheures de Côte d'Ivoire"),
+             new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.ln(6)
+
+    pdf.set_draw_color(224, 18, 126)                     # afemc-rose
+    pdf.set_line_width(0.8)
+    pdf.line(20, pdf.get_y(), 190, pdf.get_y())
+    pdf.ln(8)
+
+    pdf.set_font('Helvetica', 'B', 13)
+    pdf.set_text_color(18, 32, 79)
+    pdf.cell(0, 8, _texte_pdf(f"Reçu de cotisation — Exercice {contexte['exercice']}"),
+             new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.ln(4)
+
+    lignes = [
+        ('Membre', f"{contexte['membre']} ({contexte['matricule']})"),
+        ('Montant versé', f"{contexte['montant_verse']} FCFA"),
+        ('Mode de règlement', contexte['mode']),
+        ('Référence', contexte['reference']),
+        ('Date du versement', contexte['date_paiement']),
+        ('Montant total appelé', f"{contexte['montant_du']} FCFA"),
+        ('Total réglé à ce jour', f"{contexte['montant_paye_cumule']} FCFA"),
+        ('Reste à régler', f"{contexte['reste']} FCFA"),
+        ('Statut de la cotisation', contexte['statut']),
+    ]
+    for libelle, valeur in lignes:
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.set_text_color(30, 30, 30)
+        pdf.cell(60, 8, _texte_pdf(libelle))
+        pdf.set_font('Helvetica', '', 11)
+        pdf.cell(0, 8, _texte_pdf(valeur), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
+    pdf.ln(10)
+    pdf.set_font('Helvetica', 'I', 9)
+    pdf.set_text_color(120, 120, 120)
+    pdf.multi_cell(0, 5, _texte_pdf("Ce document tient lieu de reçu. Conservez-le pour vos archives."))
+
+    nom_fichier = f"recu_cotisation_{contexte['exercice']}.pdf"
+    return nom_fichier, bytes(pdf.output()), 'application/pdf'
 
 
 def indicateurs_exercice(exercice, section=None):

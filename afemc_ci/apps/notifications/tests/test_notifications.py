@@ -67,6 +67,45 @@ class TestAcheminement(TestCase):
             statut=Notification.Statut.EN_ATTENTE).exists())
 
 
+class TestPieceJointe(TestCase):
+    """Générateur résolu dynamiquement par chemin pointillé (§ 5.6.3) —
+    apps.notifications ne doit jamais importer une autre app directement."""
+
+    def test_une_notification_sans_generateur_n_a_pas_de_piece_jointe(self):
+        from django.core import mail
+
+        notification_test()
+        self.assertEqual(mail.outbox[0].attachments, [])
+
+    def test_une_notification_avec_generateur_recoit_sa_piece_jointe(self):
+        from django.core import mail
+
+        creer_notification(
+            destinataire='membre@exemple.org', type_notification='RECU_PAIEMENT',
+            objet='Reçu 2026', gabarit='notifications/recu_paiement.txt',
+            contexte={'membre': 'KOUAME Akissi', 'matricule': 'ABJ-2026-0001',
+                     'exercice': 2026, 'montant_verse': '10000', 'mode': 'Espèces',
+                     'reference': 'REC-1', 'date_paiement': '01/01/2026',
+                     'montant_du': '25000', 'montant_paye_cumule': '10000',
+                     'reste': '15000', 'statut': 'Partiellement payée'},
+            piece_jointe_generateur='apps.cotisations.services.generer_recu_pdf')
+        pieces = mail.outbox[0].attachments
+        self.assertEqual(len(pieces), 1)
+        self.assertEqual(pieces[0][0], 'recu_cotisation_2026.pdf')
+        self.assertEqual(pieces[0][2], 'application/pdf')
+
+    def test_un_generateur_introuvable_echoue_proprement(self):
+        """Une erreur de configuration (mauvais chemin) est un échec d'envoi
+        comme un autre — jamais une exception qui remonte à l'appelant."""
+        notification = creer_notification(
+            destinataire='membre@exemple.org', type_notification='RECU_PAIEMENT',
+            objet='Reçu 2026', gabarit='notifications/recu_paiement.txt',
+            contexte={}, piece_jointe_generateur='apps.cotisations.services.inexistant')
+        self.assertEqual(notification.statut, Notification.Statut.EN_ATTENTE)
+        self.assertEqual(notification.tentatives, 1)
+        self.assertTrue(notification.derniere_erreur)
+
+
 class TestRenduDuGabarit(TestCase):
     """Un courriel en texte brut ne doit pas subir l'échappement HTML."""
 

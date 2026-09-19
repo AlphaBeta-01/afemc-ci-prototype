@@ -23,6 +23,12 @@ class Notification(models.Model):
     objet = models.CharField(max_length=200)
     gabarit = models.CharField(max_length=80)
     contexte = models.JSONField(default=dict, blank=True)
+    piece_jointe_generateur = models.CharField(
+        max_length=200, blank=True,
+        help_text="Chemin Python pointillé (ex. apps.cotisations.services.generer_recu_pdf) "
+                  "d'une fonction qui reçoit `contexte` et retourne (nom_fichier, contenu, "
+                  "type_mime) — régénérée à chaque tentative d'envoi plutôt que stockée, "
+                  "comme le corps du courriel lui-même (voir rendre_gabarit).")
     statut = models.CharField(max_length=12, choices=Statut.choices,
                               default=Statut.EN_ATTENTE)
     tentatives = models.PositiveSmallIntegerField(default=0)

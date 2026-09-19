@@ -2,10 +2,11 @@
 import time
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.utils import timezone
+from django.utils.module_loading import import_string
 
 from .models import Notification
 
@@ -15,7 +16,8 @@ class ErreurEnvoi(Exception):
 
 
 def creer_notification(destinataire, type_notification, objet, gabarit, contexte,
-                       membre=None, relance=None, canal=Notification.Canal.EMAIL):
+                       membre=None, relance=None, canal=Notification.Canal.EMAIL,
+                       piece_jointe_generateur=''):
     """Persiste la notification puis tente aussitôt de l'envoyer (§ 5.6.3).
 
     L'échec de cette tentative immédiate — panne du fournisseur, gabarit
@@ -25,11 +27,18 @@ def creer_notification(destinataire, type_notification, objet, gabarit, contexte
     problème d'envoi de courriel. `acheminer_notifications_en_attente` reste
     le filet de sécurité qui réessaiera ce qui n'est pas parti du premier
     coup (§ 7 du README, cron toutes les 15 min).
+
+    `piece_jointe_generateur` : chemin Python pointillé d'une fonction
+    optionnelle, résolue dynamiquement à l'envoi plutôt qu'importée ici —
+    même raisonnement que EMAIL_BACKEND ou AUTH_USER_MODEL : cette
+    application ne doit jamais avoir besoin de connaître apps.cotisations
+    ou toute autre app pour rester réutilisable (§ guide, apps/notifications).
     """
     notification = Notification.objects.create(
         destinataire=destinataire, membre=membre, relance=relance,
         type=type_notification, canal=canal, objet=objet,
-        gabarit=gabarit, contexte=contexte)
+        gabarit=gabarit, contexte=contexte,
+        piece_jointe_generateur=piece_jointe_generateur)
     _tenter_envoi(notification)
     return notification
 
@@ -48,15 +57,39 @@ def rendre_gabarit(gabarit, contexte):
         Context(contexte))
 
 
-def envoyer_courriel(destinataire, objet, corps):
+def envoyer_courriel(destinataire, objet, corps, piece_jointe=None):
+    """`piece_jointe` : tuple (nom_fichier, contenu_bytes, type_mime) optionnel.
+
+    `send_mail` (simple, sans pièce jointe) reste la voie par défaut — la
+    grande majorité des notifications n'en ont pas ; `EmailMessage` n'est
+    utilisé que lorsqu'une pièce jointe est effectivement fournie.
+    """
     try:
-        envoyes = send_mail(objet, corps, settings.EMAIL_EXPEDITEUR,
-                            [destinataire], fail_silently=False)
+        if piece_jointe:
+            message = EmailMessage(objet, corps, settings.EMAIL_EXPEDITEUR, [destinataire])
+            message.attach(*piece_jointe)
+            envoyes = message.send(fail_silently=False)
+        else:
+            envoyes = send_mail(objet, corps, settings.EMAIL_EXPEDITEUR,
+                                [destinataire], fail_silently=False)
     except Exception as err:                # noqa: BLE001
         raise ErreurEnvoi(str(err)) from err
     if not envoyes:
         raise ErreurEnvoi('Aucun message accepté par le service de messagerie.')
     return envoyes
+
+
+def _generer_piece_jointe(notification):
+    """Résout et appelle le générateur de pièce jointe s'il y en a un.
+
+    Régénérée à chaque tentative plutôt que stockée (comme le corps du
+    courriel, cf. `rendre_gabarit`) : évite de conserver un PDF en base
+    pour une donnée déjà entièrement présente dans `contexte`.
+    """
+    if not notification.piece_jointe_generateur:
+        return None
+    generateur = import_string(notification.piece_jointe_generateur)
+    return generateur(notification.contexte)
 
 
 def _tenter_envoi(notification):
@@ -70,7 +103,8 @@ def _tenter_envoi(notification):
     maximum = settings.MAX_TENTATIVES_NOTIFICATION
     try:
         corps = rendre_gabarit(notification.gabarit, notification.contexte)
-        envoyer_courriel(notification.destinataire, notification.objet, corps)
+        piece_jointe = _generer_piece_jointe(notification)
+        envoyer_courriel(notification.destinataire, notification.objet, corps, piece_jointe)
     except Exception as err:                # noqa: BLE001
         notification.tentatives += 1
         notification.derniere_erreur = str(err)[:255]

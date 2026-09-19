@@ -1,7 +1,8 @@
 Madame, Chère consœur,
 
 Nous accusons réception de votre versement au titre de la cotisation
-{{ exercice }}. Voici votre reçu.
+{{ exercice }}. Vous trouverez votre reçu en pièce jointe (PDF), et son
+récapitulatif ci-dessous.
 
 Membre : {{ membre }} ({{ matricule }})
 Exercice : {{ exercice }}
@@ -16,8 +17,8 @@ Total réglé à ce jour : {{ montant_paye_cumule }} FCFA
 Reste à régler : {{ reste }} FCFA
 Statut de la cotisation : {{ statut }}
 
-Conservez ce message qui vaut reçu. Pour toute question, n'hésitez pas
-à contacter la Trésorière.
+Conservez ce message et son reçu joint. Pour toute question, n'hésitez
+pas à contacter la Trésorière.
 
 Le Bureau
 Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

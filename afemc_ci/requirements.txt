@@ -6,6 +6,8 @@ gunicorn==22.0.0           # serveur WSGI de production
 whitenoise==6.7.0          # sert les fichiers statiques sans serveur dédié
 django-anymail==11.1       # envoi via l'API HTTP de Brevo (le SMTP sortant
                             # s'est révélé peu fiable sur le réseau gratuit de Render)
+fpdf2==2.8.8                # génération du reçu de cotisation en PDF — pur Python,
+                            # aucune dépendance système (contrairement à WeasyPrint)
 pywin32==312; sys_platform == 'win32'  # verrouillage de fichiers, transport Celery 'filesystem'
 python-dotenv==1.0.1
 freezegun==1.5.5

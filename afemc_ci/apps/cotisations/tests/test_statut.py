@@ -95,6 +95,8 @@ class TestEnregistrementPaiement(TestCase):
                         .filter(type_operation='ENREGISTREMENT_PAIEMENT').exists())
 
     def test_un_recu_est_envoye_au_membre(self):
+        from django.core import mail
+
         from apps.notifications.models import Notification
 
         enregistrer_paiement(self.cotisation, Decimal('10000'), 'MOBILE_MONEY',
@@ -106,6 +108,24 @@ class TestEnregistrementPaiement(TestCase):
         self.assertEqual(notification.contexte['mode'], 'Monnaie électronique mobile')
         self.assertEqual(notification.contexte['reference'], 'REC-77')
         self.assertEqual(notification.contexte['reste'], '15000.00')
+
+        self.assertEqual(len(mail.outbox), 1)
+        pieces = mail.outbox[0].attachments
+        self.assertEqual(len(pieces), 1)
+        nom_fichier, contenu, type_mime = pieces[0]
+        self.assertEqual(nom_fichier, 'recu_cotisation_2026.pdf')
+        self.assertEqual(type_mime, 'application/pdf')
+        self.assertTrue(bytes(contenu).startswith(b'%PDF'))
+
+    def test_le_recu_pdf_survit_a_une_reference_vide(self):
+        """Sans référence, le contexte insère un tiret cadratin (« — ») —
+        hors du Latin-1 que supportent les polices de base de fpdf2 ; a
+        cassé toute la génération avant correction (_texte_pdf)."""
+        from django.core import mail
+
+        enregistrer_paiement(self.cotisation, Decimal('5000'), 'ESPECES')
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox[0].attachments), 1)
 
     def test_le_solde_reel_prevaut_sur_un_objet_perime(self):
         """Deux saisies quasi simultanées ne doivent jamais s'écraser :
