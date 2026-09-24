@@ -1,2 +1,11 @@
 # Configuration locale de l'outillage (par machine, pas partagée)
 .claude/
+
+# Fichiers du Finder (macOS)
+.DS_Store
+
+# Sauvegardes de base de données : données personnelles des membres,
+# ne doivent jamais partir sur GitHub (pg_dump de Render, exports SQL)
+*.dump
+*.sql
+*.sql.gz
