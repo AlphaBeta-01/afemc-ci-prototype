@@ -240,3 +240,35 @@ class TestScenariosComplementaires(BaseMoteur):
         # une seconde exécution ne produit aucune relance supplémentaire
         executer_detection(aujourdhui=REFERENCE + timedelta(days=30))
         self.assertEqual(ancienne.relances.count(), 1)
+
+
+class TestGabaritsDesDestinataires(BaseMoteur):
+    """Une responsable en copie ne reçoit pas le message adressé au membre."""
+
+    def setUp(self):
+        super().setUp()
+        from apps.core.tests.fabrique import utilisateur
+        from apps.accounts.models import Utilisateur
+        self.tresoriere = utilisateur(Utilisateur.Role.RESP_FINANCIER,
+                                      email='tresoriere@exemple.org')
+
+    def test_r05_membre_et_tresoriere_recoivent_chacune_leur_gabarit(self):
+        cot = self.cotisation(45)
+        executer_detection(aujourdhui=REFERENCE)
+        self.assertEqual(cot.relances.first().regle.code, 'R05')
+
+        au_membre = Notification.objects.get(destinataire=cot.membre.email)
+        self.assertEqual(au_membre.gabarit, 'notifications/relance.txt')
+
+        a_la_tresoriere = Notification.objects.get(destinataire='tresoriere@exemple.org')
+        self.assertEqual(a_la_tresoriere.gabarit, 'notifications/relance_responsable.txt')
+        self.assertIn(cot.membre.nom_complet(), a_la_tresoriere.objet)
+
+    def test_le_gabarit_responsable_nomme_la_membre_en_retard(self):
+        from apps.notifications.services import rendre_gabarit
+        cot = self.cotisation(90)
+        executer_detection(aujourdhui=REFERENCE)
+        notification = Notification.objects.get(destinataire='tresoriere@exemple.org')
+        corps = rendre_gabarit(notification.gabarit, notification.contexte)
+        self.assertIn(cot.membre.nom_complet(), corps)
+        self.assertNotIn('votre cotisation', corps)

@@ -12,6 +12,8 @@ from apps.notifications.services import creer_notification
 
 from .models import Relance, RegleRelance
 
+GABARIT_RELANCE_RESPONSABLE = 'notifications/relance_responsable.txt'
+
 
 def relance_deja_emise(cotisation, regle):
     return Relance.objects.filter(cotisation=cotisation, regle=regle).exists()
@@ -59,11 +61,22 @@ def creer_relance(cotisation, regle, aujourdhui=None):
     }
 
     for destinataire in resoudre_destinataires(regle, cotisation):
+        # Le gabarit de la règle s'adresse au membre (« votre cotisation ») :
+        # une responsable en copie (R04 à R06) reçoit à la place un message
+        # qui nomme la membre concernée, sans quoi elle lirait une demande
+        # de règlement comme si la dette était la sienne.
+        if destinataire == cotisation.membre.email:
+            objet = f'Cotisation {cotisation.exercice} — {regle.libelle}'
+            gabarit = regle.gabarit_message
+        else:
+            objet = (f'Cotisation {cotisation.exercice} — {regle.libelle} — '
+                     f'{cotisation.membre.nom_complet()}')
+            gabarit = GABARIT_RELANCE_RESPONSABLE
         creer_notification(
             destinataire=destinataire,
             type_notification='RELANCE_COTISATION',
-            objet=f'Cotisation {cotisation.exercice} — {regle.libelle}',
-            gabarit=regle.gabarit_message,
+            objet=objet,
+            gabarit=gabarit,
             contexte=contexte,
             membre=cotisation.membre,
             relance=relance)

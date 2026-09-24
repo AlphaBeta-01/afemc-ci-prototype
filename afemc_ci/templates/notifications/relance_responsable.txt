@@ -1,0 +1,15 @@
+Bonjour,
+
+Pour information, la cotisation suivante n'est toujours pas réglée :
+
+Membre : {{ membre }}
+Section : {{ section }}
+Exercice : {{ exercice }}
+Montant appelé : {{ montant_du }} FCFA
+Reste à régler : {{ reste }} FCFA
+Date d'échéance : {{ echeance }} ({{ jours }} jour(s) de retard)
+Niveau : {{ niveau }}
+
+Le détail est consultable dans l'application, rubrique Cotisations.
+
+Système de gestion AFEMC-CI
