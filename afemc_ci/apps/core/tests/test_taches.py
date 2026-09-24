@@ -72,3 +72,15 @@ class TestTachesPlanifiees(TestCase):
         call_command('charger_regles', verbosity=0)
         call_command('charger_regles', verbosity=0)
         self.assertEqual(RegleRelance.objects.count(), 6)
+
+    def test_le_rechargement_des_regles_preserve_les_modifications_en_base(self):
+        """Un redéploiement ne doit pas annuler un réglage fait dans l'admin."""
+        from apps.relances.models import RegleRelance
+
+        call_command('charger_regles', verbosity=0)
+        RegleRelance.objects.filter(code='R01').update(decalage_jours=-30, active=False)
+        call_command('charger_regles', verbosity=0)
+
+        r01 = RegleRelance.objects.get(code='R01')
+        self.assertEqual(r01.decalage_jours, -30)
+        self.assertFalse(r01.active)

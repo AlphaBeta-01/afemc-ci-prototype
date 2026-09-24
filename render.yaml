@@ -9,8 +9,9 @@ services:
     runtime: python
     plan: free
     rootDir: afemc_ci
-    # charger_regles est idempotente (update_or_create) : sans danger à
-    # rappeler à chaque déploiement, comme migrate. Sans cette ligne, la
+    # charger_regles est idempotente (get_or_create) : sans danger à
+    # rappeler à chaque déploiement, comme migrate — elle ne crée que les
+    # règles absentes et ne touche jamais à celles ajustées dans l'admin. Sans cette ligne, la
     # table RegleRelance restait vide en production — aucune relance de
     # retard n'a jamais pu être envoyée depuis la mise en service, sans
     # aucune erreur visible (RegleRelance.applicable() retourne simplement
