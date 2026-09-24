@@ -1,0 +1,13 @@
+{% comment %}
+Encadré mis en avant. Paramètres : ton ('info', 'attention' ou 'succes'),
+titre, texte. La couleur n'est jamais le seul porteur du sens : le titre
+de l'encadré dit toujours en toutes lettres de quoi il s'agit.
+{% endcomment %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px 0;">
+  <tr>
+    <td style="border-left:4px solid {% if ton == 'attention' %}#e0127e{% elif ton == 'succes' %}#1f7a4d{% else %}#2c3e78{% endif %}; background-color:{% if ton == 'attention' %}#fbe4f0{% elif ton == 'succes' %}#e6f4ec{% else %}#eef1f8{% endif %}; border-radius:0 8px 8px 0; padding:14px 18px; font-size:15px; line-height:23px; color:#262b45;">
+      {% if titre %}<strong style="display:block; margin-bottom:2px; color:{% if ton == 'attention' %}#9c0c57{% elif ton == 'succes' %}#185f3c{% else %}#12204f{% endif %};">{{ titre }}</strong>{% endif %}
+      {{ texte }}
+    </td>
+  </tr>
+</table>

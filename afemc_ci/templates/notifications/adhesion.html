@@ -1,0 +1,19 @@
+{% extends "notifications/email/base.html" %}
+{% block titre_document %}Votre demande d'adhésion — {{ statut }}{% endblock %}
+{% block preheader %}État de votre demande d'adhésion à l'AFEMC-CI : {{ statut }}.{% endblock %}
+{% block surtitre %}Demande d'adhésion{% endblock %}
+{% block titre %}{% if statut == 'Validée' %}Votre demande est acceptée{% elif statut == 'Rejetée' %}Réponse à votre demande d'adhésion{% else %}Votre demande est en cours d'examen{% endif %}{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 16px 0;">Madame {{ candidate }}, nous vous remercions pour votre demande d'adhésion à l'Association des Femmes Enseignantes Chercheures de Côte d'Ivoire (<strong>{{ section }}</strong>).</p>
+{% if statut == 'Validée' %}
+  {% include "notifications/email/_encadre.html" with ton="succes" titre="Demande validée" texte="Vous allez recevoir dans un courriel séparé le lien pour activer votre compte membre." %}
+{% elif statut == 'Rejetée' %}
+  {% include "notifications/email/_encadre.html" with ton="attention" titre="Demande non retenue" texte="Après examen, votre demande n'a pas pu être acceptée." %}
+{% else %}
+  {% include "notifications/email/_encadre.html" with ton="info" titre="État : "|add:statut texte="Nous vous tiendrons informée par courriel de chaque étape de son traitement." %}
+{% endif %}
+{% if motif %}
+<p style="margin:0 0 6px 0; font-size:14px; font-weight:700; color:#12204f;">Observation du Bureau</p>
+<p style="margin:0 0 16px 0; padding:12px 16px; background-color:#faf8f9; border-radius:8px; font-size:15px; line-height:23px;">{{ motif|linebreaksbr }}</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+{% comment %}
+Gabarit commun à tous les courriels HTML de l'AFEMC-CI.
+
+Contraintes propres aux messageries (Gmail, Outlook, Apple Mail…), très en
+retrait du web : mise en page en tableaux, styles en ligne, largeur fixe de
+600 px ramenée à 100 % sur mobile, aucune image indispensable à la
+compréhension (le nom de l'association est aussi écrit en toutes lettres,
+pour les messageries qui bloquent les images par défaut). Palette reprise de
+static/css/afemc.css ; pas de mode sombre, comme le reste de l'application.
+
+Blocs : preheader (aperçu affiché dans la boîte de réception), surtitre,
+titre, contenu, action (bouton principal), note, signature.
+{% endcomment %}
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>{% block titre_document %}AFEMC-CI{% endblock %}</title>
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    a { color: #b30e64; }
+    @media only screen and (max-width: 620px) {
+      .conteneur { width: 100% !important; }
+      .marge { padding-left: 20px !important; padding-right: 20px !important; }
+      .titre { font-size: 22px !important; line-height: 30px !important; }
+      .libelle, .valeur { display: block !important; width: 100% !important; }
+      .libelle { padding-bottom: 0 !important; }
+      .valeur { padding-top: 2px !important; text-align: left !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f1f3;">
+  {# Aperçu affiché sous l'objet dans la boîte de réception, invisible dans le message. #}
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#f4f1f3; opacity:0;">
+    {% block preheader %}{% endblock %}&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f1f3;">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+
+        <table role="presentation" class="conteneur" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 6px 20px rgba(18,32,79,0.08);">
+
+          {# ----- En-tête : logo + nom de l'association ----- #}
+          <tr>
+            <td style="background-color:#12204f; padding:24px 32px;" class="marge">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding-right:14px; vertical-align:middle;">
+                    <img src="{{ logo_url }}" width="56" height="56" alt="Logo AFEMC-CI"
+                         style="display:block; width:56px; height:56px; border-radius:50%; background-color:#ffffff;">
+                  </td>
+                  <td style="vertical-align:middle; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                    <div style="font-size:20px; line-height:24px; font-weight:700; color:#ffffff; letter-spacing:0.5px;">AFEMC-CI</div>
+                    <div style="font-size:13px; line-height:18px; color:#c9cfe6;">Association des Femmes Enseignantes Chercheures de Côte d'Ivoire</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          {# Bande rose, reprise de l'en-tête de l'application. #}
+          <tr><td style="background-color:#e0127e; height:4px; line-height:4px; font-size:4px;">&nbsp;</td></tr>
+
+          {# ----- Corps ----- #}
+          <tr>
+            <td class="marge" style="padding:36px 40px 12px 40px; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#262b45; font-size:16px; line-height:26px;">
+              <p style="margin:0 0 6px 0; font-size:13px; line-height:18px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#b30e64;">{% block surtitre %}{% endblock %}</p>
+              <h1 class="titre" style="margin:0 0 20px 0; font-size:26px; line-height:34px; font-weight:700; color:#12204f;">{% block titre %}{% endblock %}</h1>
+              {% block contenu %}{% endblock %}
+            </td>
+          </tr>
+
+          {% block action_ligne %}{% endblock %}
+
+          <tr>
+            <td class="marge" style="padding:8px 40px 32px 40px; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#262b45; font-size:16px; line-height:26px;">
+              {% block note %}{% endblock %}
+              <p style="margin:24px 0 0 0;">
+                {% block signature %}Bien cordialement,<br><strong style="color:#12204f;">Le Bureau de l'AFEMC-CI</strong>{% endblock %}
+              </p>
+            </td>
+          </tr>
+
+          {# ----- Pied de page ----- #}
+          <tr>
+            <td class="marge" style="background-color:#faf8f9; border-top:1px solid #ece7ea; padding:22px 40px; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:13px; line-height:20px; color:#5b6180;">
+              Ce message vous a été envoyé automatiquement par la plateforme de gestion de l'AFEMC-CI.
+              {% block pied %}{% endblock %}
+              <br><a href="{{ site_url }}" style="color:#b30e64; text-decoration:underline;">Accéder à la plateforme</a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:18px 0 0 0; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:12px; line-height:18px; color:#8a8fa6;">
+          © {{ annee }} AFEMC-CI · Côte d'Ivoire
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

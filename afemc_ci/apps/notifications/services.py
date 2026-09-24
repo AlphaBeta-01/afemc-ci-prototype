@@ -2,9 +2,10 @@
 import time
 
 from django.conf import settings
-from django.core.mail import EmailMessage, send_mail
-from django.template import Context, Template
-from django.template.loader import get_template
+from django.core.mail import EmailMultiAlternatives
+from django.template import Context, Template, TemplateDoesNotExist
+from django.template.loader import get_template, render_to_string
+from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
@@ -57,21 +58,57 @@ def rendre_gabarit(gabarit, contexte):
         Context(contexte))
 
 
-def envoyer_courriel(destinataire, objet, corps, piece_jointe=None):
+def rendre_gabarit_html(gabarit, contexte):
+    """Rend la version HTML d'un courriel, ou None s'il n'en a pas.
+
+    Par convention, la version HTML de `notifications/x.txt` est
+    `notifications/x.html` : rien à changer dans les appels existants, ni
+    dans les notifications déjà en base (`Notification.gabarit` reste le
+    `.txt`), ni dans les règles de relance dont le gabarit a été ajusté
+    dans l'admin — une règle pointant vers un `.txt` sans jumeau HTML part
+    simplement en texte brut, comme avant.
+
+    Contrairement à `rendre_gabarit`, l'échappement reste actif : les
+    valeurs du contexte (nom d'une candidate, motif saisi…) proviennent
+    de saisies et ne doivent jamais pouvoir injecter de balises.
+    """
+    if not gabarit.endswith('.txt'):
+        return None
+    try:
+        get_template(gabarit[:-4] + '.html')
+    except TemplateDoesNotExist:
+        return None
+    return render_to_string(gabarit[:-4] + '.html', {**_contexte_commun(), **contexte})
+
+
+def _contexte_commun():
+    """Valeurs disponibles dans tous les courriels HTML, calculées à l'envoi."""
+    try:
+        chemin_logo = static('img/logo-afemc-email.png')
+    except ValueError:      # manifeste des fichiers statiques incomplet
+        chemin_logo = '/static/img/logo-afemc-email.png'
+    return {'site_url': settings.SITE_URL,
+            'logo_url': settings.SITE_URL + chemin_logo,
+            'annee': timezone.now().year}
+
+
+def envoyer_courriel(destinataire, objet, corps, piece_jointe=None, html=None):
     """`piece_jointe` : tuple (nom_fichier, contenu_bytes, type_mime) optionnel.
 
-    `send_mail` (simple, sans pièce jointe) reste la voie par défaut — la
-    grande majorité des notifications n'en ont pas ; `EmailMessage` n'est
-    utilisé que lorsqu'une pièce jointe est effectivement fournie.
+    `html` : version mise en forme du message, jointe en alternative au
+    texte brut (multipart/alternative) — la messagerie du destinataire
+    affiche la meilleure qu'elle sait lire ; le texte brut reste la
+    version de repli (messageries en mode texte, lecteurs d'écran, filtres
+    anti-spam, qui pénalisent un courriel en HTML seul).
     """
     try:
+        message = EmailMultiAlternatives(objet, corps, settings.EMAIL_EXPEDITEUR,
+                                         [destinataire])
+        if html:
+            message.attach_alternative(html, 'text/html')
         if piece_jointe:
-            message = EmailMessage(objet, corps, settings.EMAIL_EXPEDITEUR, [destinataire])
             message.attach(*piece_jointe)
-            envoyes = message.send(fail_silently=False)
-        else:
-            envoyes = send_mail(objet, corps, settings.EMAIL_EXPEDITEUR,
-                                [destinataire], fail_silently=False)
+        envoyes = message.send(fail_silently=False)
     except Exception as err:                # noqa: BLE001
         raise ErreurEnvoi(str(err)) from err
     if not envoyes:
@@ -103,8 +140,10 @@ def _tenter_envoi(notification):
     maximum = settings.MAX_TENTATIVES_NOTIFICATION
     try:
         corps = rendre_gabarit(notification.gabarit, notification.contexte)
+        html = rendre_gabarit_html(notification.gabarit, notification.contexte)
         piece_jointe = _generer_piece_jointe(notification)
-        envoyer_courriel(notification.destinataire, notification.objet, corps, piece_jointe)
+        envoyer_courriel(notification.destinataire, notification.objet, corps,
+                         piece_jointe, html=html)
     except Exception as err:                # noqa: BLE001
         notification.tentatives += 1
         notification.derniere_erreur = str(err)[:255]

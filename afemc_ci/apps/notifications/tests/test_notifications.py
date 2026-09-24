@@ -117,3 +117,93 @@ class TestRenduDuGabarit(TestCase):
         self.assertIn("Section d'Abidjan", corps)
         self.assertNotIn('&#x27;', corps)
         self.assertNotIn('&amp;', corps)
+
+
+class TestCourrielHtml(TestCase):
+    """Version HTML aux couleurs de l'association, en alternative au texte brut."""
+
+    # Contexte minimal de chaque gabarit, tel que le construisent les services.
+    CONTEXTES = {
+        'activation': {'membre': 'KOUAME Akissi', 'lien': 'https://exemple.org/activer/'},
+        'compte_responsable': {'nom': 'KOUAME Akissi', 'role': 'Trésorière', 'section': '',
+                               'lien': 'https://exemple.org/activer/'},
+        'reinitialisation_mot_de_passe': {'nom': 'KOUAME Akissi',
+                                          'lien': 'https://exemple.org/activer/'},
+        'adhesion': {'candidate': 'KOUAME Akissi', 'statut': 'Validée',
+                     'section': "Section d'Abidjan", 'motif': ''},
+        'nouvelle_demande': {'candidate': 'KOUAME Akissi', 'section': "Section d'Abidjan",
+                             'etablissement': '', 'date_soumission': '01/09/2026'},
+        'recu_paiement': {'membre': 'KOUAME Akissi', 'matricule': 'ABJ-2026-0001',
+                          'exercice': 2026, 'montant_verse': '10000.00', 'mode': 'Espèces',
+                          'reference': '—', 'date_paiement': '01/09/2026',
+                          'montant_du': '25000.00', 'montant_paye_cumule': '10000.00',
+                          'reste': '15000.00', 'statut': 'Partiellement payée'},
+        'relance': {'membre': 'KOUAME Akissi', 'exercice': 2026, 'montant_du': '25000.00',
+                    'reste': '25000.00', 'echeance': '31/03/2026', 'jours': 20,
+                    'section': "Section d'Abidjan", 'niveau': 'Relance 1'},
+        'relance_responsable': {'membre': 'KOUAME Akissi', 'exercice': 2026,
+                                'montant_du': '25000.00', 'reste': '25000.00',
+                                'echeance': '31/03/2026', 'jours': 95,
+                                'section': "Section d'Abidjan", 'niveau': 'Alerte'},
+        'synthese': {'responsable': 'KOUAME Akissi', 'exercice': 2026, 'effectif': 12,
+                     'retards': 3, 'taux': '80.0', 'reste': '15000.00'},
+    }
+
+    def test_chaque_courriel_a_sa_version_html(self):
+        from apps.notifications.services import rendre_gabarit_html
+
+        for nom, contexte in self.CONTEXTES.items():
+            with self.subTest(gabarit=nom):
+                html = rendre_gabarit_html(f'notifications/{nom}.txt', contexte)
+                self.assertIsNotNone(html)
+                self.assertIn('AFEMC-CI', html)
+                self.assertIn('logo-afemc-email.png', html)
+
+    def test_le_courriel_envoye_contient_texte_et_html(self):
+        from django.core import mail
+
+        notification_test()
+        message = mail.outbox[0]
+        self.assertIn('Reste à régler', message.body)            # texte brut conservé
+        self.assertEqual(len(message.alternatives), 1)
+        html, type_mime = message.alternatives[0]
+        self.assertEqual(type_mime, 'text/html')
+        self.assertIn('<html lang="fr"', html)
+
+    def test_le_logo_est_une_adresse_absolue(self):
+        """Une messagerie ne peut charger qu'une image à l'adresse complète."""
+        from django.conf import settings
+        from apps.notifications.services import rendre_gabarit_html
+
+        html = rendre_gabarit_html('notifications/activation.txt',
+                                   self.CONTEXTES['activation'])
+        self.assertIn(f'src="{settings.SITE_URL}/static/img/logo-afemc-email.png"', html)
+
+    def test_les_saisies_sont_echappees_dans_le_html(self):
+        """Nom ou motif saisis par une candidate : jamais de balise injectée."""
+        from apps.notifications.services import rendre_gabarit_html
+
+        html = rendre_gabarit_html('notifications/adhesion.txt', {
+            **self.CONTEXTES['adhesion'], 'statut': 'Rejetée',
+            'candidate': '<script>alert(1)</script>', 'motif': '<b>pièce</b> manquante'})
+        self.assertNotIn('<script>', html)
+        self.assertIn('&lt;script&gt;', html)
+        self.assertNotIn('<b>pièce</b>', html)
+
+    def test_un_gabarit_sans_jumeau_html_part_en_texte_brut(self):
+        """Ex. une règle de relance pointée dans l'admin vers un autre .txt."""
+        from django.core import mail
+        from apps.notifications.services import rendre_gabarit_html
+
+        self.assertIsNone(rendre_gabarit_html('notifications/inexistant.txt', {}))
+        with patch('apps.notifications.services.rendre_gabarit_html', return_value=None):
+            notification_test()
+        self.assertEqual(mail.outbox[0].alternatives, [])
+
+    def test_les_montants_sont_formates_a_la_francaise(self):
+        from apps.notifications.templatetags.courriel import fcfa, virgule
+
+        self.assertEqual(fcfa('25000.00'), '25 000 FCFA')
+        self.assertEqual(fcfa('1250.50'), '1 250,50 FCFA')
+        self.assertEqual(fcfa('illisible'), 'illisible')
+        self.assertEqual(virgule('78.4'), '78,4')

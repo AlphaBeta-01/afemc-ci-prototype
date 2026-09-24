@@ -1,0 +1,17 @@
+{% extends "notifications/email/base.html" %}
+{% block titre_document %}Nouvelle demande d'adhésion — {{ candidate }}{% endblock %}
+{% block preheader %}{{ candidate }} souhaite rejoindre la section {{ section }}.{% endblock %}
+{% block surtitre %}À traiter{% endblock %}
+{% block titre %}Nouvelle demande d'adhésion{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 16px 0;">Une nouvelle demande vient d'être soumise sur la plateforme et attend votre examen.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 12px 0; border-top:1px solid #ece7ea;">
+  {% include "notifications/email/_ligne.html" with libelle="Candidate" valeur=candidate fort=True %}
+  {% include "notifications/email/_ligne.html" with libelle="Section souhaitée" valeur=section %}
+  {% include "notifications/email/_ligne.html" with libelle="Établissement" valeur=etablissement|default:"—" %}
+  {% include "notifications/email/_ligne.html" with libelle="Déposée le" valeur=date_soumission %}
+</table>
+{% endblock %}
+{% block action_ligne %}{% url 'adhesions:liste' as chemin %}{% include "notifications/email/_bouton.html" with url=site_url|add:chemin libelle="Examiner la demande" %}{% endblock %}
+{% block signature %}La plateforme de gestion<br><strong style="color:#12204f;">AFEMC-CI</strong>{% endblock %}
+{% block pied %}Vous le recevez en tant que membre du Bureau chargée des adhésions.{% endblock %}

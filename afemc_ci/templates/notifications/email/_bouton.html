@@ -1,0 +1,22 @@
+{% comment %}
+Bouton d'action principal, construit en tableau pour s'afficher partout
+(y compris Outlook), suivi du lien en clair : si le bouton ne fonctionne
+pas, ou pour un lecteur d'écran, l'adresse reste accessible.
+Paramètres : url, libelle.
+{% endcomment %}
+<tr>
+  <td class="marge" style="padding:8px 40px 8px 40px; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align="center" bgcolor="#e0127e" style="border-radius:8px; background-color:#e0127e;">
+          <a href="{{ url }}" target="_blank"
+             style="display:inline-block; padding:14px 28px; font-size:16px; line-height:20px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:8px;">{{ libelle }}</a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:14px 0 0 0; font-size:13px; line-height:20px; color:#5b6180;">
+      Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :<br>
+      <a href="{{ url }}" style="color:#b30e64; word-break:break-all;">{{ url }}</a>
+    </p>
+  </td>
+</tr>

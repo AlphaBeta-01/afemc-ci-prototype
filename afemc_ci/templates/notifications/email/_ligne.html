@@ -1,0 +1,5 @@
+{# Une ligne libellé / valeur d'un récapitulatif. Paramètres : libelle, valeur, fort (facultatif). #}
+<tr>
+  <td class="libelle" style="padding:10px 0; border-bottom:1px solid #ece7ea; font-size:15px; line-height:22px; color:#5b6180; vertical-align:top;">{{ libelle }}</td>
+  <td class="valeur" align="right" style="padding:10px 0; border-bottom:1px solid #ece7ea; font-size:15px; line-height:22px; text-align:right; vertical-align:top; color:{% if fort %}#12204f{% else %}#262b45{% endif %}; font-weight:{% if fort %}700{% else %}600{% endif %};">{{ valeur }}</td>
+</tr>

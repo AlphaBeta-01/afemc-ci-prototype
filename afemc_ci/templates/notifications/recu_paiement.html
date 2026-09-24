@@ -1,0 +1,36 @@
+{% extends "notifications/email/base.html" %}
+{% load courriel %}
+{% block titre_document %}Reçu de cotisation {{ exercice }}{% endblock %}
+{% block preheader %}Versement de {{ montant_verse|fcfa }} bien reçu — votre reçu PDF est joint.{% endblock %}
+{% block surtitre %}Cotisation {{ exercice }}{% endblock %}
+{% block titre %}Merci, votre versement est bien reçu{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 20px 0;">Madame {{ membre }}, nous accusons réception de votre versement. Votre <strong>reçu officiel est joint à ce message</strong> au format PDF.</p>
+
+{# Montant mis en avant #}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px 0;">
+  <tr>
+    <td align="center" style="background-color:#12204f; border-radius:12px; padding:22px 16px;">
+      <div style="font-size:13px; line-height:18px; letter-spacing:1px; text-transform:uppercase; color:#c9cfe6;">Montant versé le {{ date_paiement }}</div>
+      <div style="font-size:32px; line-height:42px; font-weight:700; color:#ffffff;">{{ montant_verse|fcfa }}</div>
+      <div style="font-size:14px; line-height:20px; color:#c9cfe6;">{{ mode }}{% if reference and reference != '—' %} · <span style="white-space:nowrap;">réf. {{ reference }}</span>{% endif %}</div>
+    </td>
+  </tr>
+</table>
+
+<p style="margin:0 0 4px 0; font-size:14px; font-weight:700; color:#12204f;">Situation de votre cotisation</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0; border-top:1px solid #ece7ea;">
+  {% include "notifications/email/_ligne.html" with libelle="Matricule" valeur=matricule %}
+  {% include "notifications/email/_ligne.html" with libelle="Montant appelé" valeur=montant_du|fcfa %}
+  {% include "notifications/email/_ligne.html" with libelle="Total réglé à ce jour" valeur=montant_paye_cumule|fcfa %}
+  {% include "notifications/email/_ligne.html" with libelle="Reste à régler" valeur=reste|fcfa fort=True %}
+  {% include "notifications/email/_ligne.html" with libelle="Statut" valeur=statut %}
+</table>
+
+{% if statut == 'Payée' %}
+  {% include "notifications/email/_encadre.html" with ton="succes" titre="Cotisation soldée" texte="Vous êtes à jour de votre cotisation pour cet exercice. Merci pour votre engagement." %}
+{% else %}
+  {% include "notifications/email/_encadre.html" with ton="info" titre="Paiement partiel enregistré" texte="Le solde restant pourra être réglé auprès de la Trésorière." %}
+{% endif %}
+{% endblock %}
+{% block note %}<p style="margin:0; font-size:14px; line-height:22px; color:#5b6180;">Conservez ce message et son reçu joint. Pour toute question, contactez la Trésorière.</p>{% endblock %}

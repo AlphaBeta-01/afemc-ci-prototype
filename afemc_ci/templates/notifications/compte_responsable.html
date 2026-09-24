@@ -1,0 +1,17 @@
+{% extends "notifications/email/base.html" %}
+{% block titre_document %}Votre compte AFEMC-CI a été créé{% endblock %}
+{% block preheader %}Un compte {{ role }} a été créé pour vous : activez-le pour choisir votre mot de passe.{% endblock %}
+{% block surtitre %}Nouveau compte{% endblock %}
+{% block titre %}Votre compte a été créé{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 16px 0;">Madame {{ nom }}, un compte d'accès à la plateforme de gestion de l'AFEMC-CI a été créé pour vous.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0; border-top:1px solid #ece7ea;">
+  {% include "notifications/email/_ligne.html" with libelle="Rôle" valeur=role fort=True %}
+  {% if section %}{% include "notifications/email/_ligne.html" with libelle="Section" valeur=section %}{% endif %}
+</table>
+<p style="margin:0 0 8px 0;">Pour commencer, activez votre compte et choisissez votre mot de passe.</p>
+{% endblock %}
+{% block action_ligne %}{% include "notifications/email/_bouton.html" with url=lien libelle="Activer mon compte" %}{% endblock %}
+{% block note %}
+{% include "notifications/email/_encadre.html" with ton="info" titre="Lien valable 3 jours" texte="Passé ce délai, contactez la Présidente pour en obtenir un nouveau." %}
+{% endblock %}

@@ -154,6 +154,23 @@ qu'une erreur propre ne remonte — voir § 7, incident du 16/09. L'API HTTP
 standard, contrairement aux ports SMTP. Vérifié en conditions réelles :
 envoi effectif d'un courriel d'activation via ce mécanisme, reçu avec succès.
 
+### Mise en forme des courriels
+
+Chaque courriel part en deux versions (`multipart/alternative`) : une version
+HTML aux couleurs de l'association (logo, bleu marine et rose, bouton
+d'action, récapitulatif lisible sur mobile) et la version texte brut, gardée
+comme repli pour les messageries en mode texte, les lecteurs d'écran et les
+filtres anti-spam. Par convention, la version HTML de
+`notifications/x.txt` est `notifications/x.html` ; le gabarit commun et ses
+composants sont dans `templates/notifications/email/`. Un gabarit `.txt`
+sans jumeau HTML (par exemple une règle de relance pointée dans l'admin vers
+un autre fichier) part simplement en texte brut.
+
+Le logo (`static/img/logo-afemc-email.png`, version allégée) est chargé par
+la messagerie depuis `SITE_URL` : il ne s'affiche donc qu'une fois
+l'application en ligne, et le nom de l'association est aussi écrit en
+toutes lettres pour les messageries qui bloquent les images.
+
 ### Exécution automatique (Celery)
 
 Les commandes ci-dessus peuvent être lancées à la main, ou automatiquement par

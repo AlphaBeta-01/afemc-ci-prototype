@@ -1,0 +1,13 @@
+{% extends "notifications/email/base.html" %}
+{% block titre_document %}Activez votre compte AFEMC-CI{% endblock %}
+{% block preheader %}Votre adhésion est validée : activez votre compte et choisissez votre mot de passe.{% endblock %}
+{% block surtitre %}Adhésion validée{% endblock %}
+{% block titre %}Bienvenue parmi nous, {{ membre }}{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 16px 0;">Votre demande d'adhésion à l'Association des Femmes Enseignantes Chercheures de Côte d'Ivoire a été <strong>validée</strong>. Nous sommes heureuses de vous compter parmi nos membres.</p>
+<p style="margin:0 0 8px 0;">Il vous reste une dernière étape : activer votre compte et choisir votre mot de passe pour accéder à votre espace personnel.</p>
+{% endblock %}
+{% block action_ligne %}{% include "notifications/email/_bouton.html" with url=lien libelle="Activer mon compte" %}{% endblock %}
+{% block note %}
+{% include "notifications/email/_encadre.html" with ton="info" titre="Lien valable 3 jours" texte="Passé ce délai, contactez le secrétariat de votre section pour en obtenir un nouveau." %}
+{% endblock %}

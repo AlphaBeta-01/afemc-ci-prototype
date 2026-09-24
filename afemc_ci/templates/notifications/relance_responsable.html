@@ -1,0 +1,21 @@
+{% extends "notifications/email/base.html" %}
+{% load courriel %}
+{% block titre_document %}Cotisation impayée — {{ membre }}{% endblock %}
+{% block preheader %}{{ membre }} ({{ section }}) : {{ reste|fcfa }} restant, {{ jours }} jour(s) de retard.{% endblock %}
+{% block surtitre %}Suivi des cotisations · {{ niveau }}{% endblock %}
+{% block titre %}Cotisation {{ exercice }} impayée{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 20px 0;">Pour information, la cotisation suivante n'est toujours pas réglée.</p>
+{% include "notifications/email/_encadre.html" with ton="attention" titre=membre texte=section %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 12px 0; border-top:1px solid #ece7ea;">
+  {% include "notifications/email/_ligne.html" with libelle="Exercice" valeur=exercice %}
+  {% include "notifications/email/_ligne.html" with libelle="Montant appelé" valeur=montant_du|fcfa %}
+  {% include "notifications/email/_ligne.html" with libelle="Reste à régler" valeur=reste|fcfa fort=True %}
+  {% include "notifications/email/_ligne.html" with libelle="Date d'échéance" valeur=echeance %}
+  {% include "notifications/email/_ligne.html" with libelle="Retard" valeur=jours|stringformat:"s"|add:" jour(s)" fort=True %}
+  {% include "notifications/email/_ligne.html" with libelle="Niveau de relance" valeur=niveau %}
+</table>
+{% endblock %}
+{% block action_ligne %}{% url 'cotisations:liste' as chemin %}{% include "notifications/email/_bouton.html" with url=site_url|add:chemin|add:"?statut=EN_RETARD" libelle="Voir les cotisations en retard" %}{% endblock %}
+{% block signature %}La plateforme de gestion<br><strong style="color:#12204f;">AFEMC-CI</strong>{% endblock %}
+{% block pied %}Vous le recevez en tant que responsable chargée du suivi de ce membre.{% endblock %}

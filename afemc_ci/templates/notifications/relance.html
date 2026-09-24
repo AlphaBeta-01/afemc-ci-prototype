@@ -1,0 +1,23 @@
+{% extends "notifications/email/base.html" %}
+{% load courriel %}
+{% block titre_document %}Cotisation {{ exercice }}{% endblock %}
+{% block preheader %}{% if niveau == 'Information' or niveau == 'Rappel' %}Votre cotisation {{ exercice }} arrive à échéance le {{ echeance }}.{% else %}Votre cotisation {{ exercice }} reste à régler : {{ reste|fcfa }}.{% endif %}{% endblock %}
+{% block surtitre %}Cotisation {{ exercice }}{% endblock %}
+{% block titre %}{% if niveau == 'Information' or niveau == 'Rappel' %}Votre cotisation arrive à échéance{% else %}Votre cotisation reste à régler{% endif %}{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 20px 0;">Madame, chère consœur, nous revenons vers vous au sujet de votre cotisation de l'exercice {{ exercice }}.</p>
+
+{% if niveau == 'Information' or niveau == 'Rappel' %}
+  {% include "notifications/email/_encadre.html" with ton="info" titre="Échéance le "|add:echeance texte="Pensez à effectuer votre règlement d'ici cette date." %}
+{% else %}
+  {% include "notifications/email/_encadre.html" with ton="attention" titre="Échéance dépassée depuis le "|add:echeance texte="Nous vous serions reconnaissantes de bien vouloir procéder au règlement dans les meilleurs délais." %}
+{% endif %}
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 12px 0; border-top:1px solid #ece7ea;">
+  {% include "notifications/email/_ligne.html" with libelle="Section" valeur=section %}
+  {% include "notifications/email/_ligne.html" with libelle="Montant appelé" valeur=montant_du|fcfa %}
+  {% include "notifications/email/_ligne.html" with libelle="Reste à régler" valeur=reste|fcfa fort=True %}
+  {% include "notifications/email/_ligne.html" with libelle="Date d'échéance" valeur=echeance %}
+</table>
+{% endblock %}
+{% block note %}<p style="margin:0; font-size:14px; line-height:22px; color:#5b6180;">Si ce versement a déjà été effectué, merci de ne pas tenir compte de ce message. Nous restons à votre disposition pour toute précision.</p>{% endblock %}
