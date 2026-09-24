@@ -63,6 +63,7 @@ class Command(BaseCommand):
         sections = self._creer_sections(options['sections'])
         self._creer_utilisateurs(sections)
         membres = self._creer_membres(options['membres'], sections)
+        membres += self._creer_fiches_responsables(sections)
         self._creer_demandes(sections)
         self._creer_cotisations(membres, options['exercices'])
 
@@ -123,6 +124,21 @@ class Command(BaseCommand):
                     utilisateur.is_staff = True
                     utilisateur.is_superuser = True
                     utilisateur.save()
+
+    def _creer_fiches_responsables(self, sections):
+        """Les responsables sont d'abord des membres (RG13) : chacune a sa
+        fiche, reliée à son compte, et paie sa cotisation comme les autres."""
+        fiches = []
+        for compte in Utilisateur.objects.exclude(role=Utilisateur.Role.MEMBRE):
+            if Membre.objects.filter(utilisateur=compte).exists():
+                continue
+            fiches.append(Membre.objects.create(
+                nom=compte.nom, prenoms=compte.prenoms, email=compte.email,
+                grade=GRADES[0], section=compte.section or sections[0],
+                etablissement=(compte.section or sections[0]).etablissement,
+                date_adhesion=self.aujourdhui - timedelta(days=1500),
+                utilisateur=compte))
+        return fiches
 
     def _creer_membres(self, nombre, sections):
         membres = []

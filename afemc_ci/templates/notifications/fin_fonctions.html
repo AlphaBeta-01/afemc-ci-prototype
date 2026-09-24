@@ -1,0 +1,13 @@
+{% extends "notifications/email/base.html" %}
+{% block titre_document %}Fin de vos fonctions{% endblock %}
+{% block preheader %}Votre fonction de {{ fonction }} a pris fin. Merci pour votre engagement.{% endblock %}
+{% block surtitre %}Fin de mandat{% endblock %}
+{% block titre %}Merci pour votre engagement{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 16px 0;">Madame {{ nom }}, votre fonction de <strong>{{ fonction }}</strong> au sein de l'association a pris fin. Les accès liés à cette fonction vous ont été retirés.</p>
+{% if reste_membre %}
+  {% include "notifications/email/_encadre.html" with ton="info" titre="Vous restez membre" texte="Votre compte, votre historique et vos cotisations sont conservés, avec le même identifiant et le même mot de passe." %}
+{% else %}
+  {% include "notifications/email/_encadre.html" with ton="info" titre="Compte désactivé" texte="Votre compte d'accès à la plateforme a été désactivé." %}
+{% endif %}
+{% endblock %}

@@ -147,6 +147,10 @@ class TestCourrielHtml(TestCase):
                                 'section': "Section d'Abidjan", 'niveau': 'Alerte'},
         'synthese': {'responsable': 'KOUAME Akissi', 'exercice': 2026, 'effectif': 12,
                      'retards': 3, 'taux': '80.0', 'reste': '15000.00'},
+        'nomination': {'nom': 'KOUAME Akissi', 'role': 'Trésorière', 'section': '',
+                       'lien': '', 'connexion': 'https://exemple.org/comptes/connexion/'},
+        'fin_fonctions': {'nom': 'KOUAME Akissi', 'fonction': 'Trésorière',
+                          'reste_membre': True},
     }
 
     def test_chaque_courriel_a_sa_version_html(self):

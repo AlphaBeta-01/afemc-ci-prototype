@@ -47,9 +47,11 @@ def detail(requete, pk):
     membre = get_object_or_404(
         Membre.objects.visibles_par(requete.user).select_related('section'), pk=pk)
     contexte = {'membre': membre}
-    if requete.user.role != 'RESP_SECTION':
+    if requete.user.role != 'RESP_SECTION' or membre.utilisateur_id == requete.user.pk:
         # Cotisations et relances sont hors périmètre du responsable de
-        # section (RG08) : ni interrogées, ni affichées pour ce rôle.
+        # section (RG08) : ni interrogées, ni affichées pour ce rôle — sauf
+        # sur sa propre fiche, puisqu'elle est aussi une membre cotisante (RG13).
+        contexte['voir_cotisations'] = True
         contexte['cotisations'] = membre.cotisations.order_by('-exercice')
         contexte['relances'] = (Relance.objects.filter(cotisation__membre=membre)
                                 .select_related('regle', 'cotisation')

@@ -1,10 +1,12 @@
-"""Tests fonctionnels TF01 à TF30 (§ 6.4 du mémoire).
+"""Tests fonctionnels TF01 à TF32 (§ 6.4 du mémoire).
 
 Chaque test rejoue un cas d'utilisation depuis l'interface, pour un profil donné.
 TF26-TF30 couvrent les fonctionnalités ajoutées après la rédaction initiale du
 chapitre 6 (activation de compte, mot de passe oublié, gestion des comptes
 responsables, périmètre resserré du responsable de section, pièces
 justificatives) — à raccorder au texte du mémoire si celui-ci doit en rendre compte.
+TF31-TF32 couvrent la nomination d'une membre à une fonction et la fin de
+fonctions (RG13) ; TF28 porte désormais sur le compte externe, l'exception.
 """
 from datetime import date
 from decimal import Decimal
@@ -381,3 +383,38 @@ class TestComptesEtPerimetreResserre(BaseFonctionnelle):
             'pieces-0-type_piece': '', 'pieces-1-type_piece': ''})
         self.assertEqual(reponse.status_code, 200)
         self.assertFalse(DemandeAdhesion.objects.filter(email='fanta@exemple.org').exists())
+
+    def test_tf31_nomination_d_une_membre_a_une_fonction(self):
+        """La Présidente nomme une membre Trésorière : même compte, nouveaux accès."""
+        from apps.accounts.models import Utilisateur
+
+        compte = fabrique.utilisateur('MEMBRE', email=self.membre_abj.email)
+        self.membre_abj.utilisateur = compte
+        self.membre_abj.save()
+        comptes_avant = Utilisateur.objects.count()
+
+        self.connecter(self.admin)
+        self.client.post(reverse('accounts:nommer'),
+                         {'membre': self.membre_abj.pk, 'role': 'RESP_FINANCIER'})
+        self.assertEqual(Utilisateur.objects.count(), comptes_avant)
+
+        self.client.logout()
+        self.connecter(compte)                  # mêmes identifiants qu'avant
+        self.assertEqual(self.client.get(reverse('cotisations:liste')).status_code, 200)
+
+    def test_tf32_fin_de_fonctions_retire_les_acces_et_garde_le_compte(self):
+        from apps.accounts.services import nommer_responsable
+
+        compte = fabrique.utilisateur('MEMBRE', email=self.membre_abj.email)
+        self.membre_abj.utilisateur = compte
+        self.membre_abj.save()
+        nommer_responsable(self.membre_abj, 'RESP_FINANCIER', nomme_par=self.admin)
+
+        self.connecter(self.admin)
+        self.client.post(reverse('accounts:fin_fonctions', args=[compte.pk]))
+
+        self.client.logout()
+        self.connecter(compte)
+        self.assertEqual(self.client.get(reverse('cotisations:liste')).status_code, 403)
+        reponse = self.client.get(reverse('membres:detail', args=[self.membre_abj.pk]))
+        self.assertContains(reponse, 'Historique des cotisations')

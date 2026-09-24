@@ -1,0 +1,18 @@
+Madame {{ nom }},
+
+La Présidente vous a confié la fonction de {{ role }}{% if section %} — {{ section }}{% endif %}
+au sein de l'Association des Femmes Enseignantes Chercheures de Côte d'Ivoire.
+
+Cette fonction est ajoutée à votre compte de membre : vous gardez le même
+identifiant et le même mot de passe, et accédez désormais aux écrans liés
+à votre fonction.
+{% if lien %}
+Votre compte n'étant pas encore activé, choisissez d'abord votre mot de
+passe en suivant ce lien (valable 3 jours) :
+
+{{ lien }}
+{% else %}
+Connectez-vous pour y accéder : {{ connexion }}
+{% endif %}
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

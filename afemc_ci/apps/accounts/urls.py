@@ -12,6 +12,8 @@ urlpatterns = [
     path('profil/', views.profil, name='profil'),
     path('responsables/', views.comptes_liste, name='comptes_liste'),
     path('responsables/nouveau/', views.comptes_creer, name='comptes_creer'),
+    path('responsables/nommer/', views.nommer, name='nommer'),
+    path('responsables/<int:pk>/fin-fonctions/', views.fin_fonctions, name='fin_fonctions'),
     path('responsables/<int:pk>/basculer/', views.compte_basculer_actif,
          name='compte_basculer_actif'),
 ]

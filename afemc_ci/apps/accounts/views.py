@@ -10,9 +10,11 @@ from apps.core.decorators import role_requis
 from apps.core.services import journaliser
 
 from .forms import (FormulaireActivation, FormulaireCompteResponsable, FormulaireConnexion,
-                    FormulaireMotDePasseOublie)
+                    FormulaireMotDePasseOublie, FormulaireNomination)
 from .models import Utilisateur
-from .services import creer_compte_responsable, demander_reinitialisation_mot_de_passe
+from .services import (NominationImpossible, creer_compte_responsable,
+                       demander_reinitialisation_mot_de_passe, mettre_fin_aux_fonctions,
+                       nommer_responsable)
 
 
 class VueConnexion(auth_views.LoginView):
@@ -98,8 +100,52 @@ def profil(requete):
 @role_requis('ADMIN')
 def comptes_liste(requete):
     comptes = (Utilisateur.objects.exclude(role=Utilisateur.Role.MEMBRE)
-              .select_related('section').order_by('nom', 'prenoms'))
+              .select_related('section', 'fiche_membre').order_by('nom', 'prenoms'))
     return render(requete, 'accounts/comptes_liste.html', {'comptes': comptes})
+
+
+@login_required
+@role_requis('ADMIN')
+def nommer(requete):
+    """Nommer une membre du registre à une fonction (RG13) — parcours normal."""
+    formulaire = FormulaireNomination(requete.POST or None,
+                                      initial={'membre': requete.GET.get('membre')})
+    if requete.method == 'POST' and formulaire.is_valid():
+        donnees = formulaire.cleaned_data
+        try:
+            compte = nommer_responsable(donnees['membre'], donnees['role'],
+                                        donnees.get('section'), nomme_par=requete.user,
+                                        requete=requete)
+        except NominationImpossible as erreur:
+            formulaire.add_error(None, str(erreur))
+        else:
+            suite = ('' if compte.is_active else
+                     " Son compte n'étant pas encore activé, le lien d'activation lui a été envoyé.")
+            messages.success(requete, f'{compte.nom_complet()} est désormais '
+                                      f'{compte.get_role_display()}.{suite}')
+            return redirect('accounts:comptes_liste')
+    titulaires = (Utilisateur.objects.filter(role__in=[r for r, _ in Utilisateur.Role.choices
+                                                        if r not in ('MEMBRE', 'ADMIN')],
+                                             is_active=True)
+                  .select_related('section').order_by('role', 'nom'))
+    return render(requete, 'accounts/nommer.html',
+                  {'formulaire': formulaire, 'titulaires': titulaires})
+
+
+@require_POST
+@login_required
+@role_requis('ADMIN')
+def fin_fonctions(requete, pk):
+    compte = get_object_or_404(Utilisateur, pk=pk)
+    try:
+        mettre_fin_aux_fonctions(compte, par=requete.user, requete=requete)
+    except NominationImpossible as erreur:
+        messages.error(requete, str(erreur))
+    else:
+        messages.success(requete, f'Fin de fonctions enregistrée pour {compte.nom_complet()}.'
+                         + (' Son compte externe a été désactivé.' if not compte.is_active
+                            else ' Elle conserve son accès de membre.'))
+    return redirect('accounts:comptes_liste')
 
 
 @login_required

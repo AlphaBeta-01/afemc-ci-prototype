@@ -6,8 +6,11 @@
   <dl class="row mb-0">
     <dt class="col-sm-3">Nom et prénoms</dt><dd class="col-sm-9">{{ utilisateur.nom_complet }}</dd>
     <dt class="col-sm-3">Adresse électronique</dt><dd class="col-sm-9">{{ utilisateur.email }}</dd>
-    <dt class="col-sm-3">Rôle</dt><dd class="col-sm-9">{{ utilisateur.get_role_display }}</dd>
+    <dt class="col-sm-3">{% if utilisateur.role == 'MEMBRE' %}Rôle{% else %}Fonction{% endif %}</dt><dd class="col-sm-9">{{ utilisateur.get_role_display }}</dd>
     <dt class="col-sm-3">Section</dt><dd class="col-sm-9">{{ utilisateur.section|default:'—' }}</dd>
   </dl>
+  {% if utilisateur.fiche_membre %}
+    <a href="{% url 'membres:detail' utilisateur.fiche_membre.pk %}" class="btn btn-outline-primary btn-sm mt-3">Ma fiche membre et mes cotisations</a>
+  {% endif %}
 </div></div>
 {% endblock %}

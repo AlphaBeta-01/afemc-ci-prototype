@@ -1,27 +1,45 @@
 {% extends 'base.html' %}
-{% block titre %}Comptes des responsables — AFEMC-CI{% endblock %}
+{% block titre %}Responsables — AFEMC-CI{% endblock %}
 {% block contenu %}
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-  <h1 class="h4 mb-0">Comptes des responsables</h1>
-  <a href="{% url 'accounts:comptes_creer' %}" class="btn btn-primary btn-sm">Nouveau compte</a>
+<div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+  <h1 class="h4 mb-0">Responsables</h1>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'accounts:nommer' %}" class="btn btn-primary btn-sm">Nommer une responsable</a>
+    <a href="{% url 'accounts:comptes_creer' %}" class="btn btn-outline-secondary btn-sm">Compte externe</a>
+  </div>
 </div>
+<p class="text-muted small mb-3">
+  Les responsables sont des membres de l'association à qui une fonction est confiée.
+  À la fin de son mandat, une responsable redevient simple membre : elle garde son
+  compte, son historique et ses cotisations.
+</p>
 
 <div class="card"><div class="table-responsive">
   <table class="table table-hover table-sm align-middle mb-0">
     <thead class="table-light">
       <tr><th>Nom et prénoms</th>
+          <th>Fonction</th>
           <th class="d-none d-lg-table-cell">Adresse électronique</th>
-          <th class="d-none d-md-table-cell">Rôle</th>
-          <th class="d-none d-lg-table-cell">Section</th><th>Statut</th><th></th></tr>
+          <th class="d-none d-md-table-cell">Fiche membre</th>
+          <th>Statut</th><th></th></tr>
     </thead>
     <tbody>
     {% for compte in comptes %}
       <tr>
         <td>{{ compte.nom_complet }}</td>
+        <td>
+          {{ compte.get_role_display }}
+          {% if compte.section %}<div class="small text-muted">{{ compte.section }}</div>{% endif %}
+        </td>
         <td class="small d-none d-lg-table-cell">{{ compte.email }}</td>
-        <td class="d-none d-md-table-cell">{{ compte.get_role_display }}</td>
-        <td class="small d-none d-lg-table-cell">{{ compte.section|default:'—' }}</td>
+        <td class="small d-none d-md-table-cell">
+          {% if compte.fiche_membre %}
+            <a href="{% url 'membres:detail' compte.fiche_membre.pk %}">{{ compte.fiche_membre.matricule }}</a>
+          {% else %}
+            <span class="badge text-bg-light text-dark border">Sans fiche membre</span>
+          {% endif %}
+        </td>
         <td>
           {% if compte.is_active %}
             <span class="badge text-bg-success">Actif</span>
@@ -31,7 +49,14 @@
             <span class="badge text-bg-warning text-dark">En attente d'activation</span>
           {% endif %}
         </td>
-        <td class="text-end">
+        <td class="text-end text-nowrap">
+          {% if compte != user and compte.role != 'ADMIN' %}
+            <form method="post" action="{% url 'accounts:fin_fonctions' compte.pk %}" class="d-inline"
+                  onsubmit="return confirm('Mettre fin aux fonctions de {{ compte.nom_complet|escapejs }} ({{ compte.get_role_display|escapejs }}) ? Ses droits de responsable lui seront retirés immédiatement.');">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger btn-sm py-0">Mettre fin aux fonctions</button>
+            </form>
+          {% endif %}
           {% if compte != user %}
             <form method="post" action="{% url 'accounts:compte_basculer_actif' compte.pk %}"
                   class="d-inline">
@@ -44,7 +69,7 @@
         </td>
       </tr>
     {% empty %}
-      <tr><td colspan="6" class="text-muted p-4 text-center">Aucun compte de responsable.</td></tr>
+      <tr><td colspan="6" class="text-muted p-4 text-center">Aucune responsable nommée.</td></tr>
     {% endfor %}
     </tbody>
   </table>

@@ -36,7 +36,7 @@
         {% endif %}
         <li class="nav-item"><a class="nav-link" href="{% url 'sections:liste' %}">Sections</a></li>
         {% if user.role == 'ADMIN' %}
-        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:comptes_liste' %}">Comptes</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:comptes_liste' %}">Responsables</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'notifications:liste' %}">Notifications</a></li>
         {% endif %}
         {% endif %}

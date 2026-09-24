@@ -1,0 +1,16 @@
+Madame {{ nom }},
+
+Votre fonction de {{ fonction }} au sein de l'Association des Femmes
+Enseignantes Chercheures de Côte d'Ivoire a pris fin. Les accès liés à
+cette fonction vous ont été retirés.
+{% if reste_membre %}
+Vous restez membre de l'association : votre compte, votre historique et
+vos cotisations sont conservés, avec le même identifiant et le même mot
+de passe.
+{% else %}
+Votre compte d'accès à la plateforme a été désactivé.
+{% endif %}
+Le Bureau vous remercie pour votre engagement.
+
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

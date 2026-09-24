@@ -1,7 +1,8 @@
-"""Tests de sécurité TS01 à TS12 (§ 6.6.2 du mémoire).
+"""Tests de sécurité TS01 à TS13 (§ 6.6.2 du mémoire).
 
 TS11-TS12 formalisent les deux failles trouvées et corrigées lors de la
 revue de sécurité menée après la rédaction initiale du chapitre 6.
+TS13 vérifie le retrait immédiat des droits à la fin d'un mandat (RG13).
 """
 from django.test import TestCase
 from django.urls import reverse
@@ -123,3 +124,21 @@ class TestSecurite(TestCase):
         self.client.login(username=self.admin.email, password=fabrique.MOT_DE_PASSE)
         reponse = self.client.get(url)
         self.assertEqual(reponse.status_code, 200)          # rôle habilité
+
+    def test_ts13_droits_retires_immediatement_en_fin_de_fonctions(self):
+        """Une session ouverte pendant le mandat ne conserve aucun droit après :
+        le rôle est relu en base à chaque requête."""
+        from apps.accounts.services import mettre_fin_aux_fonctions
+
+        fiche = fabrique.membre(nom='COULIBALY', sect=self.abidjan,
+                                email=self.resp_abidjan.email)
+        fiche.utilisateur = self.resp_abidjan
+        fiche.save()
+        self.client.login(username=self.resp_abidjan.email, password=fabrique.MOT_DE_PASSE)
+        self.assertEqual(self.client.get(reverse('membres:liste')).status_code, 200)
+
+        mettre_fin_aux_fonctions(self.resp_abidjan, par=self.admin)   # session toujours ouverte
+
+        self.assertEqual(self.client.get(reverse('membres:liste')).status_code, 403)
+        self.assertEqual(self.client.get(reverse('sections:detail',
+                                                 args=[self.abidjan.pk])).status_code, 403)

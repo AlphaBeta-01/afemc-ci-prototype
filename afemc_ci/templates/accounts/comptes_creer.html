@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
-{% block titre %}Nouveau compte responsable{% endblock %}
+{% block titre %}Compte externe — AFEMC-CI{% endblock %}
 {% block contenu %}
 <div class="row justify-content-center">
   <div class="col-lg-7">
-    <h1 class="h4 mb-4">Nouveau compte responsable</h1>
+    <h1 class="h4 mb-1">Compte externe</h1>
+    <div class="alert alert-info small py-2 mb-3" role="note">
+      Réservé à une personne <strong>qui n'est pas membre</strong> de l'association.
+      Pour confier une fonction à une membre, utilisez plutôt
+      <a href="{% url 'accounts:nommer' %}" class="alert-link">Nommer une responsable</a> :
+      elle garde son compte actuel.
+    </div>
     <div class="card"><div class="card-body">
       <form method="post" class="row g-3">
         {% csrf_token %}

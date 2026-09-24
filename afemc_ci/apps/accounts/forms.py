@@ -50,7 +50,12 @@ class FormulaireMotDePasseOublie(forms.Form):
 
 
 class FormulaireCompteResponsable(forms.ModelForm):
-    """Création d'un compte responsable (RG08), réservée à la Présidente.
+    """Création d'un compte responsable externe (RG08), réservée à la Présidente.
+
+    Exception au parcours normal (`FormulaireNomination`, RG13) : une
+    personne qui n'est pas membre du registre. Une adresse déjà connue du
+    registre est refusée — sinon la même personne se retrouverait avec
+    deux comptes.
 
     N'appelle jamais `.save()` : la création passe par
     `apps.accounts.services.creer_compte_responsable`, seule à savoir fixer
@@ -84,3 +89,48 @@ class FormulaireCompteResponsable(forms.ModelForm):
         elif role != Utilisateur.Role.RESP_SECTION:
             cleaned['section'] = None
         return cleaned
+
+    def clean_email(self):
+        from apps.membres.models import Membre
+
+        email = self.cleaned_data['email'].lower()
+        if Membre.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                "Cette adresse appartient à une membre du registre : utilisez "
+                "« Nommer une responsable » pour lui confier la fonction sur son "
+                "compte existant.")
+        return email
+
+
+class ChoixMembre(forms.ModelChoiceField):
+    def label_from_instance(self, membre):
+        return f'{membre.nom_complet()} — {membre.matricule} — {membre.section.libelle}'
+
+
+class FormulaireNomination(forms.Form):
+    """Nomination d'une membre du registre à une fonction de responsable (RG13)."""
+
+    membre = ChoixMembre(
+        queryset=None, label='Membre',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        help_text='Seules les membres actives peuvent être nommées.')
+    role = forms.ChoiceField(
+        label='Fonction', widget=forms.Select(attrs={'class': 'form-select'}))
+    section = forms.ModelChoiceField(
+        queryset=None, required=False, label='Section coordonnée',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        help_text='Pour une Coordinatrice uniquement. Par défaut : la section de la membre.')
+
+    def __init__(self, *args, **kwargs):
+        from apps.membres.models import Membre
+        from apps.sections.models import Section
+
+        super().__init__(*args, **kwargs)
+        self.fields['membre'].queryset = (
+            Membre.objects.filter(statut=Membre.Statut.ACTIF)
+            .exclude(utilisateur__role=Utilisateur.Role.ADMIN)
+            .select_related('section').order_by('nom', 'prenoms'))
+        self.fields['role'].choices = [('', '---------')] + [
+            (valeur, libelle) for valeur, libelle in Utilisateur.Role.choices
+            if valeur in ROLES_ATTRIBUABLES]
+        self.fields['section'].queryset = Section.objects.order_by('libelle')

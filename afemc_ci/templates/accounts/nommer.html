@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block titre %}Nommer une responsable — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="row justify-content-center g-3">
+  <div class="col-lg-7">
+    <h1 class="h4 mb-1">Nommer une responsable</h1>
+    <p class="text-muted small mb-3">
+      La fonction est ajoutée au compte existant de la membre : pas de nouveau compte,
+      pas de nouveau mot de passe. Elle est prévenue par courriel.
+    </p>
+    <div class="card"><div class="card-body">
+      {% if formulaire.non_field_errors %}
+        <div class="alert alert-danger py-2 small" role="alert">{{ formulaire.non_field_errors.0 }}</div>
+      {% endif %}
+      <form method="post" class="row g-3">
+        {% csrf_token %}
+        {% for champ in formulaire %}
+          <div class="col-12" id="bloc-{{ champ.name }}">
+            <label class="form-label" for="{{ champ.id_for_label }}">{{ champ.label }}</label>
+            {{ champ }}
+            {% if champ.help_text %}<div class="form-text">{{ champ.help_text }}</div>{% endif %}
+            {% if champ.errors %}<div class="text-danger small mt-1">{{ champ.errors.0 }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <div class="col-12">
+          <button class="btn btn-primary">Nommer</button>
+          <a href="{% url 'accounts:comptes_liste' %}" class="btn btn-link">Annuler</a>
+        </div>
+      </form>
+    </div></div>
+    <p class="small text-muted mt-3 mb-0">
+      La personne n'est pas dans le registre des membres ?
+      <a href="{% url 'accounts:comptes_creer' %}">Créer un compte externe</a>.
+    </p>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card"><div class="card-body">
+      <h2 class="h6 mb-3">Fonctions actuellement occupées</h2>
+      <ul class="list-unstyled small mb-0">
+        {% for titulaire in titulaires %}
+          <li class="mb-2">
+            <strong>{{ titulaire.get_role_display }}</strong>{% if titulaire.section %} · {{ titulaire.section }}{% endif %}<br>
+            <span class="text-muted">{{ titulaire.nom_complet }}</span>
+          </li>
+        {% empty %}
+          <li class="text-muted">Aucune fonction occupée pour le moment.</li>
+        {% endfor %}
+      </ul>
+    </div></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  // La section n'a de sens que pour une Coordinatrice : masquée sinon.
+  (function () {
+    var role = document.getElementById('id_role');
+    var bloc = document.getElementById('bloc-section');
+    if (!role || !bloc) { return; }
+    function actualiser() { bloc.hidden = role.value !== 'RESP_SECTION'; }
+    role.addEventListener('change', actualiser);
+    actualiser();
+  })();
+</script>
+{% endblock %}

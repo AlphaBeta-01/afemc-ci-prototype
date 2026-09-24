@@ -69,15 +69,53 @@ section) sont ceux affichés dans l'interface ; les rôles internes
 (`ADMIN`, `RESP_ADMIN`, `RESP_FINANCIER`, `RESP_SECTION`) n'ont pas changé,
 pour ne pas affecter les comptes déjà créés en base.
 
-### Gestion des comptes responsables
+### Responsables : nomination et fin de fonctions (RG13)
 
-Écran réservé à la Présidente (`/comptes/responsables/`) pour créer les
-comptes des autres responsables — Secrétaire générale, Trésorière,
-Coordinatrice de section — sans passer par l'administration Django. Un
-compte Présidente ne peut pas être créé ici : cela reste du ressort de
-`createsuperuser`. Comme pour un membre admis, le compte est créé inactif
-et un courriel avec lien d'activation est envoyé ; la Présidente peut aussi
-désactiver/réactiver un compte existant (sauf le sien).
+Une responsable — Secrétaire générale, Trésorière, Coordinatrice de
+section — est **une membre de l'association à qui une fonction est
+confiée**, pas un compte à part. Écran réservé à la Présidente
+(`/comptes/responsables/`, menu « Responsables ») :
+
+- **Nommer une responsable** (`/comptes/responsables/nommer/`, ou bouton
+  « Nommer à une fonction » sur la fiche d'une membre) : la fonction
+  s'ajoute au **compte existant** de la membre — même identifiant, même
+  mot de passe. Seules les membres actives peuvent être nommées. Si la
+  membre n'a pas encore de compte, il est créé, relié à sa fiche, et le
+  courriel de nomination contient le lien d'activation. Une Coordinatrice
+  prend par défaut la section de sa fiche.
+- **Mettre fin aux fonctions** : le compte redevient un compte Membre ; la
+  personne garde son accès, son historique et ses cotisations. Les droits
+  de responsable sont retirés **immédiatement**, y compris pour une session
+  déjà ouverte (le rôle est relu en base à chaque requête — TS13).
+- **Compte externe** (`/comptes/responsables/nouveau/`), l'exception : une
+  personne qui n'est pas dans le registre. Refusé pour une adresse déjà
+  connue du registre (sinon la même personne aurait deux comptes). En fin
+  de fonctions, un compte externe est désactivé.
+
+Chaque nomination et fin de fonctions est journalisée (RG09) et notifiée
+par courriel à la personne concernée. Le compte Présidente reste du ressort
+de `createsuperuser` / `/taches/amorcer-admin/` et ne peut recevoir aucune
+autre fonction ici. Une responsable voit ses propres cotisations sur sa
+fiche (lien depuis « Mon profil »), y compris une Coordinatrice, pour qui
+les cotisations des autres membres restent hors périmètre (RG08).
+
+**Passage à ce modèle en production (migration `accounts.0003`).** Au
+déploiement, tous les comptes Secrétaire générale, Trésorière et
+Coordinatrice existants redeviennent des comptes Membre (la Présidente
+n'est pas concernée) ; l'ancienne fonction de chacun est inscrite au
+journal (`FIN_FONCTIONS_MIGRATION`). Ensuite, pour chaque responsable :
+
+1. si elle n'a pas encore de fiche membre, la créer via « Nouveau membre »
+   **avec la même adresse électronique** que son compte — la fiche y est
+   reliée automatiquement ;
+2. la nommer depuis sa fiche (« Nommer à une fonction ») ;
+3. si elle avait deux comptes (un de membre, un de responsable), nommer le
+   compte relié à sa fiche et désactiver l'autre depuis « Responsables ».
+
+Tant que la Trésorière n'est pas nommée, personne ne peut enregistrer de
+paiement (rôle exclusif) : à faire juste après le déploiement. Une
+ancienne responsable qui reçoit une fiche en cours d'année n'a pas de
+cotisation pour l'exercice courant : l'émettre via « Émission collective ».
 
 ### Compte du membre admis (activation par courriel)
 
@@ -224,16 +262,22 @@ coverage report
 coverage html            # rapport détaillé dans htmlcov/index.html
 ```
 
-Résultats attendus — ce sont les chiffres repris au chapitre 6 du mémoire :
+Chiffres au 24/09/2026 (`python manage.py test apps`) — **ils diffèrent de
+ceux du chapitre 6**, à mettre à jour dans le mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 111 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections |
-| Scénarios du moteur (SC01-SC24) | 26 | `apps/relances/tests/test_moteur.py` |
-| Tests d'intégration (TI01-TI13) | 13 | `apps/cotisations/tests/test_integration.py` |
-| Tests fonctionnels (TF01-TF30) | 30 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF30 nouveaux) |
-| Tests de sécurité (TS01-TS12) | 12 | `apps/core/tests/test_securite.py` (TS11-TS12 nouveaux) |
-| **Total** | **192** | couverture : **95 %** du code applicatif (mesurée contre PostgreSQL) |
+| Tests unitaires | 174 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
+| Scénarios du moteur (SC01-SC24 et compléments) | 26 | `apps/relances/tests/test_moteur.py` |
+| Tests d'intégration | 12 | `apps/cotisations/tests/test_integration.py` |
+| Tests fonctionnels (TF01-TF32) | 34 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF32 nouveaux) |
+| Tests de sécurité (TS01-TS13) | 13 | `apps/core/tests/test_securite.py` (TS11-TS13 nouveaux) |
+| **Total** | **259** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
+
+Historique : le chapitre 6 en décrivait 126, puis 192 après l'ajout des
+fonctionnalités ci-dessous ; les suivants couvrent les courriels HTML,
+les relances adressées aux responsables et la nomination des responsables
+(RG13).
 
 Les 66 tests supplémentaires (par rapport aux 126 initiaux du chapitre 6)
 couvrent l'activation de compte et la réinitialisation de mot de passe
@@ -246,12 +290,16 @@ exigées à la soumission d'une demande d'adhésion (RG12, ci-dessous).
 ajoutés après la rédaction initiale du chapitre 6 : activation d'un compte
 membre, mot de passe oublié, création d'un compte responsable, périmètre
 resserré du responsable de section, rejet d'une demande sans document.
+**TF31-TF32** rejouent la nomination d'une membre à une fonction (même
+compte, nouveaux accès) et la fin de fonctions (accès retirés, compte
+conservé) ; TF28 porte désormais sur le compte externe.
 **TS11-TS12** formalisent les deux failles trouvées et corrigées lors de la
 revue de sécurité (accès au détail d'une section, accès à une pièce
-justificative). Si le corps du mémoire doit en rendre compte, ce sont ces
+justificative). **TS13** vérifie que les droits d'une responsable sont
+retirés immédiatement en fin de fonctions, même pour une session ouverte. Si le corps du mémoire doit en rendre compte, ce sont ces
 identifiants qu'il convient de citer.
 
-### Nouvelles règles de gestion (RG11, RG12)
+### Nouvelles règles de gestion (RG11, RG12, RG13)
 
 Le texte du mémoire (§ 4.4) numérote RG01 à RG10. Après consultation de ce
 texte, deux règles introduites cette session ont reçu un numéro propre plutôt
@@ -273,6 +321,14 @@ et les tests ont depuis été corrigés) :
   qualité d'enseignante chercheure de la candidate (carte professionnelle,
   attestation d'exercice ou diplôme — formats PDF/JPG/PNG, 5 Mo maximum), et
   l'ensemble des champs du formulaire public sont obligatoires.
+- **RG13 — Nomination des responsables.** Une fonction de responsable
+  (Secrétaire générale, Trésorière, Coordinatrice de section) est confiée
+  par la Présidente à une membre active du registre ; elle s'ajoute à son
+  compte existant — une personne ne possède qu'un seul compte. La fin de
+  fonctions ramène le compte au rôle Membre sans supprimer l'accès, et
+  retire immédiatement les droits liés à la fonction. Nominations et fins
+  de fonctions sont journalisées. Un compte externe (personne hors
+  registre) reste possible à titre d'exception.
 
 **Périmètre du responsable de section et du responsable financier — vérifié,
 aucune divergence.** Confronté aux chapitres 3, 4 et 5 du mémoire : § 3.2.4
