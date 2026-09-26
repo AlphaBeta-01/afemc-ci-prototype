@@ -27,6 +27,7 @@ urlpatterns = [
     path('relances/', include('apps.relances.urls')),
     path('notifications/', include('apps.notifications.urls')),
     path('tableau-de-bord/', include('apps.dashboard.urls')),
+    path('activites/', include('apps.activites.urls')),
 ]
 
 # `MEDIA_URL`/`MEDIA_ROOT` (config/settings/base.py) ne sont volontairement PAS

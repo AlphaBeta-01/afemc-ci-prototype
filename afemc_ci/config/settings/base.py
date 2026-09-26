@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'apps.relances',
     'apps.notifications',
     'apps.dashboard',
+    'apps.activites',
 ]
 
 MIDDLEWARE = [

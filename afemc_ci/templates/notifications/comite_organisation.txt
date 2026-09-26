@@ -1,0 +1,15 @@
+Madame {{ nom }},
+
+Vous avez été désignée membre du comité d'organisation de l'activité :
+
+{{ titre }}
+Le {{ date }} — {{ lieu }}
+{% if mission %}Votre mission : {{ mission }}
+{% endif %}
+Vous pouvez désormais modifier la fiche de cette activité et suivre ses
+inscriptions depuis la plateforme :
+
+{{ lien }}
+
+Le Bureau
+Association des Femmes Enseignantes Chercheures de Côte d'Ivoire

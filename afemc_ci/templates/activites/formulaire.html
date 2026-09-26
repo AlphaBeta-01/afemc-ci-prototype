@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block titre %}{{ titre }} — AFEMC-CI{% endblock %}
+{% block contenu %}
+<h1 class="h4 mb-4">{{ titre }}</h1>
+<div class="card"><div class="card-body">
+  <form method="post" class="row g-3">
+    {% csrf_token %}
+    {% for champ in formulaire %}
+      <div class="{% if champ.name == 'description' or champ.name == 'titre' %}col-12{% else %}col-md-6{% endif %}">
+        <label class="form-label" for="{{ champ.id_for_label }}">{{ champ.label }}</label>
+        {{ champ }}
+        {% if champ.help_text %}<div class="form-text">{{ champ.help_text }}</div>{% endif %}
+        {% if champ.errors %}<div class="text-danger small mt-1">{{ champ.errors.0 }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    <div class="col-12">
+      <button class="btn btn-primary">Enregistrer</button>
+      <a href="{% if activite %}{% url 'activites:detail' activite.pk %}{% else %}{% url 'activites:liste' %}{% endif %}" class="btn btn-link">Annuler</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

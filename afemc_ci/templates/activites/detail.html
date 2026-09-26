@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block titre %}{{ activite.titre }} — AFEMC-CI{% endblock %}
+{% block contenu %}
+
+<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+  <div>
+    <a href="{% url 'activites:liste' %}" class="small">← Activités</a>
+    <h1 class="h4 mb-1 mt-1">{{ activite.titre }}</h1>
+    <div class="d-flex gap-1 flex-wrap">
+      <span class="badge text-bg-light border">{{ activite.get_type_display }}</span>
+      <span class="badge {% if activite.statut == 'PUBLIEE' %}text-bg-success{% elif activite.statut == 'EN_PREPARATION' %}text-bg-warning{% elif activite.statut == 'ANNULEE' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ activite.get_statut_display }}</span>
+    </div>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    {% if peut_modifier %}<a href="{% url 'activites:modifier' activite.pk %}" class="btn btn-outline-primary btn-sm">Modifier la fiche</a>{% endif %}
+    {% for valeur, libelle in statuts_possibles %}
+      <form method="post" action="{% url 'activites:statut' activite.pk %}" class="d-inline"
+            {% if valeur == 'ANNULEE' %}onsubmit="return confirm('Annuler cette activité ?');"{% endif %}>
+        {% csrf_token %}
+        <input type="hidden" name="statut" value="{{ valeur }}">
+        <button class="btn btn-sm {% if valeur == 'PUBLIEE' %}btn-primary{% elif valeur == 'ANNULEE' %}btn-outline-danger{% else %}btn-outline-secondary{% endif %}">{{ libelle }}</button>
+      </form>
+    {% endfor %}
+  </div>
+</div>
+
+{% if activite.statut == 'EN_PREPARATION' and peut_modifier %}
+  <div class="alert alert-warning small py-2" role="note">
+    En préparation : cette activité n'est visible que de la Responsable à l'organisation et de son comité.
+    {% if gere %}Publiez-la pour que les membres puissent la voir et s'y inscrire.{% endif %}
+  </div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card mb-3"><div class="card-body">
+      <dl class="row small mb-0">
+        <dt class="col-4">Date</dt>
+        <dd class="col-8">{{ activite.date_debut|date:'l j F Y, H\hi'|capfirst }}{% if activite.date_fin %} — {% if activite.date_fin|date:'Ymd' == activite.date_debut|date:'Ymd' %}{{ activite.date_fin|date:'H\hi' }}{% else %}{{ activite.date_fin|date:'l j F Y, H\hi' }}{% endif %}{% endif %}</dd>
+        <dt class="col-4">Lieu</dt><dd class="col-8">{{ activite.lieu }}</dd>
+        <dt class="col-4">Ouverte à</dt><dd class="col-8">{% if activite.section %}{{ activite.section.libelle }}{% else %}Toutes les sections (nationale){% endif %}</dd>
+        <dt class="col-4">Places</dt>
+        <dd class="col-8">{% if activite.places %}{{ activite.nombre_inscrites }} inscrite{{ activite.nombre_inscrites|pluralize }} sur {{ activite.places }}{% else %}{{ activite.nombre_inscrites }} inscrite{{ activite.nombre_inscrites|pluralize }} · sans limite{% endif %}</dd>
+      </dl>
+      {% if activite.description %}<hr><div class="small">{{ activite.description|linebreaks }}</div>{% endif %}
+    </div></div>
+
+    {% if user.fiche_membre %}
+    <div class="card mb-3"><div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+      {% if est_inscrite %}
+        <span class="small"><strong>Vous êtes inscrite.</strong></span>
+        {% if activite.est_a_venir %}
+        <form method="post" action="{% url 'activites:inscription' activite.pk %}">
+          {% csrf_token %}<input type="hidden" name="action" value="annuler">
+          <button class="btn btn-outline-secondary btn-sm">Annuler mon inscription</button>
+        </form>
+        {% endif %}
+      {% elif peut_s_inscrire %}
+        <span class="small">{% if activite.places %}{{ activite.places_restantes }} place{{ activite.places_restantes|pluralize }} restante{{ activite.places_restantes|pluralize }}.{% else %}Inscriptions ouvertes.{% endif %}</span>
+        <form method="post" action="{% url 'activites:inscription' activite.pk %}">
+          {% csrf_token %}<button class="btn btn-primary btn-sm">M'inscrire</button>
+        </form>
+      {% else %}
+        <span class="small text-muted">
+          {% if activite.statut == 'ANNULEE' %}Activité annulée.
+          {% elif not activite.est_a_venir %}Activité passée.
+          {% elif activite.statut != 'PUBLIEE' %}Les inscriptions ouvriront à la publication.
+          {% elif activite.places_restantes == 0 %}Complet.
+          {% else %}Inscriptions réservées à la section concernée.{% endif %}
+        </span>
+      {% endif %}
+    </div></div>
+    {% endif %}
+
+    {% if inscriptions is not None and peut_modifier %}
+    <div class="card"><div class="card-body pb-0"><h2 class="h6 mb-3">Inscrites ({{ inscriptions|length }})</h2></div>
+      <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light"><tr><th>Nom</th><th>Prénoms</th><th class="d-none d-md-table-cell">Section</th><th class="d-none d-md-table-cell">Inscrite le</th></tr></thead>
+        <tbody>
+        {% for inscription in inscriptions %}
+          <tr><td>{{ inscription.membre.nom }}</td><td>{{ inscription.membre.prenoms }}</td>
+              <td class="small d-none d-md-table-cell">{{ inscription.membre.section.libelle }}</td>
+              <td class="small d-none d-md-table-cell">{{ inscription.inscrite_le|date:'d/m/Y' }}</td></tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">Aucune inscription pour le moment.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card"><div class="card-body">
+      <h2 class="h6 mb-1">Comité d'organisation</h2>
+      <p class="small text-muted mb-3">
+        {% if gere %}Les membres du comité peuvent modifier la fiche de cette activité et suivre ses inscriptions, sans pouvoir la publier ni l'annuler.
+        {% else %}Membres chargées d'organiser cette activité.{% endif %}
+      </p>
+      <table class="table table-sm small align-middle mb-3">
+        <thead><tr><th>Nom</th><th>Prénoms</th><th>Mission</th>{% if gere %}<th></th>{% endif %}</tr></thead>
+        <tbody>
+        {% for place in comite %}
+          <tr>
+            <td>{{ place.membre.nom }}</td><td>{{ place.membre.prenoms }}</td>
+            <td class="text-muted">{{ place.mission|default:'—' }}</td>
+            {% if gere %}
+            <td class="text-end">
+              <form method="post" action="{% url 'activites:comite_retirer' activite.pk place.pk %}"
+                    onsubmit="return confirm('Retirer {{ place.membre.nom|escapejs }} {{ place.membre.prenoms|escapejs }} du comité ?');">
+                {% csrf_token %}<button class="btn btn-link btn-sm text-danger p-0">Retirer</button>
+              </form>
+            </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">Aucun comité désigné.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% if gere and formulaire_comite %}
+        <form method="post" action="{% url 'activites:comite_ajouter' activite.pk %}" class="row g-2">
+          {% csrf_token %}
+          <div class="col-12">{{ formulaire_comite.membre }}</div>
+          <div class="col-8">{{ formulaire_comite.mission }}</div>
+          <div class="col-4 d-grid"><button class="btn btn-outline-primary btn-sm">Ajouter</button></div>
+        </form>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

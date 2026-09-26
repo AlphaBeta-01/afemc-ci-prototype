@@ -125,6 +125,32 @@ paiement (rôle exclusif) : à faire juste après le déploiement. Une
 ancienne responsable qui reçoit une fiche en cours d'année n'a pas de
 cotisation pour l'exercice courant : l'émettre via « Émission collective ».
 
+### Activités et comités d'organisation (RG14)
+
+Onglet **Activités** (`/activites/`), pour toutes les utilisatrices. Il met en
+œuvre les classes Événement et Inscription du modèle du chapitre 4.
+
+- **Responsable à l'organisation** : nouvelle fonction du Bureau, nommée par
+  la Présidente comme les autres (RG13). Elle crée les activités (conférence,
+  formation, journée scientifique, assemblée générale, réunion…), les
+  publie, les clôture ou les annule, et compose leur **comité
+  d'organisation**. Moindre privilège : son accès se limite aux activités,
+  sans membres, cotisations, adhésions ni tableau de bord de gouvernance.
+  La Présidente dispose des mêmes droits, pour superviser.
+- **Comité d'organisation** : membres à qui la gestion d'**une** activité est
+  déléguée (mission facultative : logistique, communication…). Elles en
+  modifient la fiche et suivent les inscriptions, sans pouvoir la publier,
+  l'annuler, composer le comité ni toucher aux autres activités. Chaque
+  membre ajoutée en est prévenue par courriel.
+- **Membres** : voient les activités publiées nationales et celles de leur
+  section, et s'y inscrivent tant qu'il reste des places. Une activité en
+  préparation n'est visible que de celles qui l'organisent.
+
+Chaque opération est journalisée (RG09). L'« À faire » signale à la
+Responsable les activités proches encore en préparation, celles à
+clôturer et celles sans comité ; à chaque membre, les activités qu'elle
+organise et ses inscriptions à venir.
+
 ### « À faire » : les tâches du jour selon la fonction
 
 Un bouton **À faire** dans la barre de navigation, avec un compteur (rouge
@@ -294,12 +320,12 @@ ceux du chapitre 6**, à mettre à jour dans le mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 215 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
+| Tests unitaires | 232 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
 | Scénarios du moteur (SC01-SC24 et compléments) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration | 12 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF32) | 34 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF32 nouveaux) |
 | Tests de sécurité (TS01-TS16) | 16 | `apps/core/tests/test_securite.py` et `test_limites.py` (TS11-TS16 nouveaux) |
-| **Total** | **303** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
+| **Total** | **320** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
 
 Historique : le chapitre 6 en décrivait 126, puis 192 après l'ajout des
 fonctionnalités ci-dessous ; les suivants couvrent les courriels HTML,
@@ -330,7 +356,7 @@ et champ piège des formulaires publics, contrôle du contenu réel des
 pièces justificatives, déconnexion après 30 minutes d'inactivité. Si le corps du mémoire doit en rendre compte, ce sont ces
 identifiants qu'il convient de citer.
 
-### Nouvelles règles de gestion (RG11, RG12, RG13)
+### Nouvelles règles de gestion (RG11 à RG14)
 
 Le texte du mémoire (§ 4.4) numérote RG01 à RG10. Après consultation de ce
 texte, deux règles introduites cette session ont reçu un numéro propre plutôt
@@ -360,6 +386,14 @@ et les tests ont depuis été corrigés) :
   retire immédiatement les droits liés à la fonction. Nominations et fins
   de fonctions sont journalisées. Un compte externe (personne hors
   registre) reste possible à titre d'exception.
+- **RG14 — Organisation des activités.** Les activités sont créées,
+  publiées, clôturées ou annulées par la Responsable à l'organisation (ou
+  la Présidente), qui peut déléguer la gestion d'une activité à un comité
+  d'organisation. Une membre du comité gère cette seule activité, sans
+  pouvoir en changer le statut ni la composition du comité. Une activité
+  n'est visible des membres qu'une fois publiée, et seulement si elle est
+  nationale ou concerne leur section ; l'inscription est ouverte aux
+  membres actives dans la limite des places.
 
 > **Mise à jour du 26/09/2026 :** à la demande de l'association, la
 > Coordinatrice consulte désormais les cotisations de sa section (lecture

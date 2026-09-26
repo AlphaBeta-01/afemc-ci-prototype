@@ -28,6 +28,10 @@ def accueil(requete):
     n'a pas vocation à voir les indicateurs de gouvernance de sa section ;
     il est redirigé vers sa propre fiche.
     """
+    if requete.user.role == 'RESP_ORGA':
+        # Son périmètre se limite aux activités (moindre privilège) : ni
+        # membres, ni cotisations, ni indicateurs de gouvernance.
+        return redirect('activites:liste')
     if not requete.user.est_responsable:
         fiche = getattr(requete.user, 'fiche_membre', None)
         if fiche:

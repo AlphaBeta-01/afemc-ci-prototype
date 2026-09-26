@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block titre %}Activités — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+  <h1 class="h4 mb-0">Activités</h1>
+  {% if gere %}<a href="{% url 'activites:creer' %}" class="btn btn-primary btn-sm">Nouvelle activité</a>{% endif %}
+</div>
+<p class="text-muted small mb-4">
+  {% if gere %}Toutes les activités, y compris celles en préparation, visibles de vous seule et de leur comité.
+  {% else %}Les activités de l'association ouvertes à votre section, et celles dont vous faites partie du comité d'organisation.{% endif %}
+</p>
+
+<h2 class="h6 text-uppercase text-muted mb-2">À venir</h2>
+<div class="list-group mb-4">
+  {% for activite in a_venir %}
+    {% include 'activites/_ligne.html' %}
+  {% empty %}
+    <div class="list-group-item text-muted py-4 text-center">Aucune activité à venir pour le moment.</div>
+  {% endfor %}
+</div>
+
+{% if passees %}
+<h2 class="h6 text-uppercase text-muted mb-2">Passées</h2>
+<div class="list-group">
+  {% for activite in passees %}
+    {% include 'activites/_ligne.html' %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

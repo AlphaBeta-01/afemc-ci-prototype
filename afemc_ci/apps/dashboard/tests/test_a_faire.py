@@ -30,6 +30,7 @@ class BaseAFaire(TestCase):
         self.presidente = fabrique.utilisateur('ADMIN')
         self.secretaire = fabrique.utilisateur('RESP_ADMIN')
         self.tresoriere = fabrique.utilisateur('RESP_FINANCIER')
+        self.organisatrice = fabrique.utilisateur('RESP_ORGA')
         self.coordinatrice = fabrique.utilisateur('RESP_SECTION', email='coord@afemc-ci.org',
                                                   section_liee=self.abidjan)
         fabrique.utilisateur('RESP_SECTION', email='coord.krg@afemc-ci.org',
@@ -179,7 +180,11 @@ class TestAccesEtBouton(BaseAFaire):
     def test_chaque_lien_propose_est_autorise_pour_la_fonction(self):
         """Une tâche qui mènerait à « Accès refusé » serait pire qu'aucune tâche."""
         self.peupler()
-        for compte in (self.presidente, self.secretaire, self.tresoriere, self.coordinatrice):
+        from apps.activites.models import Activite
+        Activite.objects.create(titre='Journée scientifique', type='JOURNEE_SCIENTIFIQUE',
+                                date_debut=timezone.now() + timedelta(days=5), lieu='UFHB')
+        for compte in (self.presidente, self.secretaire, self.tresoriere, self.coordinatrice,
+                       self.organisatrice):
             self.client.force_login(compte)
             taches = taches_pour(compte)
             self.assertTrue(taches, compte.role)

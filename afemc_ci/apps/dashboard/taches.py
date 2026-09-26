@@ -71,8 +71,10 @@ def taches_pour(utilisateur):
         R.RESP_FINANCIER: _taches_tresoriere,
         R.RESP_SECTION: _taches_coordinatrice,
         R.MEMBRE: _taches_membre,
+        R.RESP_ORGA: _taches_organisation,
     }.get(utilisateur.role)
-    taches = [t for t in (calcul(utilisateur) if calcul else []) if t.nombre]
+    taches = (calcul(utilisateur) if calcul else []) + _taches_activites_personnelles(utilisateur)
+    taches = [t for t in taches if t.nombre]
     return sorted(taches, key=lambda t: ORDRE_PRIORITES[t.priorite])
 
 
@@ -187,10 +189,11 @@ def _taches_presidente(utilisateur):
 
     for role, consequence in (
             (R.RESP_FINANCIER, "personne ne peut enregistrer de paiement"),
-            (R.RESP_ADMIN, "la gestion administrative repose sur vous seule")):
+            (R.RESP_ADMIN, "la gestion administrative repose sur vous seule"),
+            (R.RESP_ORGA, "l'organisation des activités repose sur vous seule")):
         if not actifs.filter(role=role).exists():
             taches.append(Tache(
-                priorite=URGENT if role == R.RESP_FINANCIER else A_FAIRE,
+                priorite={R.RESP_FINANCIER: URGENT, R.RESP_ADMIN: A_FAIRE}.get(role, A_SURVEILLER),
                 titre=f"Aucune {R(role).label} en fonction",
                 explication=f"Tant que la fonction est vacante, {consequence}.",
                 nombre=1, url=reverse('accounts:nommer'), action='Nommer une responsable'))
@@ -406,4 +409,85 @@ def _taches_membre(utilisateur):
             explication=f"Reste à payer : {_fcfa(c.reste_a_payer)}, {quand}. Le règlement "
                         "se fait auprès de la Trésorière.",
             nombre=1, url=_fiche(fiche), action='Voir ma fiche'))
+    return taches
+
+
+def _taches_organisation(utilisateur):
+    """Responsable à l'organisation : activités à publier, à clôturer, sans comité."""
+    from apps.activites.models import Activite
+
+    S = Activite.Statut
+    maintenant = timezone.now()
+    taches = []
+
+    a_publier = list(Activite.objects.filter(
+        statut=S.EN_PREPARATION, date_debut__gte=maintenant,
+        date_debut__lte=maintenant + timedelta(days=ECHEANCE_PROCHE_JOURS)).order_by('date_debut'))
+    if a_publier:
+        proche = any(a.date_debut <= maintenant + timedelta(days=7) for a in a_publier)
+        taches.append(Tache(
+            priorite=URGENT if proche else A_FAIRE, titre='Activités proches encore en préparation',
+            explication="Tant qu'elles ne sont pas publiées, les membres ne les voient pas "
+                        "et ne peuvent pas s'y inscrire.",
+            nombre=len(a_publier), url=reverse('activites:liste'), action='Voir les activités',
+            elements=[Element(a.titre, detail=f"{a.date_debut:%d/%m/%Y} · {a.lieu}",
+                              url=reverse('activites:detail', args=[a.pk])) for a in a_publier]))
+
+    a_cloturer = list(Activite.objects.filter(statut=S.PUBLIEE, date_debut__lt=maintenant)
+                      .order_by('date_debut'))
+    if a_cloturer:
+        taches.append(Tache(
+            priorite=A_FAIRE, titre='Activités passées à clôturer',
+            explication="Elles ont eu lieu : clôturez-les pour arrêter les inscriptions "
+                        "et garder un historique à jour.",
+            nombre=len(a_cloturer), url=reverse('activites:liste'), action='Voir les activités',
+            elements=[Element(a.titre, detail=f"{a.date_debut:%d/%m/%Y}",
+                              url=reverse('activites:detail', args=[a.pk])) for a in a_cloturer]))
+
+    sans_comite = list(Activite.objects.filter(
+        statut__in=[S.EN_PREPARATION, S.PUBLIEE], date_debut__gte=maintenant,
+        comite__isnull=True).order_by('date_debut'))
+    if sans_comite:
+        taches.append(Tache(
+            priorite=A_SURVEILLER, titre="Activités sans comité d'organisation",
+            explication="Vous pouvez déléguer leur préparation à des membres.",
+            nombre=len(sans_comite), action='',
+            elements=[Element(a.titre, detail=f"{a.date_debut:%d/%m/%Y}",
+                              url=reverse('activites:detail', args=[a.pk])) for a in sans_comite]))
+    return taches
+
+
+def _taches_activites_personnelles(utilisateur):
+    """Pour toute personne ayant une fiche : ses comités et ses inscriptions à venir."""
+    from apps.activites.models import Activite
+
+    fiche = getattr(utilisateur, 'fiche_membre', None)
+    if fiche is None:
+        return []
+    maintenant = timezone.now()
+    actives = [Activite.Statut.EN_PREPARATION, Activite.Statut.PUBLIEE]
+    taches = []
+
+    organisees = list(Activite.objects.filter(comite__membre=fiche, statut__in=actives,
+                                              date_debut__gte=maintenant).order_by('date_debut'))
+    if organisees:
+        taches.append(Tache(
+            priorite=A_FAIRE, titre="Activités que vous organisez",
+            explication="Vous faites partie de leur comité d'organisation : vous pouvez en "
+                        "modifier la fiche et suivre les inscriptions.",
+            nombre=len(organisees), action='',
+            elements=[Element(a.titre, detail=f"{a.date_debut:%d/%m/%Y} · {a.lieu} · "
+                                              f"{a.get_statut_display().lower()}",
+                              url=reverse('activites:detail', args=[a.pk])) for a in organisees]))
+
+    inscrites = list(Activite.objects.filter(inscriptions__membre=fiche,
+                                             statut=Activite.Statut.PUBLIEE,
+                                             date_debut__gte=maintenant).order_by('date_debut'))
+    if inscrites:
+        taches.append(Tache(
+            priorite=A_SURVEILLER, titre='Vos inscriptions à venir',
+            explication="Activités auxquelles vous êtes inscrite.",
+            nombre=len(inscrites), action='',
+            elements=[Element(a.titre, detail=f"{a.date_debut:%d/%m/%Y, %H:%M} · {a.lieu}",
+                              url=reverse('activites:detail', args=[a.pk])) for a in inscrites]))
     return taches

@@ -39,6 +39,7 @@ class Utilisateur(AbstractUser):
         RESP_ADMIN = 'RESP_ADMIN', 'Secrétaire générale'
         RESP_SECTION = 'RESP_SECTION', 'Coordinatrice de section'
         RESP_FINANCIER = 'RESP_FINANCIER', 'Trésorière'
+        RESP_ORGA = 'RESP_ORGA', "Responsable à l'organisation"
         ADMIN = 'ADMIN', 'Présidente'
 
     username = None

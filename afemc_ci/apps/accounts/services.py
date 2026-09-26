@@ -11,7 +11,7 @@ from apps.notifications.services import creer_notification
 from .models import Utilisateur
 
 ROLES_ATTRIBUABLES = (Utilisateur.Role.RESP_ADMIN, Utilisateur.Role.RESP_SECTION,
-                      Utilisateur.Role.RESP_FINANCIER)
+                      Utilisateur.Role.RESP_FINANCIER, Utilisateur.Role.RESP_ORGA)
 
 
 def generer_lien_activation(compte):

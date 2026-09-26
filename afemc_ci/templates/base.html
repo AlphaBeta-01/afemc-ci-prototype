@@ -26,7 +26,10 @@
     </button>
     <div class="collapse navbar-collapse" id="menu">
       <ul class="navbar-nav me-auto">
+        {% if user.role != 'RESP_ORGA' %}
         <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:accueil' %}">Tableau de bord</a></li>
+        {% endif %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'activites:liste' %}">Activités</a></li>
         {% if user.est_responsable %}
         <li class="nav-item"><a class="nav-link" href="{% url 'membres:liste' %}">Membres</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'cotisations:liste' %}">Cotisations</a></li>
@@ -38,8 +41,13 @@
         {% endif %}
         <li class="nav-item"><a class="nav-link" href="{% url 'sections:liste' %}">Sections</a></li>
         {% if user.role == 'ADMIN' %}
-        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:comptes_liste' %}">Responsables</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'notifications:liste' %}">Notifications</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Bureau</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'accounts:comptes_liste' %}">Responsables</a></li>
+            <li><a class="dropdown-item" href="{% url 'notifications:liste' %}">Notifications</a></li>
+          </ul>
+        </li>
         {% endif %}
         {% endif %}
       </ul>

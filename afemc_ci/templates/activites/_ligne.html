@@ -1,0 +1,20 @@
+{# Une activité dans la liste. Paramètres : activite, inscrites, comites. #}
+<a href="{% url 'activites:detail' activite.pk %}" class="list-group-item list-group-item-action py-3">
+  <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+    <div>
+      <div class="fw-semibold">{{ activite.titre }}</div>
+      <div class="small text-muted">
+        {{ activite.date_debut|date:'l j F Y, H\hi'|capfirst }} · {{ activite.lieu }}
+        · {% if activite.section %}{{ activite.section.libelle }}{% else %}Nationale{% endif %}
+      </div>
+    </div>
+    <div class="d-flex gap-1 flex-wrap">
+      <span class="badge text-bg-light border">{{ activite.get_type_display }}</span>
+      {% if activite.statut == 'EN_PREPARATION' %}<span class="badge text-bg-warning">En préparation</span>
+      {% elif activite.statut == 'ANNULEE' %}<span class="badge text-bg-danger">Annulée</span>
+      {% elif activite.statut == 'TERMINEE' %}<span class="badge text-bg-secondary">Terminée</span>{% endif %}
+      {% if activite.pk in comites %}<span class="badge text-bg-primary">Comité</span>{% endif %}
+      {% if activite.pk in inscrites %}<span class="badge text-bg-success">Inscrite</span>{% endif %}
+    </div>
+  </div>
+</a>

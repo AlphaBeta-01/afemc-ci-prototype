@@ -1,0 +1,16 @@
+{% extends "notifications/email/base.html" %}
+{% block titre_document %}Comité d'organisation — {{ titre }}{% endblock %}
+{% block preheader %}Vous rejoignez le comité d'organisation de « {{ titre }} » ({{ date }}).{% endblock %}
+{% block surtitre %}Comité d'organisation{% endblock %}
+{% block titre %}Vous rejoignez l'organisation de « {{ titre }} »{% endblock %}
+{% block contenu %}
+<p style="margin:0 0 16px 0;">Madame {{ nom }}, la Responsable à l'organisation vous a désignée membre du comité d'organisation de cette activité.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0; border-top:1px solid #ece7ea;">
+  {% include "notifications/email/_ligne.html" with libelle="Activité" valeur=titre fort=True %}
+  {% include "notifications/email/_ligne.html" with libelle="Date" valeur=date %}
+  {% include "notifications/email/_ligne.html" with libelle="Lieu" valeur=lieu %}
+  {% if mission %}{% include "notifications/email/_ligne.html" with libelle="Votre mission" valeur=mission %}{% endif %}
+</table>
+{% include "notifications/email/_encadre.html" with ton="info" titre="Ce que vous pouvez faire" texte="Modifier la fiche de cette activité et suivre ses inscriptions. Sa publication et son éventuelle annulation restent décidées par la Responsable à l'organisation." %}
+{% endblock %}
+{% block action_ligne %}{% include "notifications/email/_bouton.html" with url=lien libelle="Ouvrir l'activité" %}{% endblock %}
