@@ -48,39 +48,37 @@ class TestExecutionTachesPlanifiees(TestCase):
         self.assertEqual(reponse.status_code, 405)
 
 
-@override_settings(CRON_SECRET='jeton-de-test',
-                   SUPERUSER_BOOTSTRAP_EMAIL='admin@afemc-ci.org',
-                   SUPERUSER_BOOTSTRAP_PASSWORD='MotDePasse2026!')
-class TestAmorcageAdministrateur(TestCase):
+class TestAmorcageAdministratrice(TestCase):
+    """Commande de build amorcer_administratrice (remplace /taches/amorcer-admin/)."""
 
-    def _appeler(self, jeton='jeton-de-test'):
-        entetes = {'HTTP_AUTHORIZATION': f'Bearer {jeton}'} if jeton is not None else {}
-        return self.client.get(reverse('core:amorcer_administrateur'), **entetes)
+    def _lancer(self, **env):
+        from io import StringIO
+        from unittest.mock import patch
+        from django.core.management import call_command
 
-    def test_refuse_sans_jeton(self):
-        reponse = self._appeler(jeton=None)
-        self.assertEqual(reponse.status_code, 403)
-        self.assertFalse(Utilisateur.objects.filter(is_superuser=True).exists())
+        sortie = StringIO()
+        with patch.dict('os.environ', env, clear=False):
+            call_command('amorcer_administratrice', stdout=sortie)
+        return sortie.getvalue()
 
-    def test_cree_le_compte_administrateur(self):
-        reponse = self._appeler()
-        self.assertEqual(reponse.status_code, 200)
+    def test_cree_le_compte_une_seule_fois(self):
+        from apps.accounts.models import Utilisateur
+
+        env = {'SUPERUSER_BOOTSTRAP_EMAIL': 'admin@afemc-ci.org',
+               'SUPERUSER_BOOTSTRAP_PASSWORD': 'MotDePasse2026!'}
+        self.assertIn('créé', self._lancer(**env))
         compte = Utilisateur.objects.get(email='admin@afemc-ci.org')
         self.assertTrue(compte.is_superuser)
-        self.assertTrue(compte.is_staff)
         self.assertEqual(compte.role, Utilisateur.Role.ADMIN)
-        self.assertTrue(compte.check_password('MotDePasse2026!'))
+        self.assertIn('déjà présent', self._lancer(**env))
+        self.assertEqual(Utilisateur.objects.filter(is_superuser=True).count(), 1)
 
-    def test_idempotente_si_un_administrateur_existe_deja(self):
-        Utilisateur.objects.create_superuser(
-            email='deja.la@afemc-ci.org', password='MotDePasse2026!',
-            nom='TEST', prenoms='Deja')
-        reponse = self._appeler()
-        self.assertEqual(reponse.status_code, 200)
-        self.assertIn('existe déjà', reponse.json()['info'])
-        self.assertFalse(Utilisateur.objects.filter(email='admin@afemc-ci.org').exists())
+    def test_sans_variables_ne_cree_rien(self):
+        from apps.accounts.models import Utilisateur
 
-    @override_settings(SUPERUSER_BOOTSTRAP_EMAIL='', SUPERUSER_BOOTSTRAP_PASSWORD='')
-    def test_refuse_si_non_configuree(self):
-        reponse = self._appeler()
-        self.assertEqual(reponse.status_code, 500)
+        self.assertIn("rien n'a été créé", self._lancer(SUPERUSER_BOOTSTRAP_EMAIL='',
+                                                         SUPERUSER_BOOTSTRAP_PASSWORD=''))
+        self.assertFalse(Utilisateur.objects.exists())
+
+    def test_l_ancienne_adresse_publique_n_existe_plus(self):
+        self.assertEqual(self.client.get('/taches/amorcer-admin/').status_code, 404)

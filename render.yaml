@@ -18,7 +18,7 @@ services:
     # retard n'a jamais pu être envoyée depuis la mise en service, sans
     # aucune erreur visible (RegleRelance.applicable() retourne simplement
     # None si aucune règle n'existe).
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py createcachetable && python manage.py charger_regles"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py createcachetable && python manage.py charger_regles && python manage.py amorcer_administratrice"
     # --timeout 90 : marge de sécurité pour /taches/executer/, qui peut
     # traiter plusieurs notifications en un seul appel HTTP.
     startCommand: "gunicorn config.wsgi:application --timeout 90"
@@ -36,10 +36,13 @@ services:
         value: ""
       - key: CRON_SECRET
         generateValue: true    # jeton attendu par /taches/executer/ (§ 7 du README)
+      # Lus par `amorcer_administratrice` au build, pour créer le premier compte
+      # d'administration s'il n'existe pas. À SUPPRIMER de Render une fois le
+      # compte créé : inutile ensuite, et un mot de passe en clair de moins.
       - key: SUPERUSER_BOOTSTRAP_EMAIL
-        sync: false             # email du premier compte administrateur (§ 7 du README)
+        sync: false
       - key: SUPERUSER_BOOTSTRAP_PASSWORD
-        sync: false             # mot de passe correspondant
+        sync: false
       - key: POSTGRES_DB
         fromDatabase: {name: afemc-ci-db, property: database}
       - key: POSTGRES_USER

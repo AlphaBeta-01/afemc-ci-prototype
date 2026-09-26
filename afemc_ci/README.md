@@ -94,7 +94,7 @@ confiée**, pas un compte à part. Écran réservé à la Présidente
 
 Chaque nomination et fin de fonctions est journalisée (RG09) et notifiée
 par courriel à la personne concernée. Le compte Présidente reste du ressort
-de `createsuperuser` / `/taches/amorcer-admin/` et ne peut recevoir aucune
+de `createsuperuser` / `amorcer_administratrice` et ne peut recevoir aucune
 autre fonction ici. Une responsable voit ses propres cotisations sur sa
 fiche (lien depuis « Mon profil »).
 
@@ -497,16 +497,16 @@ services et les crée en un seul clic, plutôt que de les configurer un par un.
    (`SUPERUSER_BOOTSTRAP_EMAIL`, `SUPERUSER_BOOTSTRAP_PASSWORD`). Tout le
    reste (secret Django, connexion PostgreSQL, jeton `CRON_SECRET`, nom
    d'hôte, `SITE_URL`) est déduit ou généré automatiquement.
-4. Une fois déployé, créer effectivement ce compte administrateur — le Shell
-   Render exige le plan payant Starter, indisponible en gratuit ; un point
-   d'entrée HTTP protégé par jeton en tient lieu :
-   ```bash
-   curl -H "Authorization: Bearer <CRON_SECRET, onglet Environment du service>" \
-        https://afemc-ci-web.onrender.com/taches/amorcer-admin/
-   ```
-   Idempotente : ne fait rien si un compte administrateur existe déjà, donc
-   sans risque à rappeler par erreur. Se connecter ensuite avec
-   `SUPERUSER_BOOTSTRAP_EMAIL` / `SUPERUSER_BOOTSTRAP_PASSWORD`.
+4. Le compte d'administration est créé automatiquement pendant le build par
+   la commande `amorcer_administratrice` (le Shell Render, qui permettrait
+   `createsuperuser`, exige le plan payant). Elle ne fait rien si un compte
+   d'administration existe déjà. Se connecter ensuite avec
+   `SUPERUSER_BOOTSTRAP_EMAIL` / `SUPERUSER_BOOTSTRAP_PASSWORD`, puis
+   **supprimer ces deux variables de Render** (onglet Environment) : elles ne
+   servent plus, et le mot de passe n'a pas à rester en clair dans la
+   configuration. L'ancien point d'entrée HTTP `/taches/amorcer-admin/` a été
+   supprimé : plus aucune adresse publique ne permet de créer un compte
+   d'administration.
 
 ### Tâches planifiées sans worker (Background Workers indisponibles en gratuit)
 
