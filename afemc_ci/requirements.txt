@@ -1,6 +1,6 @@
 Django==5.2.17              # LTS : correctifs de sécurité jusqu'en avril 2028 (5.0 : fin en avril 2025)
 psycopg[binary]==3.3.5
-celery==5.3.6
+celery==5.6.3
 redis==5.0.1
 gunicorn==26.2.0           # serveur WSGI de production (22.x : faille de « request smuggling »)
 whitenoise==6.12.0         # sert les fichiers statiques sans serveur dédié
