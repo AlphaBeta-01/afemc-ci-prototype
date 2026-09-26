@@ -29,11 +29,11 @@ class Cotisation(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['membre', 'exercice'],
                                     name='unicite_cotisation_membre_exercice'),
-            models.CheckConstraint(check=Q(montant_du__gt=0),
+            models.CheckConstraint(condition=Q(montant_du__gt=0),
                                    name='montant_du_positif'),
-            models.CheckConstraint(check=Q(montant_paye__gte=0),
+            models.CheckConstraint(condition=Q(montant_paye__gte=0),
                                    name='montant_paye_non_negatif'),
-            models.CheckConstraint(check=Q(montant_paye__lte=F('montant_du')),
+            models.CheckConstraint(condition=Q(montant_paye__lte=F('montant_du')),
                                    name='paye_inferieur_ou_egal_au_du'),
         ]
         indexes = [
@@ -72,7 +72,7 @@ class Paiement(models.Model):
         verbose_name_plural = 'paiements'
         ordering = ['-date_paiement']
         constraints = [
-            models.CheckConstraint(check=Q(montant__gt=0), name='montant_paiement_positif'),
+            models.CheckConstraint(condition=Q(montant__gt=0), name='montant_paiement_positif'),
         ]
 
     def __str__(self):

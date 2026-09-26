@@ -175,20 +175,20 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="cotisation",
             constraint=models.CheckConstraint(
-                check=models.Q(("montant_du__gt", 0)), name="montant_du_positif"
+                condition=models.Q(("montant_du__gt", 0)), name="montant_du_positif"
             ),
         ),
         migrations.AddConstraint(
             model_name="cotisation",
             constraint=models.CheckConstraint(
-                check=models.Q(("montant_paye__gte", 0)),
+                condition=models.Q(("montant_paye__gte", 0)),
                 name="montant_paye_non_negatif",
             ),
         ),
         migrations.AddConstraint(
             model_name="cotisation",
             constraint=models.CheckConstraint(
-                check=models.Q(("montant_paye__lte", models.F("montant_du"))),
+                condition=models.Q(("montant_paye__lte", models.F("montant_du"))),
                 name="paye_inferieur_ou_egal_au_du",
             ),
         ),
@@ -201,7 +201,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="paiement",
             constraint=models.CheckConstraint(
-                check=models.Q(("montant__gt", 0)), name="montant_paiement_positif"
+                condition=models.Q(("montant__gt", 0)), name="montant_paiement_positif"
             ),
         ),
     ]

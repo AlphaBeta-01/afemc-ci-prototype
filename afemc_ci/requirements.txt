@@ -1,9 +1,9 @@
-Django==5.0.14
+Django==5.2.17              # LTS : correctifs de sécurité jusqu'en avril 2028 (5.0 : fin en avril 2025)
 psycopg[binary]==3.3.5
 celery==5.3.6
 redis==5.0.1
-gunicorn==22.0.0           # serveur WSGI de production
-whitenoise==6.7.0          # sert les fichiers statiques sans serveur dédié
+gunicorn==26.2.0           # serveur WSGI de production (22.x : faille de « request smuggling »)
+whitenoise==6.12.0         # sert les fichiers statiques sans serveur dédié
 django-anymail==11.1       # envoi via l'API HTTP de Brevo (le SMTP sortant
                             # s'est révélé peu fiable sur le réseau gratuit de Render)
 fpdf2==2.8.8                # génération du reçu de cotisation en PDF — pur Python,
