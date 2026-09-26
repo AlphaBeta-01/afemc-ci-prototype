@@ -156,6 +156,9 @@ a.card, .card.h-100 { transition: box-shadow .2s ease, transform .2s ease; }
 .vignette:hover { transform: translateY(-2px); box-shadow: var(--afemc-ombre-hover); }
 .vignette .valeur { font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--afemc-marine); }
 .vignette .intitule { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: #6c757d; }
+/* Précision sous un chiffre (« actifs », « à traiter ») : lève l'ambiguïté
+   d'un intitulé court sans l'alourdir. */
+.precision { font-size: .75rem; color: #6c757d; margin-top: .2rem; }
 .vignette.alerte { border-left-color: #dc3545; }
 .vignette.attention { border-left-color: var(--afemc-rose); }
 .vignette.succes { border-left-color: #198754; }

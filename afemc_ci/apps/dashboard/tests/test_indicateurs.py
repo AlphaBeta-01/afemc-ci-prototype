@@ -90,7 +90,7 @@ class TestAccesTableauDeBord(TestCase):
             nom='TRAORE', prenoms='Mariam', role=Utilisateur.Role.RESP_FINANCIER)
         self.client.force_login(financier)
         reponse = self.client.get(reverse('dashboard:accueil'))
-        self.assertNotContains(reponse, 'Demandes en attente')
+        self.assertNotContains(reponse, "Demandes d'adhésion")
         self.assertNotContains(reponse, "Demandes d'adhésion à traiter")
 
     def test_le_responsable_administratif_voit_les_adhesions(self):
@@ -99,7 +99,7 @@ class TestAccesTableauDeBord(TestCase):
             nom='KONE', prenoms='Aya', role=Utilisateur.Role.RESP_ADMIN)
         self.client.force_login(administratif)
         reponse = self.client.get(reverse('dashboard:accueil'))
-        self.assertContains(reponse, 'Demandes en attente')
+        self.assertContains(reponse, "Demandes d'adhésion</div>")
         self.assertContains(reponse, "Demandes d'adhésion à traiter")
 
     def test_le_responsable_de_section_a_un_tableau_de_bord_dedie(self):

@@ -1,7 +1,7 @@
 {% extends "notifications/email/base.html" %}
 {% load courriel %}
 {% block titre_document %}Synthèse hebdomadaire — exercice {{ exercice }}{% endblock %}
-{% block preheader %}{{ retards }} cotisation(s) en retard · recouvrement {{ taux|virgule }} % · {{ reste|fcfa }} à recouvrer.{% endblock %}
+{% block preheader %}{{ retards }} cotisation(s) en retard · recouvrement {{ taux|virgule }} % · {{ reste|fcfa }} restant à payer.{% endblock %}
 {% block surtitre %}Synthèse hebdomadaire · exercice {{ exercice }}{% endblock %}
 {% block titre %}Bonjour {{ responsable }}{% endblock %}
 {% block contenu %}
@@ -11,8 +11,9 @@
   <tr>
     <td width="50%" style="padding:0 6px 12px 0; vertical-align:top;">
       <div style="background-color:#eef1f8; border-radius:10px; padding:16px;">
-        <div style="font-size:13px; line-height:18px; color:#5b6180;">Membres actifs</div>
+        <div style="font-size:13px; line-height:18px; color:#5b6180;">Membres</div>
         <div style="font-size:28px; line-height:36px; font-weight:700; color:#12204f;">{{ effectif }}</div>
+        <div style="font-size:12px; line-height:16px; color:#5b6180;">actifs</div>
       </div>
     </td>
     <td width="50%" style="padding:0 0 12px 6px; vertical-align:top;">
@@ -31,7 +32,7 @@
     </td>
     <td width="50%" style="padding:0 0 0 6px; vertical-align:top;">
       <div style="background-color:#eef1f8; border-radius:10px; padding:16px;">
-        <div style="font-size:13px; line-height:18px; color:#5b6180;">Reste à recouvrer</div>
+        <div style="font-size:13px; line-height:18px; color:#5b6180;">Reste à payer</div>
         <div style="font-size:22px; line-height:36px; font-weight:700; color:#12204f;">{{ reste|fcfa }}</div>
       </div>
     </td>

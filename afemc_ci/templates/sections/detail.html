@@ -6,7 +6,8 @@
 
 <div class="row g-3 mb-4">
   <div class="col-6 col-lg-3"><div class="card vignette"><div class="card-body py-3">
-    <div class="intitule">Membres actifs</div><div class="h5 mb-0">{{ section.effectif_actif }}</div>
+    <div class="intitule">Membres</div><div class="h5 mb-0">{{ section.effectif_actif }}</div>
+    <div class="precision">actifs</div>
   </div></div></div>
   <div class="col-6 col-lg-3"><div class="card vignette succes"><div class="card-body py-3">
     <div class="intitule">Recouvrement</div>
@@ -16,7 +17,7 @@
     <div class="intitule">En retard</div><div class="h5 mb-0">{{ indicateurs.nb_retard }}</div>
   </div></div></div>
   <div class="col-6 col-lg-3"><div class="card vignette attention"><div class="card-body py-3">
-    <div class="intitule">Reste à recouvrer</div>
+    <div class="intitule">Reste à payer</div>
     <div class="h5 mb-0">{{ indicateurs.reste_a_recouvrer|floatformat:0 }} FCFA</div>
   </div></div></div>
 </div>

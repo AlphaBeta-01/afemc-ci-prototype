@@ -21,8 +21,9 @@
 <div class="row g-3 mb-4">
   <div class="col-6 {% if user.role == 'RESP_FINANCIER' %}col-lg-4{% else %}col-lg-3{% endif %}">
     <div class="card vignette succes h-100"><div class="card-body">
-      <div class="intitule">Membres actifs</div>
+      <div class="intitule">Membres</div>
       <div class="valeur">{{ indicateurs.effectif_total }}</div>
+      <div class="precision">actifs</div>
     </div></div>
   </div>
   <div class="col-6 {% if user.role == 'RESP_FINANCIER' %}col-lg-4{% else %}col-lg-3{% endif %}">
@@ -40,8 +41,9 @@
   {% if user.role != 'RESP_FINANCIER' %}
   <div class="col-6 col-lg-3">
     <div class="card vignette attention h-100"><div class="card-body">
-      <div class="intitule">Demandes en attente</div>
+      <div class="intitule">Demandes d'adhésion</div>
       <div class="valeur">{{ indicateurs.demandes_en_attente }}</div>
+      <div class="precision">à traiter</div>
     </div></div>
   </div>
   {% endif %}
@@ -56,13 +58,13 @@
   </div>
   <div class="col-6 col-lg-3">
     <div class="card h-100"><div class="card-body">
-      <div class="intitule">Montant encaissé</div>
+      <div class="intitule">Montant réellement encaissé</div>
       <div class="h5 mb-0">{{ indicateurs.total_paye|floatformat:0 }} FCFA</div>
     </div></div>
   </div>
   <div class="col-6 col-lg-3">
     <div class="card h-100"><div class="card-body">
-      <div class="intitule">Reste à recouvrer</div>
+      <div class="intitule">Reste à payer</div>
       <div class="h5 mb-0">{{ indicateurs.reste_a_recouvrer|floatformat:0 }} FCFA</div>
     </div></div>
   </div>
@@ -161,7 +163,7 @@ const statuts = lire('donneesStatuts');
 new Chart(document.getElementById('graphiqueSections'), {
   type: 'bar',
   data: { labels: sections.libelles,
-          datasets: [{ label: 'Membres actifs', data: sections.effectifs,
+          datasets: [{ label: 'Membres', data: sections.effectifs,
                        backgroundColor: '#12204f', borderRadius: 6, maxBarThickness: 36 }] },
   options: { plugins: { legend: { display: false } },
              scales: { y: { beginAtZero: true, grid: { color: '#eef0f4' } },
