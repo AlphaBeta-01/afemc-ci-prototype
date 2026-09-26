@@ -294,12 +294,12 @@ ceux du chapitre 6**, à mettre à jour dans le mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 208 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
+| Tests unitaires | 215 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
 | Scénarios du moteur (SC01-SC24 et compléments) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration | 12 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF32) | 34 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF32 nouveaux) |
-| Tests de sécurité (TS01-TS13) | 13 | `apps/core/tests/test_securite.py` (TS11-TS13 nouveaux) |
-| **Total** | **293** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
+| Tests de sécurité (TS01-TS16) | 16 | `apps/core/tests/test_securite.py` et `test_limites.py` (TS11-TS16 nouveaux) |
+| **Total** | **303** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
 
 Historique : le chapitre 6 en décrivait 126, puis 192 après l'ajout des
 fonctionnalités ci-dessous ; les suivants couvrent les courriels HTML,
@@ -323,7 +323,11 @@ conservé) ; TF28 porte désormais sur le compte externe.
 **TS11-TS12** formalisent les deux failles trouvées et corrigées lors de la
 revue de sécurité (accès au détail d'une section, accès à une pièce
 justificative). **TS13** vérifie que les droits d'une responsable sont
-retirés immédiatement en fin de fonctions, même pour une session ouverte. Si le corps du mémoire doit en rendre compte, ce sont ces
+retirés immédiatement en fin de fonctions, même pour une session ouverte.
+**TS14 à TS16** (revue de sécurité du 26/09/2026) : connexion à
+l'administration soumise au verrouillage du compte, limites de fréquence
+et champ piège des formulaires publics, contrôle du contenu réel des
+pièces justificatives, déconnexion après 30 minutes d'inactivité. Si le corps du mémoire doit en rendre compte, ce sont ces
 identifiants qu'il convient de citer.
 
 ### Nouvelles règles de gestion (RG11, RG12, RG13)
