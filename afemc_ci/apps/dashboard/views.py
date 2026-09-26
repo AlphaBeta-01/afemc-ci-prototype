@@ -102,3 +102,19 @@ def _tableau_de_bord_section(requete):
         # Les 10 dernières inscrites, affichées de A à Z.
         'membres_recents': trier_par_nom(membres.order_by('-cree_le')[:10]),
     })
+
+
+@login_required
+def a_faire(requete):
+    """« À faire » de l'utilisatrice connectée, selon sa fonction (voir taches.py)."""
+    from itertools import groupby
+
+    from .taches import LIBELLES_PRIORITES, taches_pour
+
+    taches = taches_pour(requete.user)
+    groupes = [(priorite, LIBELLES_PRIORITES[priorite], list(elements))
+               for priorite, elements in groupby(taches, key=lambda t: t.priorite)]
+    return render(requete, 'dashboard/a_faire.html', {
+        'groupes': groupes,
+        'aujourdhui': timezone.localdate(),
+    })

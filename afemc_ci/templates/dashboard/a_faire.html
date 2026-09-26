@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block titre %}À faire — AFEMC-CI{% endblock %}
+{% block contenu %}
+
+<div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+  <h1 class="h4 mb-0">À faire aujourd'hui</h1>
+  <span class="text-muted small">{{ aujourdhui|date:'l j F Y'|capfirst }}</span>
+</div>
+<p class="text-muted small mb-4">
+  {% if user.role == 'MEMBRE' %}Votre situation vis-à-vis de l'association.
+  {% else %}Ce qui relève de votre fonction de {{ user.get_role_display }}{% if user.role == 'RESP_SECTION' and user.section %} — {{ user.section }}{% endif %}, les plus urgents d'abord.{% endif %}
+</p>
+
+{% for priorite, libelle, taches in groupes %}
+  <h2 class="h6 text-uppercase mb-2 mt-4 a-faire-groupe {{ priorite }}">{{ libelle }}</h2>
+  <div class="row g-3">
+  {% for tache in taches %}
+    <div class="col-lg-6">
+      <div class="card h-100 tache {{ priorite }}"><div class="card-body d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+          <h3 class="h6 mb-0">{{ tache.titre }}</h3>
+          {% if tache.nombre > 1 or tache.elements %}<span class="badge rounded-pill text-bg-light border">{{ tache.nombre }}</span>{% endif %}
+        </div>
+        <p class="small text-muted mb-2">{{ tache.explication }}</p>
+
+        {% if tache.elements %}
+        <div class="table-responsive mb-2">
+        <table class="table table-sm small align-middle mb-0">
+          <thead><tr>
+            {% if tache.elements_sont_des_personnes %}<th>Nom</th><th>Prénoms</th>{% else %}<th>Section</th>{% endif %}
+            <th class="d-none d-sm-table-cell"></th>
+          </tr></thead>
+          <tbody>
+          {% for element in tache.elements_affiches %}
+            <tr>
+              <td>{% if element.url %}<a href="{{ element.url }}">{{ element.nom }}</a>{% else %}{{ element.nom }}{% endif %}</td>
+              {% if tache.elements_sont_des_personnes %}<td>{{ element.prenoms }}</td>{% endif %}
+              <td class="text-muted d-none d-sm-table-cell">{{ element.detail }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+        {% if tache.elements_masques %}<p class="small text-muted mb-2">… et {{ tache.elements_masques }} autre{{ tache.elements_masques|pluralize }}.</p>{% endif %}
+        {% endif %}
+
+        {% if tache.url and tache.action %}
+          <div class="mt-auto pt-1"><a href="{{ tache.url }}" class="btn btn-sm {% if priorite == 'urgent' %}btn-danger{% else %}btn-outline-primary{% endif %}">{{ tache.action }}</a></div>
+        {% endif %}
+      </div></div>
+    </div>
+  {% endfor %}
+  </div>
+{% empty %}
+  <div class="card"><div class="card-body text-center py-5">
+    <div class="h5 mb-1">Tout est à jour</div>
+    <p class="text-muted mb-0">
+      {% if user.role == 'MEMBRE' %}Aucune cotisation en attente de règlement. Merci !
+      {% else %}Rien ne requiert votre attention pour le moment.{% endif %}
+    </p>
+  </div></div>
+{% endfor %}
+{% endblock %}

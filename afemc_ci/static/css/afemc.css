@@ -173,3 +173,25 @@ a.card, .card.h-100 { transition: box-shadow .2s ease, transform .2s ease; }
   box-shadow: var(--afemc-ombre-hover);
   border-top: 3px solid var(--afemc-rose);
 }
+
+/* ----- « À faire » : une couleur par priorité, le libellé du groupe le dit
+   aussi en toutes lettres (la couleur ne porte jamais seule le sens). ----- */
+.tache { border-left: 4px solid var(--afemc-marine-claire); }
+.tache.urgent { border-left-color: #dc3545; }
+.tache.a_faire { border-left-color: var(--afemc-rose); }
+.a-faire-groupe { letter-spacing: .04em; color: var(--afemc-marine-claire); }
+.a-faire-groupe.urgent { color: #b02a37; }
+.a-faire-groupe.a_faire { color: var(--afemc-rose-fonce); }
+/* Bouton « À faire » : repérable d'un coup d'œil dans la barre, sans
+   passer à la ligne même quand la Présidente a tous ses menus. */
+.navbar .nav-link { white-space: nowrap; }
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  .navbar-dark .navbar-nav .nav-link { padding-left: .45rem; padding-right: .45rem; }
+  .navbar .navbar-text { font-size: .85rem; line-height: 1.2; }
+}
+.navbar .bouton-a-faire {
+  border: 1px solid rgba(255, 255, 255, .45); border-radius: 999px;
+  padding: .2rem .75rem !important; margin: .2rem 0; color: #fff !important;
+}
+.navbar .bouton-a-faire:hover, .navbar .bouton-a-faire:focus { background: rgba(255, 255, 255, .12); }
+.bouton-a-faire .badge { font-size: .7rem; margin-left: .2rem; vertical-align: text-top; }

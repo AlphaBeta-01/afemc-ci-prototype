@@ -117,6 +117,25 @@ paiement (rôle exclusif) : à faire juste après le déploiement. Une
 ancienne responsable qui reçoit une fiche en cours d'année n'a pas de
 cotisation pour l'exercice courant : l'émettre via « Émission collective ».
 
+### « À faire » : les tâches du jour selon la fonction
+
+Un bouton **À faire** dans la barre de navigation, avec un compteur (rouge
+s'il y a une urgence), ouvre `/tableau-de-bord/a-faire/` : la liste de ce que
+la personne connectée a à traiter, recalculée à chaque consultation
+(`apps/dashboard/taches.py`), classée en *Urgent*, *À faire* et *À surveiller*,
+chaque tâche menant directement à l'écran concerné.
+
+| Fonction | Tâches |
+|---|---|
+| Présidente | fonctions vacantes (Trésorière : urgent), sections sans Coordinatrice, demandes d'adhésion, cotisations à émettre, courriels non distribués, responsables n'ayant pas activé leur compte, retards de plus de 90 jours |
+| Secrétaire générale | demandes d'adhésion (urgent au-delà de 7 jours), membres n'ayant pas activé leur compte |
+| Trésorière | retards de plus de 90 jours (urgent), de 45 à 90 jours, cotisations à émettre, paiements partiels, échéances à 15 jours |
+| Coordinatrice | membres de sa section à contacter (retard ≥ seuil de R04, **noms seulement**, sans montant — RG08), fiches à compléter, nouvelles membres, membres inactifs ou suspendus |
+| Membre | sa propre cotisation : reste à payer et échéance, ou « Tout est à jour » |
+
+Chaque lien proposé est vérifié par les tests comme accessible à la fonction
+concernée : une tâche ne mène jamais à un écran « Accès refusé ».
+
 ### Compte du membre admis (activation par courriel)
 
 Valider une demande d'adhésion (`/adhesions/<id>/traiter/`) ne se limite pas à créer
@@ -267,12 +286,12 @@ ceux du chapitre 6**, à mettre à jour dans le mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 185 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
+| Tests unitaires | 201 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
 | Scénarios du moteur (SC01-SC24 et compléments) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration | 12 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF32) | 34 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF32 nouveaux) |
 | Tests de sécurité (TS01-TS13) | 13 | `apps/core/tests/test_securite.py` (TS11-TS13 nouveaux) |
-| **Total** | **270** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
+| **Total** | **286** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
 
 Historique : le chapitre 6 en décrivait 126, puis 192 après l'ajout des
 fonctionnalités ci-dessous ; les suivants couvrent les courriels HTML,
