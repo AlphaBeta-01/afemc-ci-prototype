@@ -43,13 +43,14 @@
     </div>
     <div class="table-responsive">
     <table class="table table-sm align-middle mb-0">
-      <thead><tr><th class="d-none d-md-table-cell">Matricule</th><th>Nom et prénoms</th>
+      <thead><tr><th class="d-none d-md-table-cell">Matricule</th><th>Nom</th><th>Prénoms</th>
           <th class="d-none d-md-table-cell">Adhésion</th><th>Statut</th></tr></thead>
       <tbody>
       {% for membre in membres_recents %}
         <tr>
           <td class="font-monospace small d-none d-md-table-cell">{{ membre.matricule }}</td>
-          <td><a href="{% url 'membres:detail' membre.pk %}">{{ membre.nom_complet }}</a></td>
+          <td><a href="{% url 'membres:detail' membre.pk %}">{{ membre.nom }}</a></td>
+          <td>{{ membre.prenoms }}</td>
           <td class="small d-none d-md-table-cell">{{ membre.date_adhesion|date:'d/m/Y' }}</td>
           <td>
             {% if membre.statut == 'ACTIF' %}<span class="badge text-bg-success badge-statut">Actif</span>
@@ -58,7 +59,7 @@
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="4" class="text-muted p-4 text-center">Aucun membre dans cette section.</td></tr>
+        <tr><td colspan="5" class="text-muted p-4 text-center">Aucun membre dans cette section.</td></tr>
       {% endfor %}
       </tbody>
     </table>

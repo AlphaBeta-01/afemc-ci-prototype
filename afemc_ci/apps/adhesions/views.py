@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.core.decorators import role_requis
 from apps.core.services import journaliser
-from apps.core.utils import paginer
+from apps.core.utils import ordre_alphabetique, paginer
 
 from .forms import FormsetPiecesJustificatives, FormulaireDemande
 from .models import DemandeAdhesion, PieceJustificative
@@ -39,7 +39,8 @@ def soumettre(requete):
 @login_required
 @role_requis('ADMIN', 'RESP_ADMIN')          # pas RESP_SECTION
 def liste(requete):
-    demandes = DemandeAdhesion.objects.select_related('section')
+    demandes = (DemandeAdhesion.objects.select_related('section')
+                .order_by(*ordre_alphabetique(), '-date_soumission'))
     if not requete.user.voit_toutes_les_sections and requete.user.section_id:
         demandes = demandes.filter(section_id=requete.user.section_id)
     if requete.GET.get('statut'):

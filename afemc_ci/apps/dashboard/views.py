@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from apps.adhesions.models import DemandeAdhesion
+from apps.core.utils import trier_par_nom
 from apps.membres.models import Membre
 
 from .services import (evolution_mensuelle, indicateurs_globaux,
@@ -68,10 +69,12 @@ def accueil(requete):
         'exercices': range(timezone.localdate().year - 3, timezone.localdate().year + 2),
         'section': section,
         'sections': sections,
-        'retards': situations_a_examiner(exercice, section),
-        'demandes': DemandeAdhesion.objects.filter(
+        # Sélection par urgence (retards les plus anciens), affichage de A à Z.
+        'retards': trier_par_nom(situations_a_examiner(exercice, section),
+                                 personne=lambda c: c.membre),
+        'demandes': trier_par_nom(DemandeAdhesion.objects.filter(
             statut__in=[DemandeAdhesion.Statut.EN_ATTENTE,
-                        DemandeAdhesion.Statut.EN_EXAMEN])[:5],
+                        DemandeAdhesion.Statut.EN_EXAMEN]).select_related('section')[:5]),
         'donnees_sections': json.dumps(donnees_sections, cls=EncodeurDecimal),
         'donnees_evolution': json.dumps(donnees_evolution, cls=EncodeurDecimal),
         'donnees_statuts': json.dumps(donnees_statuts, cls=EncodeurDecimal),
@@ -96,5 +99,6 @@ def _tableau_de_bord_section(requete):
         'effectif_actif': membres.filter(statut=Membre.Statut.ACTIF).count(),
         'effectif_inactif': membres.filter(statut=Membre.Statut.INACTIF).count(),
         'effectif_suspendu': membres.filter(statut=Membre.Statut.SUSPENDU).count(),
-        'membres_recents': membres.order_by('-cree_le')[:10],
+        # Les 10 dernières inscrites, affichées de A à Z.
+        'membres_recents': trier_par_nom(membres.order_by('-cree_le')[:10]),
     })

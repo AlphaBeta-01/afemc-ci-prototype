@@ -37,16 +37,20 @@
   <div class="col-lg-4">
     <div class="card"><div class="card-body">
       <h2 class="h6 mb-3">Fonctions actuellement occupées</h2>
-      <ul class="list-unstyled small mb-0">
+      <table class="table table-sm small align-middle mb-0">
+        <thead><tr><th>Nom</th><th>Prénoms</th><th>Fonction</th></tr></thead>
+        <tbody>
         {% for titulaire in titulaires %}
-          <li class="mb-2">
-            <strong>{{ titulaire.get_role_display }}</strong>{% if titulaire.section %} · {{ titulaire.section }}{% endif %}<br>
-            <span class="text-muted">{{ titulaire.nom_complet }}</span>
-          </li>
+          <tr>
+            <td>{{ titulaire.nom }}</td>
+            <td>{{ titulaire.prenoms }}</td>
+            <td>{{ titulaire.get_role_display }}{% if titulaire.section %}<div class="text-muted">{{ titulaire.section }}</div>{% endif %}</td>
+          </tr>
         {% empty %}
-          <li class="text-muted">Aucune fonction occupée pour le moment.</li>
+          <tr><td colspan="3" class="text-muted">Aucune fonction occupée pour le moment.</td></tr>
         {% endfor %}
-      </ul>
+        </tbody>
+      </table>
     </div></div>
   </div>
 </div>

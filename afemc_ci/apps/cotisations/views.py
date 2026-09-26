@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from apps.core.decorators import role_requis
-from apps.core.utils import paginer
+from apps.core.utils import ordre_alphabetique, paginer
 from apps.membres.models import Membre
 
 from .forms import FormulaireEmission, FormulairePaiement
@@ -27,7 +27,7 @@ def liste(requete):
     if requete.GET.get('statut'):
         cotisations = cotisations.filter(statut=requete.GET['statut'])
     return render(requete, 'cotisations/liste.html', {
-        'page': paginer(cotisations.order_by('membre__nom'), requete),
+        'page': paginer(cotisations.order_by(*ordre_alphabetique('membre__')), requete),
         'exercice': exercice,
         'statuts': Cotisation.Statut.choices,
         'parametres': requete.GET,
@@ -86,7 +86,8 @@ def exporter_csv(requete):
     for c in (Cotisation.objects
               .filter(exercice=exercice,
                       membre__in=Membre.objects.visibles_par(requete.user))
-              .select_related('membre', 'membre__section').order_by('membre__nom')):
+              .select_related('membre', 'membre__section')
+              .order_by(*ordre_alphabetique('membre__'))):
         plume.writerow([c.membre.matricule, c.membre.nom, c.membre.prenoms,
                         c.membre.section.libelle, c.exercice, c.montant_du,
                         c.montant_paye, c.reste_a_payer, c.date_echeance,

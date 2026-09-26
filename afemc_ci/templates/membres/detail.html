@@ -25,6 +25,8 @@
     <div class="card"><div class="card-body">
       <h2 class="h6 mb-3">Identité et rattachement</h2>
       <dl class="row small mb-0">
+        <dt class="col-5">Nom</dt><dd class="col-7">{{ membre.nom }}</dd>
+        <dt class="col-5">Prénoms</dt><dd class="col-7">{{ membre.prenoms }}</dd>
         <dt class="col-5">Adresse électronique</dt><dd class="col-7 text-break">{{ membre.email }}</dd>
         <dt class="col-5">Téléphone</dt><dd class="col-7">{{ membre.telephone|default:'—' }}</dd>
         <dt class="col-5">Grade</dt><dd class="col-7">{{ membre.grade|default:'—' }}</dd>

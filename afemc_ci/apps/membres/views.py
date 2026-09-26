@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.core.decorators import role_requis
 from apps.core.services import journaliser
-from apps.core.utils import paginer
+from apps.core.utils import ordre_alphabetique, paginer
 
 from .forms import FormulaireMembre
 from .models import Membre
@@ -31,7 +31,7 @@ def appliquer_filtres(selection, parametres):
 def liste(requete):
     from apps.sections.models import Section
     membres = (Membre.objects.visibles_par(requete.user)
-               .select_related('section').order_by('nom', 'prenoms'))
+               .select_related('section').order_by(*ordre_alphabetique()))
     membres = appliquer_filtres(membres, requete.GET)
     return render(requete, 'membres/liste.html', {
         'page': paginer(membres, requete),

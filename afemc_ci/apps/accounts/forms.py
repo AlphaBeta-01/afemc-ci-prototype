@@ -1,5 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
+from django.db.models.functions import Lower
+
+from apps.core.utils import ordre_alphabetique
 
 from .models import Utilisateur
 from .services import ROLES_ATTRIBUABLES
@@ -129,8 +132,8 @@ class FormulaireNomination(forms.Form):
         self.fields['membre'].queryset = (
             Membre.objects.filter(statut=Membre.Statut.ACTIF)
             .exclude(utilisateur__role=Utilisateur.Role.ADMIN)
-            .select_related('section').order_by('nom', 'prenoms'))
+            .select_related('section').order_by(*ordre_alphabetique()))
         self.fields['role'].choices = [('', '---------')] + [
             (valeur, libelle) for valeur, libelle in Utilisateur.Role.choices
             if valeur in ROLES_ATTRIBUABLES]
-        self.fields['section'].queryset = Section.objects.order_by('libelle')
+        self.fields['section'].queryset = Section.objects.order_by(Lower('libelle'))

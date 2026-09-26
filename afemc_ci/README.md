@@ -262,17 +262,17 @@ coverage report
 coverage html            # rapport détaillé dans htmlcov/index.html
 ```
 
-Chiffres au 24/09/2026 (`python manage.py test apps`) — **ils diffèrent de
+Chiffres au 26/09/2026 (`python manage.py test apps`) — **ils diffèrent de
 ceux du chapitre 6**, à mettre à jour dans le mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 174 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
+| Tests unitaires | 185 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
 | Scénarios du moteur (SC01-SC24 et compléments) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration | 12 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF32) | 34 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF32 nouveaux) |
 | Tests de sécurité (TS01-TS13) | 13 | `apps/core/tests/test_securite.py` (TS11-TS13 nouveaux) |
-| **Total** | **259** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
+| **Total** | **270** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
 
 Historique : le chapitre 6 en décrivait 126, puis 192 après l'ajout des
 fonctionnalités ci-dessous ; les suivants couvrent les courriels HTML,

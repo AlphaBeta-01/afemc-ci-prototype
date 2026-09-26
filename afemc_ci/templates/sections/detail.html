@@ -23,13 +23,14 @@
 
 <div class="card"><div class="table-responsive">
   <table class="table table-sm table-hover align-middle mb-0">
-    <thead class="table-light"><tr><th class="d-none d-md-table-cell">Matricule</th><th>Membre</th>
+    <thead class="table-light"><tr><th class="d-none d-md-table-cell">Matricule</th><th>Nom</th><th>Prénoms</th>
         <th class="d-none d-md-table-cell">Grade</th><th>Statut</th></tr></thead>
     <tbody>
     {% for membre in membres %}
       <tr>
         <td class="font-monospace small d-none d-md-table-cell">{{ membre.matricule }}</td>
-        <td><a href="{% url 'membres:detail' membre.pk %}">{{ membre.nom_complet }}</a></td>
+        <td><a href="{% url 'membres:detail' membre.pk %}">{{ membre.nom }}</a></td>
+        <td>{{ membre.prenoms }}</td>
         <td class="small d-none d-md-table-cell">{{ membre.grade|default:'—' }}</td>
         <td>{{ membre.get_statut_display }}</td>
       </tr>

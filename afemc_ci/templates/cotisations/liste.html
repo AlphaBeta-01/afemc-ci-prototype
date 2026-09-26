@@ -53,7 +53,7 @@
 <div class="card"><div class="table-responsive">
   <table class="table table-hover table-sm align-middle mb-0">
     <thead class="table-light">
-      <tr><th class="d-none d-md-table-cell">Matricule</th><th>Membre</th>
+      <tr><th class="d-none d-md-table-cell">Matricule</th><th>Nom</th><th>Prénoms</th>
           <th class="d-none d-md-table-cell">Section</th>
           <th class="text-end d-none d-md-table-cell">Dû</th>
           <th class="text-end d-none d-md-table-cell">Payé</th>
@@ -64,7 +64,8 @@
     {% for cotisation in page %}
       <tr>
         <td class="font-monospace small d-none d-md-table-cell">{{ cotisation.membre.matricule }}</td>
-        <td><a href="{% url 'membres:detail' cotisation.membre.pk %}">{{ cotisation.membre.nom_complet }}</a></td>
+        <td><a href="{% url 'membres:detail' cotisation.membre.pk %}">{{ cotisation.membre.nom }}</a></td>
+        <td>{{ cotisation.membre.prenoms }}</td>
         <td class="small d-none d-md-table-cell">{{ cotisation.membre.section.libelle }}</td>
         <td class="text-end d-none d-md-table-cell">{{ cotisation.montant_du|floatformat:0 }}</td>
         <td class="text-end d-none d-md-table-cell">{{ cotisation.montant_paye|floatformat:0 }}</td>
@@ -86,7 +87,7 @@
         </td>
       </tr>
     {% empty %}
-      <tr><td colspan="9" class="text-muted p-4 text-center">Aucune cotisation pour cet exercice.</td></tr>
+      <tr><td colspan="10" class="text-muted p-4 text-center">Aucune cotisation pour cet exercice.</td></tr>
     {% endfor %}
     </tbody>
   </table>

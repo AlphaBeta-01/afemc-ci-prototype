@@ -101,18 +101,19 @@
       <h2 class="h6 mb-3">Situations appelant une attention</h2>
       <div class="table-responsive">
       <table class="table table-sm align-middle mb-0">
-        <thead><tr><th>Membre</th><th class="d-none d-md-table-cell">Section</th>
+        <thead><tr><th>Nom</th><th>Prénoms</th><th class="d-none d-md-table-cell">Section</th>
             <th class="d-none d-md-table-cell">Échéance</th><th class="text-end">Reste</th></tr></thead>
         <tbody>
         {% for cotisation in retards %}
           <tr>
-            <td><a href="{% url 'membres:detail' cotisation.membre.pk %}">{{ cotisation.membre.nom_complet }}</a></td>
+            <td><a href="{% url 'membres:detail' cotisation.membre.pk %}">{{ cotisation.membre.nom }}</a></td>
+            <td>{{ cotisation.membre.prenoms }}</td>
             <td class="d-none d-md-table-cell">{{ cotisation.membre.section.libelle }}</td>
             <td class="d-none d-md-table-cell">{{ cotisation.date_echeance|date:'d/m/Y' }}</td>
             <td class="text-end">{{ cotisation.reste_a_payer|floatformat:0 }} FCFA</td>
           </tr>
         {% empty %}
-          <tr><td colspan="4" class="text-muted">Aucune cotisation en retard.</td></tr>
+          <tr><td colspan="5" class="text-muted">Aucune cotisation en retard.</td></tr>
         {% endfor %}
         </tbody>
       </table>
@@ -123,16 +124,23 @@
   <div class="col-lg-5">
     <div class="card h-100"><div class="card-body">
       <h2 class="h6 mb-3">Demandes d'adhésion à traiter</h2>
-      <ul class="list-group list-group-flush">
+      <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Nom</th><th>Prénoms</th><th class="d-none d-md-table-cell">Section</th><th>Statut</th></tr></thead>
+        <tbody>
         {% for demande in demandes %}
-          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-            <span>{{ demande.nom_complet }} <span class="text-muted small">— {{ demande.section.libelle }}</span></span>
-            <span class="badge text-bg-warning">{{ demande.get_statut_display }}</span>
-          </li>
+          <tr>
+            <td>{{ demande.nom }}</td>
+            <td>{{ demande.prenoms }}</td>
+            <td class="small d-none d-md-table-cell">{{ demande.section.libelle }}</td>
+            <td><span class="badge text-bg-warning">{{ demande.get_statut_display }}</span></td>
+          </tr>
         {% empty %}
-          <li class="list-group-item px-0 text-muted">Aucune demande en attente.</li>
+          <tr><td colspan="4" class="text-muted">Aucune demande en attente.</td></tr>
         {% endfor %}
-      </ul>
+        </tbody>
+      </table>
+      </div>
     </div></div>
   </div>
   {% endif %}

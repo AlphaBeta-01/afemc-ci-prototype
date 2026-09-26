@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.core.validators import FileExtensionValidator
+from django.db.models.functions import Lower
 
 from apps.sections.models import Section
 
@@ -23,7 +24,7 @@ class FormulaireDemande(forms.ModelForm):
     # Cocody) : plus de champ « établissement » saisi à la main, et donc
     # plus d'incohérence possible entre les deux — voir `save()` ci-dessous.
     section = ChampUniversite(
-        queryset=Section.objects.filter(active=True).order_by('etablissement'),
+        queryset=Section.objects.filter(active=True).order_by(Lower('etablissement')),
         label='Université', empty_label='Sélectionnez votre université',
         widget=forms.Select(attrs={'class': 'form-select'}))
 

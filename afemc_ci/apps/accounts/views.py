@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 
 from apps.core.decorators import role_requis
 from apps.core.services import journaliser
+from apps.core.utils import ordre_alphabetique
 
 from .forms import (FormulaireActivation, FormulaireCompteResponsable, FormulaireConnexion,
                     FormulaireMotDePasseOublie, FormulaireNomination)
@@ -100,7 +101,7 @@ def profil(requete):
 @role_requis('ADMIN')
 def comptes_liste(requete):
     comptes = (Utilisateur.objects.exclude(role=Utilisateur.Role.MEMBRE)
-              .select_related('section', 'fiche_membre').order_by('nom', 'prenoms'))
+              .select_related('section', 'fiche_membre').order_by(*ordre_alphabetique()))
     return render(requete, 'accounts/comptes_liste.html', {'comptes': comptes})
 
 
@@ -127,7 +128,7 @@ def nommer(requete):
     titulaires = (Utilisateur.objects.filter(role__in=[r for r, _ in Utilisateur.Role.choices
                                                         if r not in ('MEMBRE', 'ADMIN')],
                                              is_active=True)
-                  .select_related('section').order_by('role', 'nom'))
+                  .select_related('section').order_by(*ordre_alphabetique()))
     return render(requete, 'accounts/nommer.html',
                   {'formulaire': formulaire, 'titulaires': titulaires})
 

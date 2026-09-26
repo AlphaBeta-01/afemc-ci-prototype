@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from apps.core.utils import ordre_alphabetique
+
 from .models import Relance, RegleRelance
 
 
@@ -16,5 +18,19 @@ class RegleRelanceAdmin(admin.ModelAdmin):
 
 @admin.register(Relance)
 class RelanceAdmin(admin.ModelAdmin):
-    list_display = ('cotisation', 'regle', 'jours_ecart', 'date_emission')
+    list_display = ('nom', 'prenoms', 'exercice', 'regle', 'jours_ecart', 'date_emission')
     list_filter = ('regle',)
+    ordering = (*ordre_alphabetique('cotisation__membre__'), '-date_emission')
+    list_select_related = ('cotisation__membre', 'regle')
+
+    @admin.display(description='nom', ordering='cotisation__membre__nom')
+    def nom(self, relance):
+        return relance.cotisation.membre.nom
+
+    @admin.display(description='prénoms', ordering='cotisation__membre__prenoms')
+    def prenoms(self, relance):
+        return relance.cotisation.membre.prenoms
+
+    @admin.display(description='exercice', ordering='cotisation__exercice')
+    def exercice(self, relance):
+        return relance.cotisation.exercice

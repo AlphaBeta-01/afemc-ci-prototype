@@ -18,7 +18,7 @@
 <div class="card"><div class="table-responsive">
   <table class="table table-hover table-sm align-middle mb-0">
     <thead class="table-light">
-      <tr><th>Nom et prénoms</th>
+      <tr><th>Nom</th><th>Prénoms</th>
           <th>Fonction</th>
           <th class="d-none d-lg-table-cell">Adresse électronique</th>
           <th class="d-none d-md-table-cell">Fiche membre</th>
@@ -27,7 +27,8 @@
     <tbody>
     {% for compte in comptes %}
       <tr>
-        <td>{{ compte.nom_complet }}</td>
+        <td>{{ compte.nom }}</td>
+        <td>{{ compte.prenoms }}</td>
         <td>
           {{ compte.get_role_display }}
           {% if compte.section %}<div class="small text-muted">{{ compte.section }}</div>{% endif %}
@@ -69,7 +70,7 @@
         </td>
       </tr>
     {% empty %}
-      <tr><td colspan="6" class="text-muted p-4 text-center">Aucune responsable nommée.</td></tr>
+      <tr><td colspan="7" class="text-muted p-4 text-center">Aucune responsable nommée.</td></tr>
     {% endfor %}
     </tbody>
   </table>
