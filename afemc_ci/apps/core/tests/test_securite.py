@@ -1,9 +1,10 @@
-"""Tests de sécurité TS01 à TS14 (§ 6.6.2 du mémoire).
+"""Tests de sécurité TS01 à TS16 (§ 6.6.2 du mémoire).
 
 TS11-TS12 formalisent les deux failles trouvées et corrigées lors de la
 revue de sécurité menée après la rédaction initiale du chapitre 6.
 TS13 vérifie le retrait immédiat des droits à la fin d'un mandat (RG13),
-TS14 que la connexion à l'administration est soumise au verrouillage (RG10).
+TS14 que la connexion à l'administration est soumise au verrouillage (RG10),
+TS16 la déconnexion après 30 minutes d'inactivité (TS15 : apps/core/tests/test_limites.py).
 """
 from django.test import TestCase
 from django.urls import reverse
@@ -163,3 +164,21 @@ class TestSecurite(TestCase):
         self.client.post(reverse('accounts:connexion') + '?next=/admin/',
                          {'username': self.admin.email, 'password': fabrique.MOT_DE_PASSE})
         self.assertEqual(self.client.get('/admin/').status_code, 200)
+
+    def test_ts16_deconnexion_apres_trente_minutes_d_inactivite(self):
+        """Chaque action prolonge la session ; 30 minutes sans rien la ferment."""
+        from datetime import timedelta
+        from django.utils import timezone
+        from freezegun import freeze_time
+
+        debut = timezone.now()
+        with freeze_time(debut):
+            self.client.login(username=self.admin.email, password=fabrique.MOT_DE_PASSE)
+        with freeze_time(debut + timedelta(minutes=25)):        # activité : prolonge
+            self.assertEqual(self.client.get(reverse('membres:liste')).status_code, 200)
+        with freeze_time(debut + timedelta(minutes=50)):        # 25 min après la dernière action
+            self.assertEqual(self.client.get(reverse('membres:liste')).status_code, 200)
+        with freeze_time(debut + timedelta(minutes=81)):        # 31 min d'inactivité
+            reponse = self.client.get(reverse('membres:liste'))
+            self.assertEqual(reponse.status_code, 302)
+            self.assertIn(reverse('accounts:connexion'), reponse.url)

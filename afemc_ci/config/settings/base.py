@@ -117,7 +117,12 @@ LOGIN_URL = 'accounts:connexion'
 LOGIN_REDIRECT_URL = 'dashboard:accueil'
 LOGOUT_REDIRECT_URL = 'accounts:connexion'
 
-SESSION_COOKIE_AGE = 60 * 60 * 4
+# Déconnexion après 30 minutes d'INACTIVITÉ (la session est prolongée à
+# chaque requête) : les postes des universités sont souvent partagés, et
+# une session de responsable laissée ouverte donnait accès aux données
+# personnelles et financières pendant 4 heures.
+SESSION_COOKIE_AGE = 60 * 30
+SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Sans ceci, une exception non gérée (500) ne s'affiche nulle part une fois
