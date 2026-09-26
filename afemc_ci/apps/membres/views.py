@@ -67,7 +67,7 @@ def creer(requete):
         membre = formulaire.save()
         journaliser(requete.user, 'CREATION_MEMBRE',
                     f'{membre.matricule} — {membre.nom_complet()}', requete)
-        messages.success(requete, f'Membre créé. Matricule attribué : {membre.matricule}.')
+        messages.success(requete, f"Membre créé. N° d'adhérente attribué automatiquement : {membre.matricule}.")
         return redirect('membres:detail', pk=membre.pk)
     return render(requete, 'membres/formulaire.html',
                   {'formulaire': formulaire, 'titre': 'Nouveau membre'})

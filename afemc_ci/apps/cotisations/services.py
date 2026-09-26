@@ -167,7 +167,8 @@ def generer_recu_pdf(contexte):
     pdf.ln(4)
 
     lignes = [
-        ('Membre', f"{contexte['membre']} ({contexte['matricule']})"),
+        ('Membre', contexte['membre']),
+        ("N° d'adhérente", contexte['matricule']),
         ('Montant versé', f"{contexte['montant_verse']} FCFA"),
         ('Mode de règlement', contexte['mode']),
         ('Référence', contexte['reference']),

@@ -38,7 +38,10 @@ class Membre(models.Model):
         INACTIF = 'INACTIF', 'Inactif'
         SUSPENDU = 'SUSPENDU', 'Suspendu'
 
-    matricule = models.CharField(max_length=20, unique=True, editable=False)
+    # Identifiant interne à l'association (RG01), affiché « N° d'adhérente » :
+    # attribué automatiquement, à ne pas confondre avec le matricule de
+    # fonctionnaire délivré par l'État, que toutes les membres n'ont pas.
+    matricule = models.CharField("n° d'adhérente", max_length=20, unique=True, editable=False)
     nom = models.CharField(max_length=100)
     prenoms = models.CharField(max_length=150)
     email = models.EmailField(unique=True)

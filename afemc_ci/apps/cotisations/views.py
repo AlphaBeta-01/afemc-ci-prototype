@@ -81,7 +81,7 @@ def exporter_csv(requete):
     reponse = HttpResponse(content_type='text/csv; charset=utf-8')
     reponse['Content-Disposition'] = f'attachment; filename="cotisations_{exercice}.csv"'
     plume = csv.writer(reponse, delimiter=';')
-    plume.writerow(['Matricule', 'Nom', 'Prénoms', 'Section', 'Exercice',
+    plume.writerow(["N° d'adhérente", 'Nom', 'Prénoms', 'Section', 'Exercice',
                     'Montant dû', 'Montant payé', 'Reste', 'Échéance', 'Statut'])
     for c in (Cotisation.objects
               .filter(exercice=exercice,

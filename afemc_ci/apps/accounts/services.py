@@ -104,7 +104,7 @@ def nommer_responsable(membre, role, section=None, nomme_par=None, requete=None)
     if fiche_du_compte is not None and fiche_du_compte.pk != membre.pk:
         raise NominationImpossible(
             f"L'adresse {membre.email} est déjà celle du compte d'une autre fiche "
-            f"({fiche_du_compte.matricule}) : vérifiez qu'il ne s'agit pas d'un doublon.")
+            f"(n° d'adhérente {fiche_du_compte.matricule}) : vérifiez qu'il ne s'agit pas d'un doublon.")
     if compte and compte.role == Utilisateur.Role.ADMIN:
         raise NominationImpossible(
             "Le compte de la Présidente ne peut pas recevoir une autre fonction.")

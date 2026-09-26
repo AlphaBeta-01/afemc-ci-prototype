@@ -5,6 +5,13 @@
 <div class="card"><div class="card-body">
   <form method="post" class="row g-3">
     {% csrf_token %}
+    <div class="col-12">
+      <div class="alert alert-light border small py-2 mb-0" role="note">
+        <strong>N° d'adhérente :</strong>
+        {% if formulaire.instance.pk %}<span class="font-monospace">{{ formulaire.instance.matricule }}</span>, attribué automatiquement — il ne se modifie pas.
+        {% else %}attribué automatiquement à l'enregistrement de la fiche, à partir de la section et de l'année.{% endif %}
+      </div>
+    </div>
     {% for champ in formulaire %}
       <div class="col-md-6">
         <label class="form-label">{{ champ.label }}</label>

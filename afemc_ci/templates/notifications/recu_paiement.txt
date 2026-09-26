@@ -4,7 +4,8 @@ Nous accusons réception de votre versement au titre de la cotisation
 {{ exercice }}. Vous trouverez votre reçu en pièce jointe (PDF), et son
 récapitulatif ci-dessous.
 
-Membre : {{ membre }} ({{ matricule }})
+Membre : {{ membre }}
+N° d'adhérente : {{ matricule }}
 Exercice : {{ exercice }}
 
 Montant versé ce jour : {{ montant_verse }} FCFA

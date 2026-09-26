@@ -13,6 +13,12 @@ class FormulaireMembre(forms.ModelForm):
         model = Membre
         fields = ['nom', 'prenoms', 'email', 'telephone', 'date_naissance',
                   'grade', 'etablissement', 'section', 'date_adhesion', 'statut']
+        labels = {
+            'nom': 'Nom', 'prenoms': 'Prénoms', 'email': 'Adresse électronique',
+            'telephone': 'Téléphone', 'date_naissance': 'Date de naissance',
+            'grade': 'Grade', 'etablissement': 'Établissement', 'section': 'Section',
+            'date_adhesion': "Date d'adhésion", 'statut': 'Statut',
+        }
         widgets = {
             'nom': forms.TextInput(attrs=CLASSE),
             'prenoms': forms.TextInput(attrs=CLASSE),
