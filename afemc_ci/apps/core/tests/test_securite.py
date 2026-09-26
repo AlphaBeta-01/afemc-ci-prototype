@@ -1,8 +1,9 @@
-"""Tests de sécurité TS01 à TS13 (§ 6.6.2 du mémoire).
+"""Tests de sécurité TS01 à TS14 (§ 6.6.2 du mémoire).
 
 TS11-TS12 formalisent les deux failles trouvées et corrigées lors de la
 revue de sécurité menée après la rédaction initiale du chapitre 6.
-TS13 vérifie le retrait immédiat des droits à la fin d'un mandat (RG13).
+TS13 vérifie le retrait immédiat des droits à la fin d'un mandat (RG13),
+TS14 que la connexion à l'administration est soumise au verrouillage (RG10).
 """
 from django.test import TestCase
 from django.urls import reverse
@@ -142,3 +143,23 @@ class TestSecurite(TestCase):
         self.assertEqual(self.client.get(reverse('membres:liste')).status_code, 403)
         self.assertEqual(self.client.get(reverse('sections:detail',
                                                  args=[self.abidjan.pk])).status_code, 403)
+
+    def test_ts14_connexion_admin_soumise_au_verrouillage(self):
+        """La page de connexion de l'administration ne permet plus d'essayer
+        des mots de passe sans limite : elle renvoie vers celle de
+        l'application, qui compte les échecs et verrouille le compte."""
+        reponse = self.client.get('/admin/login/?next=/admin/')
+        self.assertEqual(reponse.status_code, 302)
+        self.assertEqual(reponse.url, reverse('accounts:connexion') + '?next=/admin/')
+
+        # Un envoi direct de mot de passe n'y est plus traité du tout.
+        self.admin.is_staff = True
+        self.admin.save()
+        self.client.post('/admin/login/', {'username': self.admin.email,
+                                           'password': fabrique.MOT_DE_PASSE})
+        self.assertEqual(self.client.get('/admin/').status_code, 302)   # toujours déconnecté
+
+        # Par la page de l'application, l'accès à l'administration fonctionne.
+        self.client.post(reverse('accounts:connexion') + '?next=/admin/',
+                         {'username': self.admin.email, 'password': fabrique.MOT_DE_PASSE})
+        self.assertEqual(self.client.get('/admin/').status_code, 200)

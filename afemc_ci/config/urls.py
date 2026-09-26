@@ -8,6 +8,14 @@ admin.site.site_title = 'AFEMC-CI'
 admin.site.index_title = "Panneau d'administration"
 
 urlpatterns = [
+    # Le formulaire de connexion propre à l'administration ne passe pas par
+    # VueConnexion : il ne comptait pas les échecs et ne verrouillait jamais
+    # le compte (RG10) — un mot de passe pouvait y être deviné sans limite,
+    # sur le compte le plus sensible (Présidente, seule à y avoir accès). Toute
+    # connexion passe donc par la page de l'application ; `next` est conservé
+    # pour revenir ensuite dans l'administration.
+    path('admin/login/', RedirectView.as_view(pattern_name='accounts:connexion',
+                                              query_string=True)),
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(pattern_name='dashboard:accueil'), name='racine'),
     path('', include('apps.core.urls')),
