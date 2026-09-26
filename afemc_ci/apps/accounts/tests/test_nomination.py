@@ -202,8 +202,8 @@ class TestEcransNomination(BaseNomination):
                       reponse.context['formulaire'].errors['email'][0])
 
     def test_une_coordinatrice_voit_ses_propres_cotisations(self):
-        """Elle est aussi une membre cotisante ; les cotisations des autres
-        membres restent hors de son périmètre (RG08)."""
+        """Elle est aussi une membre cotisante ; hors de sa section, aucune
+        fiche ne lui est accessible (RG08)."""
         fabrique.cotisation(membre_lie=self.membre)
         nommer_responsable(self.membre, 'RESP_SECTION', nomme_par=self.presidente)
         self.client.force_login(self.compte)
@@ -211,9 +211,9 @@ class TestEcransNomination(BaseNomination):
         sa_fiche = self.client.get(reverse('membres:detail', args=[self.membre.pk]))
         self.assertContains(sa_fiche, 'Historique des cotisations')
 
-        autre = fabrique.membre(nom='YAO', sect=self.abidjan)
-        fiche_autre = self.client.get(reverse('membres:detail', args=[autre.pk]))
-        self.assertNotContains(fiche_autre, 'Historique des cotisations')
+        ailleurs = fabrique.membre(nom='YAO', sect=self.korhogo)
+        self.assertEqual(
+            self.client.get(reverse('membres:detail', args=[ailleurs.pk])).status_code, 404)
 
 
 class TestMigrationDesResponsables(TestCase):

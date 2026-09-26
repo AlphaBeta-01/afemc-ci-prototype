@@ -29,9 +29,7 @@
         <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:accueil' %}">Tableau de bord</a></li>
         {% if user.est_responsable %}
         <li class="nav-item"><a class="nav-link" href="{% url 'membres:liste' %}">Membres</a></li>
-        {% if user.role != 'RESP_SECTION' %}
         <li class="nav-item"><a class="nav-link" href="{% url 'cotisations:liste' %}">Cotisations</a></li>
-        {% endif %}
         {% if user.role != 'RESP_FINANCIER' and user.role != 'RESP_SECTION' %}
         <li class="nav-item"><a class="nav-link" href="{% url 'adhesions:liste' %}">Adhésions</a></li>
         {% endif %}

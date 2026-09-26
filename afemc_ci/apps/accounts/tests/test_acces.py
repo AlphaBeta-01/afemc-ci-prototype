@@ -218,10 +218,12 @@ class TestMotDePasseOublie(TestCase):
 
 
 class TestPerimetreResponsableSection(TestCase):
-    """Le responsable de section : membres et sections seulement (RG08).
+    """La Coordinatrice : membres et sections, cotisations de sa section en
+    consultation seule (RG08).
 
-    Ni cotisations, ni adhésions, ni relances — ni dans le menu, ni en accès
-    direct (le menu ne doit jamais proposer un lien qui aboutit à un 403).
+    Ni adhésions ni relances, ni dans le menu ni en accès direct (le menu ne
+    doit jamais proposer un lien qui aboutit à un 403), et aucune écriture
+    sur les cotisations : ni émission, ni paiement.
     """
 
     def setUp(self):
@@ -232,19 +234,54 @@ class TestPerimetreResponsableSection(TestCase):
             prenoms='Mariam', role=Utilisateur.Role.RESP_SECTION, section=self.section)
         self.client.force_login(self.responsable)
 
-    def test_le_menu_ne_montre_que_membres_et_sections(self):
+    def test_le_menu_montre_membres_sections_et_cotisations(self):
         reponse = self.client.get(reverse('membres:liste'))
         self.assertContains(reponse, reverse('membres:liste'))
         self.assertContains(reponse, reverse('sections:liste'))
-        self.assertNotContains(reponse, reverse('cotisations:liste'))
+        self.assertContains(reponse, reverse('cotisations:liste'))
         self.assertNotContains(reponse, reverse('adhesions:liste'))
         self.assertNotContains(reponse, reverse('relances:liste'))
 
-    def test_acces_direct_bloque_cotisations_adhesions_relances(self):
-        for url in (reverse('cotisations:liste'), reverse('adhesions:liste'),
-                   reverse('relances:liste')):
+    def test_acces_direct_bloque_adhesions_et_relances(self):
+        for url in (reverse('adhesions:liste'), reverse('relances:liste')):
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 403)
+
+    def test_consulte_les_cotisations_de_sa_seule_section(self):
+        from datetime import date
+        from apps.core.tests import fabrique
+
+        annee = date.today().year
+        sienne = fabrique.cotisation(membre_lie=fabrique.membre(nom='KOUAME', sect=self.section),
+                                     exercice=annee)
+        fabrique.cotisation(membre_lie=fabrique.membre(nom='BAMBA', sect=self.autre_section),
+                            exercice=annee, paye='25000')
+        reponse = self.client.get(reverse('cotisations:liste'))
+        self.assertEqual(reponse.status_code, 200)
+        self.assertEqual([c.pk for c in reponse.context['page']], [sienne.pk])
+        self.assertEqual(reponse.context['indicateurs']['total_paye'], 0)   # sa section seule
+        self.assertContains(reponse, 'consultation seule')
+
+        export = self.client.get(reverse('cotisations:export')).content.decode()
+        self.assertIn('KOUAME', export)
+        self.assertNotIn('BAMBA', export)
+
+    def test_ne_peut_rien_modifier_sur_les_cotisations(self):
+        from datetime import date
+        from apps.core.tests import fabrique
+
+        cotisation = fabrique.cotisation(membre_lie=fabrique.membre(sect=self.section),
+                                         exercice=date.today().year)
+        liste = self.client.get(reverse('cotisations:liste'))
+        self.assertNotContains(liste, reverse('cotisations:emettre'))
+        self.assertNotContains(liste, reverse('cotisations:paiement', args=[cotisation.pk]))
+        for url in (reverse('cotisations:emettre'),
+                    reverse('cotisations:paiement', args=[cotisation.pk])):
+            with self.subTest(url=url):
+                self.assertEqual(self.client.get(url).status_code, 403)
+                self.assertEqual(self.client.post(url, {'montant': '1000'}).status_code, 403)
+        cotisation.refresh_from_db()
+        self.assertEqual(cotisation.montant_paye, 0)
 
     def test_peut_ajouter_un_membre_dans_sa_propre_section(self):
         from apps.membres.models import Membre
@@ -301,17 +338,23 @@ class TestPerimetreResponsableSection(TestCase):
         membre.refresh_from_db()
         self.assertEqual(membre.section, self.section)          # inchangé
 
-    def test_ne_voit_ni_cotisations_ni_relances_sur_la_fiche_membre(self):
+    def test_voit_cotisations_et_relances_sur_les_fiches_de_sa_section(self):
         from apps.membres.models import Membre
 
         membre = Membre.objects.create(nom='KOUAME', prenoms='Akissi',
                                        email='kouame@exemple.org', section=self.section)
         reponse = self.client.get(reverse('membres:detail', args=[membre.pk]))
         self.assertEqual(reponse.status_code, 200)
-        self.assertNotIn('cotisations', reponse.context)
-        self.assertNotIn('relances', reponse.context)
-        self.assertNotContains(reponse, 'Historique des cotisations')
-        self.assertNotContains(reponse, 'Relances reçues')
+        self.assertContains(reponse, 'Historique des cotisations')
+        self.assertContains(reponse, 'Relances reçues')
+
+    def test_aucune_fiche_hors_de_sa_section(self):
+        from apps.membres.models import Membre
+
+        ailleurs = Membre.objects.create(nom='BAMBA', prenoms='Awa',
+                                         email='bamba@exemple.org', section=self.autre_section)
+        self.assertEqual(self.client.get(reverse('membres:detail', args=[ailleurs.pk])).status_code,
+                         404)
 
 
 class TestGestionComptesResponsables(TestCase):

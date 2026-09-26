@@ -6,7 +6,7 @@ liste reflète toujours l'état réel, sans tâche planifiée à maintenir.
 Chaque tâche ne pointe que vers des écrans que la fonction concernée a le
 droit d'ouvrir (RG08) : une Coordinatrice apprend qu'une membre de sa
 section est en retard — ce que la relance R04 lui dit déjà par courriel —
-mais sans montant ni accès aux écrans financiers.
+et peut consulter les cotisations de sa section, sans pouvoir les modifier.
 """
 from dataclasses import dataclass, field
 from datetime import timedelta
@@ -326,22 +326,28 @@ def _taches_coordinatrice(utilisateur):
     membres = Membre.objects.filter(section=section)
     taches = []
 
-    # Seuil de la relance qui la met en copie (R04) : noms seulement, sans
-    # montant — exactement ce que le courriel de relance lui apprend déjà.
+    # Seuil de la relance qui la met en copie (R04). Elle consulte les
+    # cotisations de sa section sans pouvoir les modifier (RG08) : le lien
+    # mène à la liste en lecture seule, le paiement reste à la Trésorière.
     r04 = RegleRelance.objects.filter(code='R04', active=True).first()
     seuil = r04.decalage_jours if r04 else 15
     limite = _aujourdhui() - timedelta(days=seuil)
-    en_retard = list(membres.filter(cotisations__statut=Cotisation.Statut.EN_RETARD,
-                                    cotisations__date_echeance__lt=limite)
-                     .distinct().order_by(*_ordre()))
+    en_retard = list(Cotisation.objects
+                     .filter(membre__in=membres, statut=Cotisation.Statut.EN_RETARD,
+                             date_echeance__lt=limite)
+                     .select_related('membre').order_by(*_ordre('membre__'), 'exercice'))
     if en_retard:
         taches.append(Tache(
             priorite=A_FAIRE, titre='Membres de votre section à contacter',
             explication=f"Leur cotisation est en retard de plus de {seuil} jours. Un mot "
-                        "de votre part peut aider ; le suivi financier reste assuré "
-                        "par la Trésorière.",
-            nombre=len(en_retard), action='',
-            elements=[Element(m.nom, m.prenoms, url=_fiche(m)) for m in en_retard]))
+                        "de votre part peut aider ; le paiement s'enregistre auprès "
+                        "de la Trésorière.",
+            nombre=len(en_retard), url=reverse('cotisations:liste') + '?statut=EN_RETARD',
+            action='Voir les cotisations en retard',
+            elements=[Element(c.membre.nom, c.membre.prenoms,
+                              f"{c.exercice} · reste {_fcfa(c.reste_a_payer)} · "
+                              f"{(_aujourdhui() - c.date_echeance).days} jours de retard",
+                              _fiche(c.membre)) for c in en_retard]))
 
     incompletes = list(membres.filter(statut=Membre.Statut.ACTIF)
                        .filter(Q(telephone='') | Q(grade='')).order_by(*_ordre()))

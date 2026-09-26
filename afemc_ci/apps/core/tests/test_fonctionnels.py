@@ -366,9 +366,14 @@ class TestComptesEtPerimetreResserre(BaseFonctionnelle):
         self.assertEqual(compte.role, Utilisateur.Role.RESP_SECTION)
         self.assertFalse(compte.is_active)
 
-    def test_tf29_le_responsable_de_section_est_exclu_des_ecrans_financiers(self):
+    def test_tf29_la_coordinatrice_consulte_les_cotisations_sans_les_modifier(self):
+        """Cotisations de sa section en lecture seule ; ni adhésions ni relances."""
         self.connecter(self.resp_abidjan)
-        for nom_url in ('cotisations:liste', 'adhesions:liste', 'relances:liste'):
+        page = self.client.get(reverse('cotisations:liste')).context['page']
+        self.assertEqual({c.membre.section for c in page}, {self.abidjan})
+        self.assertEqual(self.client.get(
+            reverse('cotisations:paiement', args=[self.cotisation.pk])).status_code, 403)
+        for nom_url in ('adhesions:liste', 'relances:liste'):
             with self.subTest(url=nom_url):
                 self.assertEqual(self.client.get(reverse(nom_url)).status_code, 403)
 

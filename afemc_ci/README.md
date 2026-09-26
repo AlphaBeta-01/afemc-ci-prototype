@@ -96,8 +96,16 @@ Chaque nomination et fin de fonctions est journalisée (RG09) et notifiée
 par courriel à la personne concernée. Le compte Présidente reste du ressort
 de `createsuperuser` / `/taches/amorcer-admin/` et ne peut recevoir aucune
 autre fonction ici. Une responsable voit ses propres cotisations sur sa
-fiche (lien depuis « Mon profil »), y compris une Coordinatrice, pour qui
-les cotisations des autres membres restent hors périmètre (RG08).
+fiche (lien depuis « Mon profil »).
+
+**Coordinatrice et cotisations (RG08, révisé le 26/09/2026).** La
+Coordinatrice consulte les cotisations des membres **de sa section** : liste
+des cotisations et export CSV filtrés sur sa section, indicateurs calculés
+sur sa section, cotisations et relances visibles sur les fiches de ses
+membres. C'est une **consultation seule** : émission des cotisations et
+enregistrement des paiements lui restent interdits (403), et aucun bouton
+de modification ne lui est proposé. Adhésions et historique des relances
+restent hors de son périmètre.
 
 **Passage à ce modèle en production (migration `accounts.0003`).** Au
 déploiement, tous les comptes Secrétaire générale, Trésorière et
@@ -130,7 +138,7 @@ chaque tâche menant directement à l'écran concerné.
 | Présidente | fonctions vacantes (Trésorière : urgent), sections sans Coordinatrice, demandes d'adhésion, cotisations à émettre, courriels non distribués, responsables n'ayant pas activé leur compte, retards de plus de 90 jours |
 | Secrétaire générale | demandes d'adhésion (urgent au-delà de 7 jours), membres n'ayant pas activé leur compte |
 | Trésorière | retards de plus de 90 jours (urgent), de 45 à 90 jours, cotisations à émettre, paiements partiels, échéances à 15 jours |
-| Coordinatrice | membres de sa section à contacter (retard ≥ seuil de R04, **noms seulement**, sans montant — RG08), fiches à compléter, nouvelles membres, membres inactifs ou suspendus |
+| Coordinatrice | membres de sa section à contacter (retard ≥ seuil de R04, avec le reste à payer, lien vers ses cotisations en lecture seule), fiches à compléter, nouvelles membres, membres inactifs ou suspendus |
 | Membre | sa propre cotisation : reste à payer et échéance, ou « Tout est à jour » |
 
 Chaque lien proposé est vérifié par les tests comme accessible à la fonction
@@ -286,12 +294,12 @@ ceux du chapitre 6**, à mettre à jour dans le mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 201 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
+| Tests unitaires | 208 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
 | Scénarios du moteur (SC01-SC24 et compléments) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration | 12 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF32) | 34 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF32 nouveaux) |
 | Tests de sécurité (TS01-TS13) | 13 | `apps/core/tests/test_securite.py` (TS11-TS13 nouveaux) |
-| **Total** | **286** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
+| **Total** | **293** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
 
 Historique : le chapitre 6 en décrivait 126, puis 192 après l'ajout des
 fonctionnalités ci-dessous ; les suivants couvrent les courriels HTML,
@@ -348,6 +356,12 @@ et les tests ont depuis été corrigés) :
   retire immédiatement les droits liés à la fonction. Nominations et fins
   de fonctions sont journalisées. Un compte externe (personne hors
   registre) reste possible à titre d'exception.
+
+> **Mise à jour du 26/09/2026 :** à la demande de l'association, la
+> Coordinatrice consulte désormais les cotisations de sa section (lecture
+> seule, voir § « Responsables » plus haut). Le paragraphe ci-dessous
+> décrit la règle initiale ; § 3.2.4 et le tableau 6 du mémoire sont à
+> ajuster en conséquence.
 
 **Périmètre du responsable de section et du responsable financier — vérifié,
 aucune divergence.** Confronté aux chapitres 3, 4 et 5 du mémoire : § 3.2.4

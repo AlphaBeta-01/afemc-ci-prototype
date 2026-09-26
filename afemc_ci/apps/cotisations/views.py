@@ -13,11 +13,20 @@ from .forms import FormulaireEmission, FormulairePaiement
 from .models import Cotisation
 from .services import emettre_cotisations_exercice, enregistrer_paiement, indicateurs_exercice
 
-RESPONSABLES = ('ADMIN', 'RESP_ADMIN', 'RESP_FINANCIER')          # pas RESP_SECTION
+RESPONSABLES = ('ADMIN', 'RESP_ADMIN', 'RESP_FINANCIER')
+# La Coordinatrice consulte les cotisations de sa seule section (filtrage par
+# Membre.objects.visibles_par), sans rien pouvoir modifier : émission et
+# saisie des paiements restent réservées (RG08).
+CONSULTATION = RESPONSABLES + ('RESP_SECTION',)
+
+
+def _section_consultee(utilisateur):
+    """Indicateurs limités à sa section pour la Coordinatrice, nationaux sinon."""
+    return None if utilisateur.voit_toutes_les_sections else utilisateur.section
 
 
 @login_required
-@role_requis(*RESPONSABLES)
+@role_requis(*CONSULTATION)
 def liste(requete):
     exercice = int(requete.GET.get('exercice', timezone.localdate().year))
     membres_visibles = Membre.objects.visibles_par(requete.user)
@@ -31,7 +40,7 @@ def liste(requete):
         'exercice': exercice,
         'statuts': Cotisation.Statut.choices,
         'parametres': requete.GET,
-        'indicateurs': indicateurs_exercice(exercice),
+        'indicateurs': indicateurs_exercice(exercice, section=_section_consultee(requete.user)),
     })
 
 
@@ -74,7 +83,7 @@ def emettre(requete):
 
 
 @login_required
-@role_requis(*RESPONSABLES)
+@role_requis(*CONSULTATION)
 def exporter_csv(requete):
     import csv
     exercice = int(requete.GET.get('exercice', timezone.localdate().year))

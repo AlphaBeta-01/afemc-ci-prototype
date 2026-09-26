@@ -118,18 +118,18 @@ class TestTresoriere(BaseAFaire):
 
 class TestCoordinatrice(BaseAFaire):
 
-    def test_membres_en_retard_de_sa_section_sans_montant(self):
+    def test_membres_en_retard_de_sa_section_seule(self):
         self.cotisation(fabrique.membre(nom='KOFFI', sect=self.abidjan), jours_de_retard=20)
         self.cotisation(fabrique.membre(nom='BAMBA', sect=self.korhogo), jours_de_retard=20)
         tache = titres(self.coordinatrice)['Membres de votre section à contacter']
         self.assertEqual([e.nom for e in tache.elements], ['KOFFI'])      # sa section seule
-        self.assertEqual(tache.url, '')                      # pas d'écran financier
+        self.assertIn('reste', tache.elements[0].detail)
+        self.assertTrue(tache.url.startswith(reverse('cotisations:liste')))  # lecture seule
 
         self.client.force_login(self.coordinatrice)
         page = self.client.get(reverse('dashboard:a_faire'))
         self.assertContains(page, 'KOFFI')
-        self.assertNotContains(page, 'FCFA')
-        self.assertNotContains(page, reverse('cotisations:liste'))
+        self.assertNotContains(page, 'BAMBA')
 
     def test_pas_de_contact_avant_le_seuil_de_la_relance_r04(self):
         self.cotisation(fabrique.membre(nom='KOFFI', sect=self.abidjan), jours_de_retard=5)
