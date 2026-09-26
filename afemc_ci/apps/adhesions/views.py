@@ -5,9 +5,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.core.decorators import role_requis
 from apps.core.services import journaliser
+from apps.core.limites import limite_atteinte
 from apps.core.utils import ordre_alphabetique, paginer
 
-from .forms import FormsetPiecesJustificatives, FormulaireDemande
+from .forms import CHAMP_PIEGE, FormsetPiecesJustificatives, FormulaireDemande
 from .models import DemandeAdhesion, PieceJustificative
 from .services import MembreExistant, TransitionInterdite, changer_statut, notifier_nouvelle_demande
 
@@ -22,7 +23,20 @@ def soumettre(requete):
     formulaire = FormulaireDemande(requete.POST or None)
     formset = FormsetPiecesJustificatives(requete.POST or None, requete.FILES or None,
                                           prefix='pieces')
+    if requete.method == 'POST':
+        if requete.POST.get(CHAMP_PIEGE):
+            # Champ invisible pour une personne, rempli par un robot : on
+            # simule le succès sans rien enregistrer ni envoyer.
+            journaliser(None, 'ROBOT_DETECTE', "demande d'adhésion", requete)
+            return render(requete, 'adhesions/confirmation.html')
     if requete.method == 'POST' and formulaire.is_valid() and formset.is_valid():
+        # Seules les demandes complètes sont comptées : une candidate qui
+        # corrige plusieurs fois sa saisie ne doit pas être bloquée, et une
+        # soumission invalide n'envoie ni courriel ni fichier.
+        if limite_atteinte('demande_adhesion', requete):
+            return render(requete, 'adhesions/soumettre.html', {
+                'formulaire': formulaire, 'formset': formset, 'limite_atteinte': True},
+                status=429)
         demande = formulaire.save()
         for piece in formset:
             fichier = piece.cleaned_data.get('fichier')

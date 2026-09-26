@@ -18,6 +18,11 @@ class ChampUniversite(forms.ModelChoiceField):
         return section.etablissement or section.libelle
 
 
+# Champ piège : masqué pour les personnes, mais rempli par les robots qui
+# complètent tous les champs d'un formulaire (voir adhesions.views.soumettre).
+CHAMP_PIEGE = 'site_web'
+
+
 class FormulaireDemande(forms.ModelForm):
     # Une seule sélection détermine à la fois l'université et la section
     # (ex. « Université Félix Houphouët-Boigny de Cocody » = section

@@ -9,6 +9,8 @@ services:
     runtime: python
     plan: free
     rootDir: afemc_ci
+    # createcachetable (idempotente) crée la table du cache qui porte les
+    # compteurs des limites de fréquence des formulaires publics.
     # charger_regles est idempotente (get_or_create) : sans danger à
     # rappeler à chaque déploiement, comme migrate — elle ne crée que les
     # règles absentes et ne touche jamais à celles ajustées dans l'admin. Sans cette ligne, la
@@ -16,7 +18,7 @@ services:
     # retard n'a jamais pu être envoyée depuis la mise en service, sans
     # aucune erreur visible (RegleRelance.applicable() retourne simplement
     # None si aucune règle n'existe).
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py charger_regles"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py createcachetable && python manage.py charger_regles"
     # --timeout 90 : marge de sécurité pour /taches/executer/, qui peut
     # traiter plusieurs notifications en un seul appel HTTP.
     startCommand: "gunicorn config.wsgi:application --timeout 90"

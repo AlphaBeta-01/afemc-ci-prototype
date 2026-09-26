@@ -7,6 +7,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from apps.core.decorators import role_requis
+from apps.core.limites import limite_atteinte
 from apps.core.services import journaliser
 from apps.core.utils import ordre_alphabetique
 
@@ -87,7 +88,11 @@ class VueMotDePasseOublie(View):
     def post(self, requete):
         formulaire = FormulaireMotDePasseOublie(requete.POST)
         if formulaire.is_valid():
-            demander_reinitialisation_mot_de_passe(formulaire.cleaned_data['email'], requete)
+            email = formulaire.cleaned_data['email']
+            # Limite atteinte : même page de confirmation, sans envoi — la
+            # réponse ne doit rien révéler, ni l'existence d'un compte, ni la limite.
+            if not limite_atteinte('mot_de_passe_oublie', requete, cible=email):
+                demander_reinitialisation_mot_de_passe(email, requete)
             return render(requete, 'accounts/mot_de_passe_oublie_envoye.html')
         return render(requete, self.template_name, {'formulaire': formulaire})
 

@@ -5,8 +5,19 @@
   <div class="col-lg-7">
     <h1 class="h4 mb-4">Demande d'adhésion</h1>
     <div class="card"><div class="card-body">
+      {% if limite_atteinte %}
+        <div class="alert alert-warning small" role="alert">
+          De nombreuses demandes ont été envoyées récemment. Pour protéger le service,
+          merci de réessayer d'ici une heure. Votre saisie a été conservée.
+        </div>
+      {% endif %}
       <form method="post" enctype="multipart/form-data" class="row g-3">
         {% csrf_token %}
+        {# Champ piège : hors écran pour les personnes, rempli par les robots. #}
+        <div style="position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+          <label for="site_web">Laissez ce champ vide</label>
+          <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off">
+        </div>
         {% for champ in formulaire %}
           <div class="{% if champ.name == 'motivation' %}col-12{% else %}col-md-6{% endif %}">
             <label class="form-label">{{ champ.label }}</label>

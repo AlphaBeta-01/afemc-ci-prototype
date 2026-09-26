@@ -103,6 +103,16 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 TAILLE_MAX_PIECE_JUSTIFICATIVE = 5 * 1024 * 1024          # 5 Mo
 
+# Cache adossé à la base (table créée par `createcachetable`, lancé au build) :
+# compteurs des limites de fréquence (apps.core.limites) partagés entre les
+# processus du serveur et préservés lors des redémarrages.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'afemc_cache',
+    }
+}
+
 LOGIN_URL = 'accounts:connexion'
 LOGIN_REDIRECT_URL = 'dashboard:accueil'
 LOGOUT_REDIRECT_URL = 'accounts:connexion'
