@@ -86,3 +86,38 @@ class TestDemandeAdhesion(TestCase):
         page = self.client.get(self.url)
         self.assertContains(page, 'name="site_web"')
         self.assertContains(page, 'aria-hidden="true"')
+
+
+class TestContenuDesPiecesJustificatives(TestCase):
+    """L'extension ne suffit plus : le contenu doit correspondre au format."""
+
+    def setUp(self):
+        self.section = fabrique.section()
+
+    def soumettre(self, nom_fichier, contenu):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        return self.client.post(reverse('adhesions:soumettre'), {
+            'nom': 'KONE', 'prenoms': 'Awa', 'email': 'awa@exemple.org',
+            'telephone': '0102030405', 'grade': 'Assistante', 'section': self.section.pk,
+            'motivation': 'Adhérer.', 'pieces-TOTAL_FORMS': '1', 'pieces-INITIAL_FORMS': '0',
+            'pieces-MIN_NUM_FORMS': '0', 'pieces-MAX_NUM_FORMS': '1000',
+            'pieces-0-type_piece': 'DIPLOME',
+            'pieces-0-fichier': SimpleUploadedFile(nom_fichier, contenu)})
+
+    def test_un_faux_pdf_est_refuse(self):
+        for nom, contenu in (('diplome.pdf', b'<html><script>alert(1)</script></html>'),
+                             ('carte.png', b'MZ\x90\x00 executable'),
+                             ('carte.jpg', b'%PDF-1.4 un pdf deguise')):
+            with self.subTest(fichier=nom):
+                reponse = self.soumettre(nom, contenu)
+                self.assertContains(reponse, 'ne correspond pas')
+        self.assertFalse(DemandeAdhesion.objects.exists())
+
+    def test_les_vrais_formats_sont_acceptes(self):
+        for i, (nom, contenu) in enumerate((('d.pdf', b'%PDF-1.7\n...'),
+                                            ('c.png', b'\x89PNG\r\n\x1a\n....'),
+                                            ('c.jpeg', b'\xff\xd8\xff\xe0....'))):
+            with self.subTest(fichier=nom):
+                DemandeAdhesion.objects.all().delete()
+                reponse = self.soumettre(nom, contenu)
+                self.assertTemplateUsed(reponse, 'adhesions/confirmation.html')

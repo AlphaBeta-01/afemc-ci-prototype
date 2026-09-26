@@ -75,7 +75,31 @@ class FormulairePieceJustificative(forms.Form):
             self.add_error('type_piece', 'Précisez le type de ce document.')
         if fichier and fichier.size > settings.TAILLE_MAX_PIECE_JUSTIFICATIVE:
             self.add_error('fichier', 'Le fichier dépasse la taille maximale autorisée (5 Mo).')
+        elif fichier and not contenu_conforme(fichier):
+            self.add_error('fichier', "Le contenu du fichier ne correspond pas à un document "
+                                      "PDF, JPG ou PNG valide.")
         return cleaned
+
+
+# Signature (premiers octets) de chaque format accepté : l'extension seule se
+# falsifie en renommant n'importe quel fichier — un exécutable ou une page
+# web déguisés en « .pdf » seraient sinon acceptés puis conservés.
+SIGNATURES = {
+    'pdf': (b'%PDF-',),
+    'png': (b'\x89PNG\r\n\x1a\n',),
+    'jpg': (b'\xff\xd8\xff',),
+    'jpeg': (b'\xff\xd8\xff',),
+}
+
+
+def contenu_conforme(fichier):
+    """Vrai si les premiers octets correspondent au format annoncé par l'extension."""
+    extension = fichier.name.rsplit('.', 1)[-1].lower() if '.' in fichier.name else ''
+    position = fichier.tell()
+    fichier.seek(0)
+    debut = fichier.read(16)
+    fichier.seek(position)
+    return any(debut.startswith(signature) for signature in SIGNATURES.get(extension, ()))
 
 
 class ExigerAuMoinsUnePiece(forms.BaseFormSet):
