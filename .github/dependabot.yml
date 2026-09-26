@@ -1,0 +1,30 @@
+# Alertes et propositions automatiques de mises à jour (GitHub Dependabot).
+#
+# Le prototype a tourné sur Django 5.0 plus d'un an après la fin de ses
+# correctifs de sécurité sans que personne ne s'en aperçoive : Dependabot
+# ouvre désormais une proposition (pull request) dès qu'une dépendance a
+# une nouvelle version, et une alerte de sécurité en priorité dès qu'une
+# faille connue la concerne. Rien n'est fusionné automatiquement : chaque
+# proposition déclenche la suite de tests et attend une validation.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /afemc_ci
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # Correctifs mineurs regroupés en une seule proposition par semaine.
+      correctifs:
+        update-types: [patch]
+    ignore:
+      # Rester sur la branche LTS de Django (5.2, maintenue jusqu'en
+      # avril 2028) : un passage à Django 6 est une décision à part.
+      - dependency-name: django
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
