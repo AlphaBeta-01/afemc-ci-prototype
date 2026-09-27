@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block titre %}Page d'accueil — AFEMC-CI{% endblock %}
+{% block contenu %}
+<div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+  <h1 class="h4 mb-0">Page d'accueil publique</h1>
+  <a href="{% url 'vitrine:accueil' %}" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener">Voir la page</a>
+</div>
+<p class="text-muted small mb-4">Ce contenu est visible de tout public, sans connexion. N'y mettez aucune information personnelle.</p>
+
+{% if not formulaire.instance.contenu_verifie %}
+  <div class="alert alert-warning small" role="note">
+    Le contenu initial a été rédigé à partir de sources publiques (UVCI, Agence Ivoirienne de Presse,
+    Fraternité Matin). Relisez-le, complétez-le{% if peut_valider %}, puis cochez « contenu relu et validé »{% endif %}.
+  </div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ chiffres.management_form }}{{ realisations.management_form }}
+
+  <div class="card mb-4"><div class="card-body">
+    <h2 class="h6 mb-3">Présentation</h2>
+    <div class="row g-3">
+      {% for champ in formulaire %}
+        {% if champ.name == 'photo' or champ.name == 'retirer_photo' or champ.name|slice:':11' == 'presidente_' %}
+        {% elif champ.name == 'contenu_verifie' %}
+          <div class="col-12"><div class="form-check">
+            {{ champ }}<label class="form-check-label" for="{{ champ.id_for_label }}">{{ champ.label|capfirst }}</label>
+            <div class="form-text">{{ champ.help_text }}</div>
+          </div></div>
+        {% else %}
+          <div class="{% if champ.name == 'email_contact' or champ.name == 'site_institutionnel' %}col-md-6{% else %}col-12{% endif %}">
+            <label class="form-label" for="{{ champ.id_for_label }}">{{ champ.label|capfirst }}</label>
+            {{ champ }}
+            {% if champ.help_text %}<div class="form-text">{{ champ.help_text }}</div>{% endif %}
+            {% if champ.errors %}<div class="text-danger small mt-1">{{ champ.errors.0 }}</div>{% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div></div>
+
+  <div class="card mb-4"><div class="card-body">
+    <h2 class="h6 mb-1">Le mot de la Présidente</h2>
+    <p class="small text-muted mb-3">Section affichée dès qu'une photo, un nom ou un message est renseigné.</p>
+    <div class="row g-3">
+      <div class="col-md-4 text-center">
+        {% if formulaire.instance.a_une_photo %}
+          <img src="{% url 'vitrine:photo_presidente' %}?v={{ formulaire.instance.presidente_photo_maj|date:'U' }}"
+               alt="Photo actuelle" class="img-fluid rounded mb-2" style="max-height:220px">
+          <div class="form-check d-inline-block">{{ formulaire.retirer_photo }}
+            <label class="form-check-label small" for="{{ formulaire.retirer_photo.id_for_label }}">Retirer la photo</label></div>
+        {% else %}
+          <div class="border rounded d-flex align-items-center justify-content-center text-muted small mb-2" style="height:180px">Aucune photo</div>
+        {% endif %}
+      </div>
+      <div class="col-md-8">
+        <label class="form-label" for="{{ formulaire.photo.id_for_label }}">{{ formulaire.photo.label }}</label>
+        {{ formulaire.photo }}
+        <div class="form-text">{{ formulaire.photo.help_text }}</div>
+        {% if formulaire.photo.errors %}<div class="text-danger small mt-1">{{ formulaire.photo.errors.0 }}</div>{% endif %}
+        <div class="row g-2 mt-1">
+          <div class="col-md-6"><label class="form-label" for="{{ formulaire.presidente_nom.id_for_label }}">Nom et prénoms</label>{{ formulaire.presidente_nom }}</div>
+          <div class="col-md-6"><label class="form-label" for="{{ formulaire.presidente_titre.id_for_label }}">{{ formulaire.presidente_titre.label|capfirst }}</label>{{ formulaire.presidente_titre }}</div>
+          <div class="col-12"><label class="form-label" for="{{ formulaire.presidente_presentation.id_for_label }}">{{ formulaire.presidente_presentation.label|capfirst }}</label>{{ formulaire.presidente_presentation }}
+            <div class="form-text">{{ formulaire.presidente_presentation.help_text }}</div></div>
+          <div class="col-12"><label class="form-label" for="{{ formulaire.presidente_message.id_for_label }}">{{ formulaire.presidente_message.label|capfirst }}</label>{{ formulaire.presidente_message }}
+            <div class="form-text">{{ formulaire.presidente_message.help_text }}</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="card mb-4"><div class="card-body">
+    <h2 class="h6 mb-1">Chiffres clés</h2>
+    <p class="small text-muted mb-3">Indiquez toujours la date ou la source d'un chiffre. La dernière ligne permet d'en ajouter un.</p>
+    <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Valeur</th><th>Libellé</th><th>Précision / source</th><th style="width:6rem">Ordre</th><th class="text-center">Supprimer</th></tr></thead>
+      <tbody>
+      {% for f in chiffres %}
+        <tr>
+          <td>{{ f.id }}{{ f.valeur }}{% if f.valeur.errors %}<div class="text-danger small">{{ f.valeur.errors.0 }}</div>{% endif %}</td>
+          <td>{{ f.libelle }}</td><td>{{ f.precision }}</td><td>{{ f.ordre }}</td>
+          <td class="text-center">{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="card mb-4"><div class="card-body">
+    <h2 class="h6 mb-1">Réalisations</h2>
+    <p class="small text-muted mb-3">Présentées de la plus récente à la plus ancienne. Le dernier bloc permet d'en ajouter une.</p>
+    {% for f in realisations %}
+      <div class="border rounded p-3 mb-3 {% if not f.instance.pk %}bg-light{% endif %}">
+        {{ f.id }}
+        {% if not f.instance.pk %}<div class="small fw-semibold mb-2">Nouvelle réalisation</div>{% endif %}
+        <div class="row g-2">
+          <div class="col-4 col-md-2"><label class="form-label small">Année</label>{{ f.annee }}</div>
+          <div class="col-8 col-md-3"><label class="form-label small">Période</label>{{ f.periode }}</div>
+          <div class="col-md-7"><label class="form-label small">Titre</label>{{ f.titre }}{% if f.titre.errors %}<div class="text-danger small">{{ f.titre.errors.0 }}</div>{% endif %}</div>
+          <div class="col-12"><label class="form-label small">Description</label>{{ f.description }}</div>
+          <div class="col-md-8"><label class="form-label small">Source</label>{{ f.source }}</div>
+          <div class="col-md-4 d-flex align-items-end gap-3">
+            <div class="form-check">{{ f.publiee }}<label class="form-check-label small" for="{{ f.publiee.id_for_label }}">Affichée</label></div>
+            {% if f.instance.pk %}<div class="form-check">{{ f.DELETE }}<label class="form-check-label small text-danger" for="{{ f.DELETE.id_for_label }}">Supprimer</label></div>{% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div></div>
+
+  {{ galerie.management_form }}
+  <div class="card mb-4" id="galerie"><div class="card-body">
+    <h2 class="h6 mb-1">Galerie « L'association en images »</h2>
+    <p class="small text-muted mb-3">Photos affichées sur la page d'accueil, par ordre croissant. Ne publiez que des photos
+      dont les personnes visibles ont accepté la diffusion.</p>
+    <div class="mb-3">
+      <label class="form-label" for="{{ ajout.photos.id_for_label }}">{{ ajout.photos.label }}</label>
+      {{ ajout.photos }}
+      <div class="form-text">{{ ajout.photos.help_text }}</div>
+      {% if ajout.photos.errors %}<div class="text-danger small mt-1">{{ ajout.photos.errors.0 }}</div>{% endif %}
+    </div>
+    <div class="row g-3">
+      {% for f in galerie %}
+        <div class="col-md-6 col-xl-4">
+          <div class="border rounded p-2 h-100 {% if not f.instance.publiee %}opacity-75{% endif %}">
+            {{ f.id }}
+            <img src="{% url 'vitrine:photo_galerie' f.instance.pk %}" alt="" class="img-fluid rounded mb-2"
+                 style="width:100%; aspect-ratio:4/3; object-fit:cover">
+            <label class="form-label small mb-1" for="{{ f.legende.id_for_label }}">Légende</label>{{ f.legende }}
+            {% if not f.instance.legende %}<div class="form-text text-warning-emphasis">Sans légende : à compléter.</div>{% endif %}
+            <div class="d-flex align-items-center gap-3 mt-2 small">
+              <div style="width:5rem">{{ f.ordre }}</div>
+              <div class="form-check">{{ f.publiee }}<label class="form-check-label" for="{{ f.publiee.id_for_label }}">Affichée</label></div>
+              <div class="form-check">{{ f.DELETE }}<label class="form-check-label text-danger" for="{{ f.DELETE.id_for_label }}">Supprimer</label></div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-muted small">Aucune photo pour le moment.</div>
+      {% endfor %}
+    </div>
+  </div></div>
+
+  <button class="btn btn-primary">Enregistrer</button>
+  <a href="{% url 'vitrine:accueil' %}" class="btn btn-link">Annuler</a>
+</form>
+{% endblock %}

@@ -125,6 +125,45 @@ paiement (rôle exclusif) : à faire juste après le déploiement. Une
 ancienne responsable qui reçoit une fiche en cours d'année n'a pas de
 cotisation pour l'exercice courant : l'émettre via « Émission collective ».
 
+### Page d'accueil publique
+
+L'adresse racine (`/`) présente l'association à tout public, sans connexion :
+accroche, chiffres clés, présentation et missions, frise des réalisations,
+prochaines activités annoncées, appel à adhérer et accès à l'espace membres.
+Aucune donnée personnelle n'y figure.
+
+Tout le contenu est modifiable depuis l'application (**Bureau ▾ → Page
+d'accueil**) par la Présidente et la Responsable à l'organisation, sans
+développeur. Une activité n'y apparaît que si « Annoncer sur la page
+d'accueil publique » est cochée et qu'elle est publiée : les réunions
+internes restent privées.
+
+Le contenu initial (migration `vitrine.0002`) a été rédigé **uniquement** à
+partir des sources publiques citées dans le mémoire — 1 000 membres et 17
+sections en 2024 selon l'UVCI, 3ᵉ édition des JSIFEC, conférences de la
+section de Korhogo (AIP, décembre 2024), bilan triennal et renouvellement du
+Bureau (Fraternité Matin, mai 2026) — chaque réalisation portant sa source.
+Il reste signalé « à relire » dans l'« À faire » de la Présidente tant
+qu'elle ne l'a pas validé.
+
+**La Présidente.** Section avec sa photo (stockée en base : le disque de
+Render est effacé à chaque redéploiement ; allégée et débarrassée de ses
+métadonnées à l'envoi), son nom, son titre et une présentation à la
+troisième personne. Celle-ci (migration `vitrine.0004`) a été rédigée à
+partir d'articles vérifiés : Fraternité Matin (9 août 2022 et 20 mai 2026)
+et KOACI (21 mai 2026). Ces mêmes sources ont mis à jour le nombre de
+sections (22 en 2026). Le **mot de bienvenue**, qui doit être écrit par la
+Présidente elle-même, reste vide tant qu'elle ne l'a pas rédigé ; la photo
+est à envoyer depuis l'écran de modification.
+
+**Galerie « L'association en images ».** Photos envoyées depuis le même
+écran (jusqu'à 12 à la fois), stockées en base pour la même raison que la
+photo de la Présidente, redimensionnées à 1 600 px et débarrassées de leurs
+métadonnées. Chacune reçoit une légende, un ordre et peut être masquée
+(une photo masquée n'est plus servie au public). L'écran rappelle de ne
+publier que des photos dont les personnes visibles ont accepté la
+diffusion.
+
 ### Activités et comités d'organisation (RG14)
 
 Onglet **Activités** (`/activites/`), pour toutes les utilisatrices. Il met en
@@ -320,12 +359,12 @@ ceux du chapitre 6**, à mettre à jour dans le mémoire :
 
 | Catégorie | Nombre | Emplacement |
 |-----------|--------|-------------|
-| Tests unitaires | 232 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
+| Tests unitaires | 253 | core, accounts, membres, adhesions, cotisations, notifications, dashboard, sections, relances |
 | Scénarios du moteur (SC01-SC24 et compléments) | 26 | `apps/relances/tests/test_moteur.py` |
 | Tests d'intégration | 12 | `apps/cotisations/tests/test_integration.py` |
 | Tests fonctionnels (TF01-TF32) | 34 | `apps/core/tests/test_fonctionnels.py` (TF08/TF16b adaptés ; TF26-TF32 nouveaux) |
 | Tests de sécurité (TS01-TS16) | 16 | `apps/core/tests/test_securite.py` et `test_limites.py` (TS11-TS16 nouveaux) |
-| **Total** | **320** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
+| **Total** | **341** | couverture : 95 % mesurés à 192 tests — **à re-mesurer** |
 
 Historique : le chapitre 6 en décrivait 126, puis 192 après l'ajout des
 fonctionnalités ci-dessous ; les suivants couvrent les courriels HTML,

@@ -6,6 +6,7 @@ gunicorn==26.2.0           # serveur WSGI de production (22.x : faille de « req
 whitenoise==6.12.0         # sert les fichiers statiques sans serveur dédié
 django-anymail==11.1       # envoi via l'API HTTP de Brevo (le SMTP sortant
                             # s'est révélé peu fiable sur le réseau gratuit de Render)
+Pillow==12.3.0              # photo de la Présidente : recadrage, allègement, retrait des EXIF
 fpdf2==2.8.8                # génération du reçu de cotisation en PDF — pur Python,
                             # aucune dépendance système (contrairement à WeasyPrint)
 pywin32==312; sys_platform == 'win32'  # verrouillage de fichiers, transport Celery 'filesystem'

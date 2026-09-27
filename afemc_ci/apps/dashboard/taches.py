@@ -216,6 +216,15 @@ def _taches_presidente(utilisateur):
     taches += _demandes_a_traiter()
     taches += _cotisations_non_emises()
 
+    from apps.vitrine.models import PageAccueil
+    page = PageAccueil.objects.first()
+    if page is not None and not page.contenu_verifie:
+        taches.append(Tache(
+            priorite=A_FAIRE, titre="Relire la page d'accueil publique",
+            explication="Son contenu initial a été rédigé à partir de sources publiques : "
+                        "vérifiez les textes, les chiffres et les réalisations, puis validez-le.",
+            nombre=1, url=reverse('vitrine:modifier'), action='Relire la page'))
+
     echecs = Notification.objects.filter(statut=Notification.Statut.ECHEC).count()
     if echecs:
         taches.append(Tache(

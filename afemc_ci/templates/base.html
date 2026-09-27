@@ -30,6 +30,9 @@
         <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:accueil' %}">Tableau de bord</a></li>
         {% endif %}
         <li class="nav-item"><a class="nav-link" href="{% url 'activites:liste' %}">Activités</a></li>
+        {% if user.role == 'RESP_ORGA' %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'vitrine:modifier' %}">Page d'accueil</a></li>
+        {% endif %}
         {% if user.est_responsable %}
         <li class="nav-item"><a class="nav-link" href="{% url 'membres:liste' %}">Membres</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'cotisations:liste' %}">Cotisations</a></li>
@@ -46,6 +49,7 @@
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{% url 'accounts:comptes_liste' %}">Responsables</a></li>
             <li><a class="dropdown-item" href="{% url 'notifications:liste' %}">Notifications</a></li>
+            <li><a class="dropdown-item" href="{% url 'vitrine:modifier' %}">Page d'accueil</a></li>
           </ul>
         </li>
         {% endif %}
@@ -70,10 +74,13 @@
 </nav>
 {% else %}
 <header class="afemc-entete-publique text-center py-2">
-  <img src="{% static 'img/logo-afemc.png' %}?v=5" alt="AFEMC-CI">
-  <div class="small text-muted mt-1">
-    Association des Femmes Enseignantes Chercheures de Côte d'Ivoire
-  </div>
+  <a href="{% url 'vitrine:accueil' %}" class="text-decoration-none" aria-label="Retour à la page d'accueil">
+    <img src="{% static 'img/logo-afemc.png' %}?v=5" alt="AFEMC-CI">
+    <div class="small text-muted mt-1">
+      Association des Femmes Enseignantes Chercheures de Côte d'Ivoire
+    </div>
+  </a>
+  <a href="{% url 'vitrine:accueil' %}" class="small">← Retour à l'accueil</a>
 </header>
 {% endif %}
 

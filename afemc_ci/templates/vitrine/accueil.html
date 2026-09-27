@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AFEMC-CI — {{ page.accroche }}</title>
+  <meta name="description" content="{{ page.sous_titre|default:page.accroche }}">
+  <meta property="og:title" content="AFEMC-CI — {{ page.accroche }}">
+  <meta property="og:description" content="{{ page.sous_titre|default:page.accroche }}">
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo-afemc.png' %}">
+  <link href="{% static 'vendor/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/afemc.css' %}?v=10" rel="stylesheet">
+  <link href="{% static 'css/vitrine.css' %}?v=7" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/logo-afemc.png' %}?v=5">
+</head>
+<body class="vitrine">
+
+<a class="visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+
+<header class="vitrine-barre">
+  <div class="container d-flex align-items-center justify-content-between gap-3 py-2">
+    <a href="{% url 'vitrine:accueil' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+      <img src="{% static 'img/logo-afemc.png' %}?v=5" alt="" width="44" height="44" class="vitrine-logo-petit">
+      <span class="vitrine-marque">AFEMC-CI</span>
+    </a>
+    <nav class="d-none d-lg-flex gap-4 small" aria-label="Sections de la page">
+      {% if page.montre_la_presidente %}<a href="#presidente">La Présidente</a>{% endif %}
+      <a href="#association">L'association</a>
+      {% if realisations %}<a href="#realisations">Nos réalisations</a>{% endif %}
+      {% if galerie %}<a href="#galerie">En images</a>{% endif %}
+      {% if activites %}<a href="#activites">Activités</a>{% endif %}
+      <a href="#adherer">Adhérer</a>
+    </nav>
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard:accueil' %}" class="btn btn-sm btn-light fw-semibold">Mon espace</a>
+    {% else %}
+      <a href="{% url 'accounts:connexion' %}" class="btn btn-sm btn-light fw-semibold">Espace membres</a>
+    {% endif %}
+  </div>
+</header>
+
+<main id="contenu">
+
+  <section class="vitrine-hero">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7">
+          <p class="vitrine-surtitre">AFEMC-CI</p>
+          <h1 class="vitrine-titre">{{ page.accroche }}</h1>
+          {% if page.sous_titre %}<p class="vitrine-sous-titre">{{ page.sous_titre }}</p>{% endif %}
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <a href="{% url 'adhesions:soumettre' %}" class="btn btn-lg vitrine-btn-principal">Demander mon adhésion</a>
+            <a href="#association" class="btn btn-lg btn-outline-light">Découvrir l'association</a>
+          </div>
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block">
+          <img src="{% static 'img/logo-afemc.png' %}?v=5" alt="Logo de l'AFEMC-CI" class="vitrine-logo-grand">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if chiffres %}
+  <section class="vitrine-chiffres" aria-label="Chiffres clés">
+    <div class="container">
+      <div class="row g-3 justify-content-center">
+        {% for chiffre in chiffres %}
+          <div class="col-6 col-md-4 col-lg-3">
+            <div class="vitrine-chiffre">
+              <div class="valeur">{{ chiffre.valeur }}</div>
+              <div class="libelle">{{ chiffre.libelle }}</div>
+              {% if chiffre.precision %}<div class="precision">{{ chiffre.precision }}</div>{% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if page.montre_la_presidente %}
+  <section id="presidente" class="vitrine-section vitrine-presidente">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        {% if page.a_une_photo %}
+        <div class="col-md-5 col-lg-4">
+          <figure class="vitrine-portrait mb-0">
+            <img src="{% url 'vitrine:photo_presidente' %}?v={{ page.presidente_photo_maj|date:'U' }}"
+                 alt="{% if page.presidente_nom %}{{ page.presidente_nom }}, {% endif %}{{ page.presidente_titre|default:'Présidente de l’AFEMC-CI' }}"
+                 loading="lazy">
+          </figure>
+        </div>
+        {% endif %}
+        <div class="{% if page.a_une_photo %}col-md-7 col-lg-8{% else %}col-lg-9 mx-auto{% endif %}">
+          <p class="vitrine-surtitre sombre">{% if page.presidente_message %}Le mot de la Présidente{% else %}La Présidente{% endif %}</p>
+          {% if page.presidente_message %}
+            <blockquote class="vitrine-citation">{{ page.presidente_message|linebreaks }}</blockquote>
+          {% endif %}
+          <div class="vitrine-signature{% if page.presidente_message %}{% else %} mb-3{% endif %}">
+            {% if page.presidente_nom %}<h2 class="nom">{{ page.presidente_nom }}</h2>{% endif %}
+            <div class="titre">{{ page.presidente_titre|default:"Présidente de l'AFEMC-CI" }}</div>
+          </div>
+          {% if page.presidente_presentation %}
+            <div class="vitrine-bio{% if page.presidente_message %} mt-4{% endif %}">{{ page.presidente_presentation|linebreaks }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section id="association" class="vitrine-section">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-lg-6">
+          <p class="vitrine-surtitre sombre">Qui sommes-nous</p>
+          <h2 class="vitrine-h2">L'association</h2>
+          <div class="vitrine-texte">{{ page.presentation|linebreaks }}</div>
+        </div>
+        {% if page.missions %}
+        <div class="col-lg-6">
+          <p class="vitrine-surtitre sombre">Ce qui nous engage</p>
+          <h2 class="vitrine-h2">Nos missions</h2>
+          <ul class="vitrine-missions">
+            {% for mission in page.missions %}<li>{{ mission }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  {% if realisations %}
+  <section id="realisations" class="vitrine-section vitrine-fond">
+    <div class="container">
+      <p class="vitrine-surtitre sombre">Notre parcours</p>
+      <h2 class="vitrine-h2 mb-4">Nos réalisations</h2>
+      <ol class="vitrine-frise">
+        {% for realisation in realisations %}
+          <li>
+            <div class="annee">{% if realisation.periode %}{{ realisation.periode|capfirst }} {% endif %}{{ realisation.annee }}</div>
+            <div class="carte">
+              <h3>{{ realisation.titre }}</h3>
+              {% if realisation.description %}<p>{{ realisation.description }}</p>{% endif %}
+              {% if realisation.source %}<p class="source">Source : {{ realisation.source }}</p>{% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if galerie %}
+  <section id="galerie" class="vitrine-section">
+    <div class="container">
+      <p class="vitrine-surtitre sombre">Galerie</p>
+      <h2 class="vitrine-h2 mb-4">L'association en images</h2>
+      <div class="vitrine-galerie">
+        {% for photo in galerie %}
+          <figure class="{% if forloop.first %}large{% endif %}">
+            <a href="{% url 'vitrine:photo_galerie' photo.pk %}" target="_blank" rel="noopener"
+               aria-label="Agrandir la photo{% if photo.legende %} : {{ photo.legende }}{% endif %}">
+              <img src="{% url 'vitrine:photo_galerie' photo.pk %}" alt="{{ photo.legende|default:'Photo de l’AFEMC-CI' }}"
+                   width="{{ photo.largeur }}" height="{{ photo.hauteur }}" loading="lazy">
+            </a>
+            {% if photo.legende %}<figcaption>{{ photo.legende }}</figcaption>{% endif %}
+          </figure>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if activites %}
+  <section id="activites" class="vitrine-section">
+    <div class="container">
+      <p class="vitrine-surtitre sombre">Agenda</p>
+      <h2 class="vitrine-h2 mb-4">Prochaines activités</h2>
+      <div class="row g-3">
+        {% for activite in activites %}
+          <div class="col-md-6 col-lg-3">
+            <div class="vitrine-activite h-100">
+              <div class="date">
+                <span class="jour">{{ activite.date_debut|date:'j' }}</span>
+                <span class="mois">{{ activite.date_debut|date:'M Y' }}</span>
+              </div>
+              <div class="type">{{ activite.get_type_display }}</div>
+              <h3>{{ activite.titre }}</h3>
+              <p class="lieu">{{ activite.lieu }}{% if activite.section %} · {{ activite.section.libelle }}{% endif %}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <p class="small text-muted mt-3 mb-0">Les membres s'inscrivent depuis leur espace.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  <section id="adherer" class="vitrine-appel">
+    <div class="container text-center">
+      <h2>Rejoindre l'AFEMC-CI</h2>
+      <p>Vous êtes enseignante ou chercheure en Côte d'Ivoire ? Déposez votre demande
+        d'adhésion en ligne : elle sera examinée par le Bureau de l'association.</p>
+      <a href="{% url 'adhesions:soumettre' %}" class="btn btn-lg vitrine-btn-principal">Demander mon adhésion</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="vitrine-pied">
+  <div class="container d-flex flex-wrap justify-content-between gap-3 small">
+    <div>
+      <strong>AFEMC-CI</strong><br>
+      Association des Femmes Enseignantes Chercheures de Côte d'Ivoire
+    </div>
+    <div class="d-flex flex-column gap-1">
+      {% if page.email_contact %}<a href="mailto:{{ page.email_contact }}">{{ page.email_contact }}</a>{% endif %}
+      {% if page.site_institutionnel %}<a href="{{ page.site_institutionnel }}" rel="noopener">Site institutionnel</a>{% endif %}
+      <a href="{% url 'accounts:connexion' %}">Espace membres</a>
+    </div>
+  </div>
+  <div class="container small mt-3 opacity-75">© {% now 'Y' %} AFEMC-CI</div>
+</footer>
+
+{% if peut_modifier %}
+  <a href="{% url 'vitrine:modifier' %}" class="btn btn-primary shadow vitrine-modifier">Modifier la page d'accueil</a>
+{% endif %}
+
+</body>
+</html>

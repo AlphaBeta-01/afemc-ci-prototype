@@ -1,0 +1,127 @@
+/* Page d'accueil publique : mêmes teintes que l'application (afemc.css),
+   mise en page de site vitrine. Contrastes vérifiés AA sur fond marine
+   comme sur fond clair ; aucune information portée par la seule couleur. */
+
+.vitrine { background: #fff; color: var(--afemc-encre); font-size: 1rem; background-image: none; }
+.vitrine a:not(.btn) { color: var(--afemc-rose-fonce); }
+
+.vitrine-barre { background: var(--afemc-marine-fonce); border-bottom: 3px solid var(--afemc-rose);
+                 position: sticky; top: 0; z-index: 10; }
+.vitrine .vitrine-barre nav a { color: rgba(255, 255, 255, .85); text-decoration: none; }
+.vitrine .vitrine-barre nav a:hover, .vitrine .vitrine-barre nav a:focus { color: #fff; text-decoration: underline; }
+.vitrine-marque { color: #fff; font-weight: 700; font-size: 1.15rem; letter-spacing: .03em; }
+.vitrine-logo-petit { border-radius: 50%; background: #fff; }
+
+.vitrine-hero { background: linear-gradient(125deg, var(--afemc-marine-fonce) 0%, var(--afemc-marine) 55%, #3a1747 100%);
+                color: #fff; padding: 4.5rem 0 5rem; }
+.vitrine-surtitre { text-transform: uppercase; letter-spacing: .12em; font-size: .8rem; font-weight: 700;
+                    color: #f7a8d0; margin-bottom: .5rem; }
+.vitrine-surtitre.sombre { color: var(--afemc-rose-fonce); }
+.vitrine-titre { font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 700; line-height: 1.15; color: #fff; }
+.vitrine-sous-titre { font-size: 1.2rem; color: #d5daee; max-width: 38rem; margin-top: 1rem; }
+.vitrine-logo-grand { width: min(320px, 100%); border-radius: 50%; background: #fff; padding: .4rem;
+                      box-shadow: 0 0 0 8px rgba(255, 255, 255, .08), 0 20px 50px rgba(0, 0, 0, .35); }
+.vitrine-btn-principal { background: var(--afemc-rose); border-color: var(--afemc-rose); color: #fff; font-weight: 600; }
+.vitrine-btn-principal:hover, .vitrine-btn-principal:focus { background: var(--afemc-rose-fonce);
+                                                             border-color: var(--afemc-rose-fonce); color: #fff; }
+
+.vitrine-chiffres { margin-top: -2.5rem; position: relative; }
+.vitrine-chiffre { background: #fff; border-radius: 1rem; padding: 1.4rem 1rem; text-align: center; height: 100%;
+                   box-shadow: 0 .6rem 1.75rem rgba(18, 32, 79, .12); border-top: 4px solid var(--afemc-rose); }
+.vitrine-chiffre .valeur { font-size: 2.2rem; font-weight: 700; color: var(--afemc-marine); line-height: 1.1; }
+.vitrine-chiffre .libelle { font-weight: 600; color: var(--afemc-marine); }
+.vitrine-chiffre .precision { font-size: .78rem; color: #5b6180; margin-top: .3rem; }
+
+.vitrine-section { padding: 4.5rem 0; }
+.vitrine-fond { background: #faf8f9; }
+.vitrine-h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--afemc-marine); }
+.vitrine-texte { font-size: 1.05rem; line-height: 1.75; }
+
+.vitrine-missions { list-style: none; padding: 0; margin: 1rem 0 0; }
+.vitrine-missions li { position: relative; padding: .7rem 0 .7rem 2.2rem; border-bottom: 1px solid #ece7ea; }
+.vitrine-missions li::before { content: "✓"; position: absolute; left: 0; top: .6rem; width: 1.5rem; height: 1.5rem;
+                               border-radius: 50%; background: var(--afemc-rose-claire); color: var(--afemc-rose-fonce);
+                               font-weight: 700; text-align: center; line-height: 1.5rem; font-size: .85rem; }
+
+.vitrine-frise { list-style: none; padding: 0; margin: 0; position: relative; }
+.vitrine-frise::before { content: ""; position: absolute; left: 7.5rem; top: .5rem; bottom: .5rem;
+                         width: 2px; background: #e6dde2; }
+.vitrine-frise li { display: flex; gap: 2rem; margin-bottom: 1.5rem; position: relative; }
+.vitrine-frise .annee { flex: 0 0 6.5rem; text-align: right; font-weight: 700; color: var(--afemc-marine); padding-top: 1rem; }
+.vitrine-frise li::after { content: ""; position: absolute; left: calc(7.5rem - 6px); top: 1.2rem; width: 14px; height: 14px;
+                           border-radius: 50%; background: var(--afemc-rose); box-shadow: 0 0 0 4px #faf8f9; }
+.vitrine-frise .carte { flex: 1; background: #fff; border-radius: .9rem; padding: 1rem 1.25rem;
+                        box-shadow: 0 .35rem 1.25rem rgba(18, 32, 79, .07); }
+.vitrine-frise h3 { font-size: 1.05rem; font-weight: 700; color: var(--afemc-marine); margin-bottom: .35rem; }
+.vitrine-frise p { margin-bottom: .35rem; }
+.vitrine-frise .source { font-size: .8rem; color: #5b6180; font-style: italic; margin: 0; }
+@media (max-width: 575.98px) {
+  .vitrine-frise::before { left: .45rem; }
+  .vitrine-frise li { flex-direction: column; gap: .4rem; padding-left: 1.75rem; }
+  .vitrine-frise .annee { text-align: left; padding-top: 0; flex-basis: auto; }
+  .vitrine-frise li::after { left: 0; top: .2rem; }
+}
+
+.vitrine-activite { border: 1px solid #ece7ea; border-radius: 1rem; padding: 1.25rem; background: #fff; }
+.vitrine-activite .date { display: inline-flex; flex-direction: column; align-items: center; background: var(--afemc-marine);
+                          color: #fff; border-radius: .6rem; padding: .35rem .8rem; margin-bottom: .75rem; }
+.vitrine-activite .jour { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.vitrine-activite .mois { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+.vitrine-activite .type { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--afemc-rose-fonce); font-weight: 700; }
+.vitrine-activite h3 { font-size: 1.05rem; font-weight: 700; color: var(--afemc-marine); margin: .25rem 0; }
+.vitrine-activite .lieu { font-size: .9rem; color: #5b6180; margin: 0; }
+
+.vitrine-appel { background: linear-gradient(115deg, var(--afemc-rose-fonce), var(--afemc-rose)); color: #fff; padding: 4rem 0; }
+.vitrine-appel h2 { font-weight: 700; color: #fff; }
+.vitrine-appel p { max-width: 40rem; margin: 1rem auto 1.75rem; color: #fff; font-size: 1.05rem; }
+.vitrine-appel .vitrine-btn-principal { background: #fff; color: var(--afemc-rose-fonce); border-color: #fff; }
+.vitrine-appel .vitrine-btn-principal:hover, .vitrine-appel .vitrine-btn-principal:focus { background: var(--afemc-rose-claire);
+                                                                                           color: var(--afemc-rose-fonce); }
+
+.vitrine-pied { background: var(--afemc-marine-fonce); color: #c9cfe6; padding: 2.5rem 0; }
+.vitrine-pied a:not(.btn) { color: #fff; }
+.vitrine-pied strong { color: #fff; }
+
+.vitrine-modifier { position: fixed; right: 1rem; bottom: 1rem; z-index: 20; }
+
+/* ----- Le mot de la Présidente ----- */
+.vitrine-presidente { padding-top: 5rem; }
+.vitrine-portrait { position: relative; max-width: 360px; margin: 0 auto; }
+.vitrine-portrait::before { content: ""; position: absolute; inset: 1.1rem -1.1rem -1.1rem 1.1rem;
+                            border-radius: 1.5rem; background: linear-gradient(135deg, var(--afemc-rose), var(--afemc-marine)); }
+.vitrine-portrait img { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
+                        object-position: top; border-radius: 1.5rem; box-shadow: 0 1rem 2.5rem rgba(18, 32, 79, .25); }
+.vitrine-citation { position: relative; font-size: 1.15rem; line-height: 1.75; color: var(--afemc-encre);
+                    margin: .5rem 0 1.5rem; padding-left: 1.5rem; border-left: 4px solid var(--afemc-rose); }
+.vitrine-citation p:last-child { margin-bottom: 0; }
+.vitrine-signature .nom { font-size: 1.3rem; font-weight: 700; color: var(--afemc-marine); }
+.vitrine-signature .titre { color: var(--afemc-rose-fonce); font-weight: 600; }
+@media (max-width: 767.98px) {
+  .vitrine-portrait { max-width: 260px; }
+  .vitrine-portrait::before { inset: .7rem -.7rem -.7rem .7rem; }
+}
+.vitrine-signature .nom { margin: 0; line-height: 1.3; }
+.vitrine-bio { font-size: 1.02rem; line-height: 1.75; color: var(--afemc-encre); }
+.vitrine-bio p:last-child { margin-bottom: 0; }
+
+/* ----- Galerie « L'association en images » ----- */
+.vitrine-galerie { display: grid; grid-template-columns: repeat(3, 1fr);
+                   grid-auto-rows: 240px; grid-auto-flow: dense; gap: 1rem; }
+.vitrine-galerie figure { position: relative; margin: 0; overflow: hidden; border-radius: 1rem;
+                          box-shadow: 0 .35rem 1.25rem rgba(18, 32, 79, .1); background: var(--afemc-marine); }
+.vitrine-galerie figure.large { grid-column: span 2; grid-row: span 2; }
+.vitrine-galerie a { display: block; height: 100%; }
+.vitrine-galerie img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%;
+                       transition: transform .35s ease; }
+.vitrine-galerie a:hover img, .vitrine-galerie a:focus img { transform: scale(1.04); }
+.vitrine-galerie a:focus-visible { outline: 3px solid var(--afemc-rose); outline-offset: -3px; }
+.vitrine-galerie figcaption { position: absolute; inset: auto 0 0 0; padding: 2.2rem .9rem .7rem; font-size: .85rem;
+                              line-height: 1.35; color: #fff; pointer-events: none;
+                              background: linear-gradient(transparent, rgba(10, 22, 54, .88)); }
+@media (max-width: 991.98px) {
+  .vitrine-galerie { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 575.98px) {
+  .vitrine-galerie { grid-template-columns: 1fr; grid-auto-rows: 260px; }
+  .vitrine-galerie figure.large { grid-column: auto; grid-row: span 1; }
+}

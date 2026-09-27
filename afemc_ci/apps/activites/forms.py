@@ -25,7 +25,7 @@ class FormulaireActivite(forms.ModelForm):
     class Meta:
         model = Activite
         fields = ['titre', 'type', 'date_debut', 'date_fin', 'lieu', 'section', 'places',
-                  'description']
+                  'description', 'annoncee']
         labels = {'section': 'Section concernée'}
         widgets = {
             'titre': forms.TextInput(attrs=CLASSE),
@@ -34,6 +34,7 @@ class FormulaireActivite(forms.ModelForm):
             'section': forms.Select(attrs={'class': 'form-select'}),
             'places': forms.NumberInput(attrs={**CLASSE, 'min': 1}),
             'description': forms.Textarea(attrs={**CLASSE, 'rows': 5}),
+            'annoncee': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
     def __init__(self, *args, **kwargs):

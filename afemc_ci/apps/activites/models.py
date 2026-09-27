@@ -40,6 +40,10 @@ class Activite(models.Model):
         help_text='Laisser vide si le nombre de participantes n\'est pas limité.')
     statut = models.CharField(max_length=15, choices=Statut.choices,
                               default=Statut.EN_PREPARATION)
+    annoncee = models.BooleanField(
+        "annoncer sur la page d'accueil publique", default=False,
+        help_text="Titre, date et lieu seront visibles de tout public une fois l'activité "
+                  "publiée. À laisser décoché pour une réunion interne.")
     cree_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
                                  on_delete=models.SET_NULL, related_name='activites_creees')
     cree_le = models.DateTimeField(auto_now_add=True)

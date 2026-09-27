@@ -17,7 +17,7 @@ urlpatterns = [
     path('admin/login/', RedirectView.as_view(pattern_name='accounts:connexion',
                                               query_string=True)),
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(pattern_name='dashboard:accueil'), name='racine'),
+    path('', include('apps.vitrine.urls')),
     path('', include('apps.core.urls')),
     path('comptes/', include('apps.accounts.urls')),
     path('sections/', include('apps.sections.urls')),

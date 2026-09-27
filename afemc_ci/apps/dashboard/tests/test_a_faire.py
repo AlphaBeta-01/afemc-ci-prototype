@@ -73,7 +73,13 @@ class TestPresidente(BaseAFaire):
         self.assertEqual(titres(self.presidente)['Courriels non distribués'].nombre, 1)
 
     def test_rien_a_faire(self):
+        from apps.vitrine.models import PageAccueil
+        PageAccueil.objects.update(contenu_verifie=True)
         self.assertEqual(taches_pour(self.presidente), [])
+
+    def test_relire_la_page_d_accueil_tant_qu_elle_n_est_pas_validee(self):
+        tache = titres(self.presidente)["Relire la page d'accueil publique"]
+        self.assertEqual(tache.url, reverse('vitrine:modifier'))
 
 
 class TestSecretaireGenerale(BaseAFaire):
