@@ -10,6 +10,6 @@ Pillow==12.3.0              # photo de la Présidente : recadrage, allègement, 
 fpdf2==2.8.8                # génération du reçu de cotisation en PDF — pur Python,
                             # aucune dépendance système (contrairement à WeasyPrint)
 pywin32==312; sys_platform == 'win32'  # verrouillage de fichiers, transport Celery 'filesystem'
-python-dotenv==1.0.1
+python-dotenv==1.2.3
 freezegun==1.5.5
 coverage==7.4.4
